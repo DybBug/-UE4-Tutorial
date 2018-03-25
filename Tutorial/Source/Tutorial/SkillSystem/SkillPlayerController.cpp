@@ -47,7 +47,7 @@ void ASkillPlayerController::SetupInputComponent()
 
 void ASkillPlayerController::CancelMovementCommand()
 {
-	if (m_pGoalDecal != nullptr)
+	if (m_pGoalDecal)
 	{
 		Cast<ASkillCharacter>(GetPawn())->GetCharacterMovement()->StopMovementImmediately();
 		m_bHasMouseMovementCommand = false;

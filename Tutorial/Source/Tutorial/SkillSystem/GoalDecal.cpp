@@ -7,6 +7,7 @@
 #include "Components/BoxComponent.h"
 
 #include "Engine/World.h"
+#include "Engine/GameEngine.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -23,7 +24,9 @@ AGoalDecal::AGoalDecal()
 	m_pDecal->SetupAttachment(RootComponent);
 
 	m_pBox = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
-	//m_pBox->OnComponentBeginOverlap.AddDynamic(this, &AGoalDecal::_OnComponentBeginOverlap);
+	m_pBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	
+	m_pBox->OnComponentBeginOverlap.AddDynamic(this, &AGoalDecal::_OnComponentBeginOverlap);
 	m_pBox->SetupAttachment(m_pDecal);
 }
 
@@ -54,8 +57,9 @@ void AGoalDecal::_OnComponentBeginOverlap(
 	bool _bFromSweep, 
 	const FHitResult & _SweepResult)
 {
-	if (_pOtherActor == m_pController)
+	if (_pOtherActor == m_pController->GetOwner())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, TEXT("Overlap"));
 		m_pController->CancelMovementCommand();
 	}
 

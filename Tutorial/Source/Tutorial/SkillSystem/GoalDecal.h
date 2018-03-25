@@ -38,6 +38,7 @@ protected:
 	class ASkillPlayerController* m_pController = nullptr;
 
 protected:
+	UFUNCTION()
 	void _OnComponentBeginOverlap(
 		UPrimitiveComponent* _pOverlappedComponent,
 		AActor* _pOtherActor,

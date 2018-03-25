@@ -36,5 +36,6 @@ protected:
 	class UCameraComponent* m_pCamera = nullptr;
 	UPROPERTY(VisibleAnywhere)
 	class USpringArmComponent* m_pSpringArm = nullptr;
+
 	
 };

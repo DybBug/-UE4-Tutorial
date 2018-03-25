@@ -7,8 +7,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 
+#include "UObject/ConstructorHelpers.h"
 #include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/UserWidget.h"
 
 
 
@@ -33,12 +35,16 @@ ASkillCharacter::ASkillCharacter()
 	m_pCamera->SetupAttachment(m_pSpringArm);
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	
+
 }
 
 // Called when the game starts or when spawned
 void ASkillCharacter::BeginPlay()
 {
 	Super::BeginPlay();	
+
+
 }
 
 // Called every frame
