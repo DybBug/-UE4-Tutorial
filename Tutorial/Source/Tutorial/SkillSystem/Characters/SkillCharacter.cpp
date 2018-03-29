@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SkillCharacter.h"
+#include "../Widgets/SkillSystemHUD.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -25,6 +26,8 @@ ASkillCharacter::ASkillCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll= false;
 
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	m_pSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	m_pSpringArm->TargetArmLength = 650.f;
 	m_pSpringArm->SetRelativeRotation(FRotator(-40.f, 0.f, 0.f));
@@ -32,9 +35,13 @@ ASkillCharacter::ASkillCharacter()
 	m_pSpringArm->SetupAttachment(RootComponent);
 
 	m_pCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
-	m_pCamera->SetupAttachment(m_pSpringArm);
+	m_pCamera->SetupAttachment(m_pSpringArm);	
 
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	static ConstructorHelpers::FClassFinder<UUserWidget> WBP_HUD(TEXT("WidgetBlueprint'/Game/TutorialContent/SkillSystem/Widgets/WBP_HUD.WBP_HUD_C'"));
+	if (WBP_HUD.Succeeded())
+	{
+		m_HUDClass = WBP_HUD.Class;
+	}
 	
 
 }
@@ -44,6 +51,11 @@ void ASkillCharacter::BeginPlay()
 {
 	Super::BeginPlay();	
 
+	if (m_HUDClass)
+	{
+		m_pHUD = CreateWidget<USkillSystemHUD>(GWorld, m_HUDClass);
+		m_pHUD->AddToViewport();
+	}
 
 }
 

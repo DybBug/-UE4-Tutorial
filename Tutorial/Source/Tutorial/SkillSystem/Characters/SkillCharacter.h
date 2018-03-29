@@ -28,14 +28,22 @@ public:
 
 
 	/* Get */
+	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
 	class USpringArmComponent* GetSpringArm() const { return m_pSpringArm; }
+	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
 	class UCameraComponent* GetCamera() const { return m_pCamera; }
 
+
 protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
 	class UCameraComponent* m_pCamera = nullptr;
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
 	class USpringArmComponent* m_pSpringArm = nullptr;
+
+	UPROPERTY()
+	TSubclassOf<class UUserWidget> m_HUDClass = nullptr;
+	UPROPERTY()
+	class USkillSystemHUD* m_pHUD = nullptr;
 
 	
 };
