@@ -28,11 +28,11 @@ public :
 	float DisplayedValue = 0.f;
 	float MinLerpTime = 0.2f;
 	float MaxLerpTime = 1.5f;
-	class UUserWidget* pBarWidget = nullptr;
+	class UStatBarWidget* pBarWidget = nullptr;
 	bool bCurrentlyAnimated = false;
 	bool bHasRegeneration = false;
 	float TimeToRegMaxValue = 45.f;
-	float RegIntervall = 0.4f;
+	float RegInterval = 0.4f;
 	FTimerHandle hRegenerationTimer;
 };
 
