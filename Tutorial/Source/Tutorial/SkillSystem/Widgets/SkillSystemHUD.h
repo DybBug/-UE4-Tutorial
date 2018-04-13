@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "StatBarWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "SkillSystemHUD.generated.h"
 
@@ -19,27 +18,27 @@ public :
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
-	class UStatBarWidget* GetHealthBar() const { return m_pHealthBar; }
+	class UUserWidget* GetHealthBar() const { return m_pHealthBar; }
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
-	class UStatBarWidget* GetManaBar() const { return m_pManaBar; }
+	class UUserWidget* GetManaBar() const { return m_pManaBar; }
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
-	class UStatBarWidget* GetExpBar() const { return m_pExpBar; }
+	class UUserWidget* GetExpBar() const { return m_pExpBar; }
 
 	/* Set */
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
-	void SetHealthBar(class UStatBarWidget* _Widget) { m_pHealthBar = _Widget; }
+	void SetHealthBar(class UUserWidget* _Widget) { m_pHealthBar = _Widget; }
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
-	void SetManaBar(class UStatBarWidget* _Widget) { m_pManaBar = _Widget; }
+	void SetManaBar(class UUserWidget* _Widget) { m_pManaBar = _Widget; }
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
-	void SetExpBar(class UStatBarWidget* _Widget) { m_pExpBar = _Widget; }
+	void SetExpBar(class UUserWidget* _Widget) { m_pExpBar = _Widget; }
 
 	
 protected :
 	UPROPERTY(VisibleAnywhere, Category = "SkillSystemHUD")
-	class UStatBarWidget* m_pHealthBar;
+	class UUserWidget* m_pHealthBar;
 	UPROPERTY(VisibleAnywhere, Category = "SkillSystemHUD")
-	class UStatBarWidget* m_pManaBar;
+	class UUserWidget* m_pManaBar;
 	UPROPERTY(VisibleAnywhere, Category = "SkillSystemHUD")
-	class UStatBarWidget* m_pExpBar;
+	class UUserWidget* m_pExpBar;
 	
 };
