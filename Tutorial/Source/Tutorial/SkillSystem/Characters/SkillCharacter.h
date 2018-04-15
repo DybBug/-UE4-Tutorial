@@ -27,7 +27,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION()
+	void ModifyStat(EStats _Stat, int _Value, bool _bIsAnimated = false);
 
+	UFUNCTION()
+	void GenerateStartingSkills();
+
+	UFUNCTION()
+	void BeginSpellCast(class ABase_Skill* _pCastedSkill);
+
+	UFUNCTION()
+	void EndSpellCast(class ABase_Skill* _pCastedSkill);
 
 
 	/* Get */
@@ -38,12 +48,13 @@ public:
 	class UCameraComponent* GetCamera() const { return m_pCamera; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
-	FStatData GetStat(EStats _Stat) const { return m_Stats[_Stat]; }
+	const FStatData& GetStat(EStats _Stat) const { return m_Stats[_Stat]; }
+
+	const bool& GetIsCasting() const { return m_bIsCasting; }
 
 private:
 	void _SetupStatBars();
 	void _UpdateStat(EStats _Stat); // StatBarWidget의 정보 업데이트.
-	void _ModifyStat(EStats _Stat, int _Value, bool _bIsAnimated = false);
 
 	void _SetupRegenerations();
 	void _HealthRegenTick();
@@ -61,9 +72,10 @@ private:
 	void _ManaStatLerpTick();
 	void _ExpStatLerpTick();
 
+	/* 키 입력 관련 함수들. */
 	void _Increase();
 	void _Decrease();
-
+	void _AnyKey();
 
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
@@ -81,6 +93,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
 	class UTimelineComponent* m_pExpTimeline = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = "SkillCharacter")
+	TArray<TSubclassOf<class ABase_Skill>> m_StartingSkillClasses;
+
 	UPROPERTY()
 	TSubclassOf<class UUserWidget> m_HUDClass = nullptr;
 
@@ -93,5 +108,11 @@ protected:
 	UPROPERTY()
 	TMap<EStats, FStatLerp> m_StatLerpData;
 
+	UPROPERTY()
+	bool m_bIsCasting = false;	
+
+
+	UPROPERTY()
+	class ABase_Skill* m_pCurrentSpell;
 	
 };

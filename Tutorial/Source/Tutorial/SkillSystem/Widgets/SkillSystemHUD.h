@@ -16,6 +16,8 @@ class TUTORIAL_API USkillSystemHUD : public UUserWidget
 	GENERATED_BODY()
 
 public :
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "SkillSystemHUD")
+	bool GenerateHotkeys(const TArray<FKey>& Key);
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
@@ -24,6 +26,15 @@ public :
 	class UStatBarWidget* GetManaBar() const { return m_pManaBar; }
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	class UStatBarWidget* GetExpBar() const { return m_pExpBar; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	const TArray<FKey>& GetHotKeys() const { return m_Hotkeys; }
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	const int& GetKeysPerRow() const { return m_KeysPerRow; }
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	const TArray<class USkillHotkeyWidget*>& GetAllHotkeySlots() const { return m_AllHotkeySlots; }
+
+
 
 	/* Set */
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
@@ -41,5 +52,17 @@ protected :
 	class UStatBarWidget* m_pManaBar;
 	UPROPERTY(VisibleAnywhere, Category = "SkillSystemHUD")
 	class UStatBarWidget* m_pExpBar;
-	
+
+
+	UPROPERTY(EditAnywhere, Category = "SkillSystemHUD")
+	TArray<FKey> m_Hotkeys;
+
+
+	UPROPERTY(EditAnywhere, Category = "SkillSystemHUD")
+		int m_KeysPerRow = 0;
+
+	UPROPERTY(BlueprintReadWrite, Category = "SkillSystemHUD")
+	TArray<class USkillHotkeyWidget*> m_AllHotkeySlots;
+
+
 };

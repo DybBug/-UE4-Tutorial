@@ -2,6 +2,8 @@
 
 #include "SkillCharacter.h"
 #include "../Widgets/SkillSystemHUD.h"
+#include "../Widgets/SkillHotkeyWidget.h"
+#include "../SkillActors/Base_Skill.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/TimelineComponent.h"
@@ -86,6 +88,7 @@ ASkillCharacter::ASkillCharacter()
 	m_Stats[EStats::Exp].MinLerpTime = 0.4;
 	m_Stats[EStats::Exp].MaxLerpTime = 2.0f;
 
+
 }
 
 // Called when the game starts or when spawned
@@ -105,6 +108,8 @@ void ASkillCharacter::BeginPlay()
 		_UpdateStat(EStats::Health);
 		_UpdateStat(EStats::Mana);
 		_UpdateStat(EStats::Exp);
+
+		GenerateStartingSkills();
 	}
 
 }
@@ -126,6 +131,86 @@ void ASkillCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindKey(EKeys::Equals, IE_Pressed, this, &ASkillCharacter::_Increase);
 	PlayerInputComponent->BindKey(EKeys::Hyphen, IE_Pressed, this, &ASkillCharacter::_Decrease);
 
+	PlayerInputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &ASkillCharacter::_AnyKey);
+
+}
+
+void ASkillCharacter::ModifyStat(EStats _Stat, int _Value, bool _bIsAnimated)
+{
+	FStatData& StatRef = m_Stats[_Stat];
+
+	if (_bIsAnimated)
+	{
+		StatRef.CurrValue = UKismetMathLibrary::Clamp((StatRef.CurrValue + _Value), StatRef.MinValue, StatRef.MaxValue);
+
+		float LerpAlpha = UKismetMathLibrary::Abs(UKismetMathLibrary::Clamp(_Value, -StatRef.CurrValue, StatRef.MaxValue - StatRef.CurrValue)) / StatRef.MaxValue;
+		float LerpTime = UKismetMathLibrary::Lerp(StatRef.MinLerpTime, StatRef.MaxLerpTime, LerpAlpha);
+		_LerpStatDisplay(_Stat, LerpTime, _Value > 0);
+
+		_HandleRegeneration(_Stat);
+	}
+
+	else
+	{
+		StatRef.DisplayedValue = UKismetMathLibrary::Clamp((StatRef.DisplayedValue + _Value), StatRef.MinValue, StatRef.MaxValue);
+		StatRef.CurrValue = UKismetMathLibrary::Clamp((StatRef.CurrValue + _Value), StatRef.MinValue, StatRef.MaxValue);
+		_HandleRegeneration(_Stat);
+		_UpdateStat(_Stat);
+	}
+}
+
+void ASkillCharacter::GenerateStartingSkills()
+{
+	for (int i = 0; i < m_StartingSkillClasses.Num(); ++i)
+	{
+		ABase_Skill* pSpell = GetWorld()->SpawnActor<ABase_Skill>(m_StartingSkillClasses[i]);
+
+		for (int j = 0; j < m_pHUD->GetAllHotkeySlots().Num(); ++j)
+		{
+			USkillHotkeyWidget* pSkillHotkeyWidget = m_pHUD->GetAllHotkeySlots()[j];
+			if (!pSkillHotkeyWidget->GetAssignedSpell())
+			{
+				pSkillHotkeyWidget->AssignSpell(pSpell);
+				break;
+			}
+		}
+	}
+}
+
+void ASkillCharacter::BeginSpellCast(ABase_Skill * _pCastedSkill)
+{
+	m_bIsCasting = true;
+	m_pCurrentSpell = _pCastedSkill;
+
+	for (int i = 0; i < m_pHUD->GetAllHotkeySlots().Num(); ++i)
+	{
+		USkillHotkeyWidget* pSkillHotkeyWidget = m_pHUD->GetAllHotkeySlots()[i];
+		if (pSkillHotkeyWidget->GetAssignedSpell())
+		{
+			if (pSkillHotkeyWidget->GetAssignedSpell() != _pCastedSkill)
+			{
+				pSkillHotkeyWidget->DisableHotkey();
+			}
+		}
+	}
+}
+
+void ASkillCharacter::EndSpellCast(ABase_Skill * _pCastedSkill)
+{
+	m_bIsCasting = false;
+	m_pCurrentSpell = nullptr;
+
+	for (int i = 0; i < m_pHUD->GetAllHotkeySlots().Num(); ++i)
+	{
+		USkillHotkeyWidget* pSkillHotkeyWidget = m_pHUD->GetAllHotkeySlots()[i];
+		if (pSkillHotkeyWidget->GetAssignedSpell())
+		{
+			if (pSkillHotkeyWidget->GetAssignedSpell() == _pCastedSkill)
+			{
+				pSkillHotkeyWidget->EnableHotkey();
+			}
+		}
+	}
 }
 
 void ASkillCharacter::_SetupStatBars()
@@ -144,32 +229,6 @@ void ASkillCharacter::_UpdateStat(EStats _Stat)
 	Stat.pBarWidget->SetPercent(FMath::Clamp(((float)Stat.DisplayedValue / (float)Stat.MaxValue), 0.f, 1.f));
 
 	_HandleRegeneration(_Stat);
-}
-
-void ASkillCharacter::_ModifyStat(EStats _Stat, int _Value, bool _bIsAnimated)
-{
-	FStatData& StatRef = m_Stats[_Stat];
-
-	if (_bIsAnimated)
-	{
-		StatRef.CurrValue = UKismetMathLibrary::Clamp((StatRef.CurrValue + _Value), StatRef.MinValue, StatRef.MaxValue);
-
-		float LerpAlpha = UKismetMathLibrary::Abs(UKismetMathLibrary::Clamp(_Value, -StatRef.CurrValue, StatRef.MaxValue - StatRef.CurrValue)) / StatRef.MaxValue;
-		float LerpTime = UKismetMathLibrary::Lerp(StatRef.MinLerpTime, StatRef.MaxLerpTime, LerpAlpha);
-		_LerpStatDisplay(_Stat, LerpTime, _Value > 0);
-
-		_HandleRegeneration(_Stat);
-	}
-	
-	else
-	{
-		StatRef.DisplayedValue = UKismetMathLibrary::Clamp((StatRef.DisplayedValue + _Value), StatRef.MinValue, StatRef.MaxValue);
-		StatRef.CurrValue = UKismetMathLibrary::Clamp((StatRef.CurrValue + _Value), StatRef.MinValue, StatRef.MaxValue);
-		_HandleRegeneration(_Stat);
-		_UpdateStat(_Stat);
-	}
-
-
 }
 
 void ASkillCharacter::_SetupRegenerations()
@@ -200,7 +259,7 @@ void ASkillCharacter::_HealthRegenTick()
 {
 	FStatData HealthStat = m_Stats[EStats::Health];
 	int Value = FMath::TruncToInt((HealthStat.RegInterval / HealthStat.TimeToRegMaxValue) * HealthStat.MaxValue);
-	_ModifyStat(EStats::Health, Value);
+	ModifyStat(EStats::Health, Value);
 
 }
 
@@ -208,7 +267,7 @@ void ASkillCharacter::_ManaRegenTick()
 {
 	FStatData ManaStat = m_Stats[EStats::Mana];
 	int Value = FMath::TruncToInt((ManaStat.RegInterval / ManaStat.TimeToRegMaxValue) * ManaStat.MaxValue);
-	_ModifyStat(EStats::Mana, Value);
+	ModifyStat(EStats::Mana, Value);
 
 }
 
@@ -370,11 +429,28 @@ void ASkillCharacter::_ExpStatLerpTick()
 
 void ASkillCharacter::_Increase()
 {
-	_ModifyStat(EStats::Health, 100, true);
+	ModifyStat(EStats::Health, 100, true);
 }
 
 void ASkillCharacter::_Decrease()
 {
-	_ModifyStat(EStats::Health, -100, true);
+	ModifyStat(EStats::Health, -100, true);
+}
+
+void ASkillCharacter::_AnyKey()
+{
+	APlayerController* Controller = UGameplayStatics::GetPlayerController(GWorld, 0);
+
+	for(int i = 0 ; i < m_pHUD->GetAllHotkeySlots().Num(); ++i)
+	{
+		USkillHotkeyWidget* pSkillHotkeyWidget = m_pHUD->GetAllHotkeySlots()[i];
+
+		if (Controller->WasInputKeyJustPressed(pSkillHotkeyWidget->GetHotKey()) &&
+			pSkillHotkeyWidget->GetAssignedSpell())
+		{
+			pSkillHotkeyWidget->GetAssignedSpell()->OnTryCastSpell();
+			break;
+		}
+	}
 }
 
