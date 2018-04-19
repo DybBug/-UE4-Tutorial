@@ -2,6 +2,24 @@
 
 #include "StatBarWidget.h"
 
+#include "WidgetTree.h"
+#include "Components/ProgressBar.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
+
+void UStatBarWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+	
+	m_pStatBar =     WidgetTree->FindWidget<UProgressBar>(FName("StatBar"));
+	m_pStatLerpBar = WidgetTree->FindWidget<UImage>(FName("StatLerpBar"));
+	m_pStatText =    WidgetTree->FindWidget<UTextBlock>(FName("StatText"));
+
+	m_pDynamicMaterial = m_pStatLerpBar->GetDynamicMaterial();
+	m_pDynamicMaterial->SetVectorParameterValue("Color", m_LerpColor);
+}
+
+
 void UStatBarWidget::SetPercent(float _Percent)
 {
 	m_Percent = _Percent;

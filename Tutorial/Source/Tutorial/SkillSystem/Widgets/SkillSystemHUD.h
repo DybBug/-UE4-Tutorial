@@ -16,8 +16,10 @@ class TUTORIAL_API USkillSystemHUD : public UUserWidget
 	GENERATED_BODY()
 
 public :
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "SkillSystemHUD")
-	bool GenerateHotkeys(const TArray<FKey>& Key);
+	virtual void NativeConstruct() override;
+
+	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
+	void GenerateHotkeys(const TArray<FKey>& _Key);
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
@@ -64,5 +66,9 @@ protected :
 	UPROPERTY(BlueprintReadWrite, Category = "SkillSystemHUD")
 	TArray<class USkillHotkeyWidget*> m_AllHotkeySlots;
 
+
+	/* */
+	UPROPERTY()
+	class UVerticalBox* m_pHotkeyRowContainer;
 
 };

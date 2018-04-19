@@ -61,15 +61,28 @@ private:
 	void _ManaRegenTick();
 	void _HandleRegeneration(EStats _Stat);
 
+	UFUNCTION()
 	void _OnStatLerpStart(EStats _Stat);
+
 	UFUNCTION()
 	void _OnHealthStatLerpEnd();
+
+	UFUNCTION()
 	void _OnManaStatLerpEnd();
+
+	UFUNCTION()
 	void _OnExpStatLerpEnd();
+
+	UFUNCTION()
 	void _LerpStatDisplay(EStats _Stat, float _LerpTime, bool _bInPositive);
+
 	UFUNCTION()
 	void _HealthStatLerpTick();
+
+	UFUNCTION()
 	void _ManaStatLerpTick();
+
+	UFUNCTION()
 	void _ExpStatLerpTick();
 
 	/* 키 입력 관련 함수들. */

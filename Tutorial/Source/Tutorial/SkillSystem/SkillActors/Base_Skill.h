@@ -68,6 +68,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
 	void SetCurrentlyCasted(bool _bBool);
 
+protected :
+	UFUNCTION()
+	void _OnTimelineUpdate();
+	UFUNCTION()
+	void _OnTimelineFinished();
+
 
 
 protected :
@@ -86,5 +92,6 @@ protected :
 	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
 	bool m_bCurrentlyCasted = false;
 
-
+	UPROPERTY()
+	class UTimelineComponent* m_pCooldownTimeline;
 };

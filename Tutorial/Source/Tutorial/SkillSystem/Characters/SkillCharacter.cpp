@@ -190,6 +190,7 @@ void ASkillCharacter::BeginSpellCast(ABase_Skill * _pCastedSkill)
 			if (pSkillHotkeyWidget->GetAssignedSpell() != _pCastedSkill)
 			{
 				pSkillHotkeyWidget->DisableHotkey();
+				break;
 			}
 		}
 	}
@@ -208,6 +209,7 @@ void ASkillCharacter::EndSpellCast(ABase_Skill * _pCastedSkill)
 			if (pSkillHotkeyWidget->GetAssignedSpell() == _pCastedSkill)
 			{
 				pSkillHotkeyWidget->EnableHotkey();
+				break;
 			}
 		}
 	}
@@ -398,7 +400,10 @@ void ASkillCharacter::_HealthStatLerpTick()
 void ASkillCharacter::_ManaStatLerpTick()
 {
 	/* DisplayedValue 설정. */
-	float Alpha = m_pManaTimeline->GetPlaybackPosition() / m_pManaTimeline->GetTimelineLength();
+	float TimelinePlaybackPosition = m_pManaTimeline->GetPlaybackPosition();
+	float TimelineLength = m_pManaTimeline->GetTimelineLength();
+
+	float Alpha = (TimelineLength > 0) ? TimelinePlaybackPosition / TimelineLength : 0.f;
 
 	m_Stats[EStats::Mana].DisplayedValue =
 		UKismetMathLibrary::Lerp(m_StatLerpData[EStats::Mana].OriginalValue, m_StatLerpData[EStats::Mana].ValueToLerpTo, Alpha);
@@ -414,7 +419,10 @@ void ASkillCharacter::_ManaStatLerpTick()
 void ASkillCharacter::_ExpStatLerpTick()
 {
 	/* DisplayedValue 설정. */
-	float Alpha = m_pExpTimeline->GetPlaybackPosition() / m_pExpTimeline->GetTimelineLength();
+	float TimelinePlaybackPosition = m_pExpTimeline->GetPlaybackPosition();
+	float TimelineLength = m_pExpTimeline->GetTimelineLength();
+
+	float Alpha = (TimelineLength > 0) ? TimelinePlaybackPosition / TimelineLength : 0.f;
 
 	m_Stats[EStats::Exp].DisplayedValue =
 		UKismetMathLibrary::Lerp(m_StatLerpData[EStats::Exp].OriginalValue, m_StatLerpData[EStats::Exp].ValueToLerpTo, Alpha);
@@ -429,12 +437,12 @@ void ASkillCharacter::_ExpStatLerpTick()
 
 void ASkillCharacter::_Increase()
 {
-	ModifyStat(EStats::Health, 100, true);
+	ModifyStat(EStats::Mana, 100, true);
 }
 
 void ASkillCharacter::_Decrease()
 {
-	ModifyStat(EStats::Health, -100, true);
+	ModifyStat(EStats::Mana, -100, true);
 }
 
 void ASkillCharacter::_AnyKey()

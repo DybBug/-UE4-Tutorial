@@ -15,7 +15,9 @@ class TUTORIAL_API UHotkeyRowWidget : public UUserWidget
 	GENERATED_BODY()	
 
 public :
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="HotkeyRowWidget")
+	virtual void NativeConstruct() override;
+
+	UFUNCTION(BlueprintCallable, Category="HotkeyRowWidget")
 	TArray<class USkillHotkeyWidget*> GenerateHotkeyRow();
 
 	/* Get */
@@ -25,11 +27,17 @@ public :
 	UFUNCTION(BlueprintPure, Category = "HotkeyRowWidget")
 	const TArray<class USkillHotkeyWidget*>& GetSkillHotkeyWidgets() const { return m_SkillHotkeyWidgets; }
 
+	/* Set */
+	UFUNCTION(BlueprintCallable, Category = "HotkeyRowWidget")
+	void SetHotkeys(const TArray<FKey>& _Key);
+
 protected :
-	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = "true"), Category = "HotkeyRowWidget")
+	UPROPERTY(BlueprintReadWrite, Category = "HotkeyRowWidget")
 	TArray<FKey> m_Hotkeys;
 	
 	UPROPERTY(BlueprintReadWrite, Category = "HotkeyRowWidget")
 	TArray<class USkillHotkeyWidget*> m_SkillHotkeyWidgets;
+
+	class UHorizontalBox* m_pBox;
 	
 };

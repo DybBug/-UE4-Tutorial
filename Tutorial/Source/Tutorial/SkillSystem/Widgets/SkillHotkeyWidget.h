@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
+#include "Components/Button.h"
+#include "Components/Image.h"
 #include "SkillHotkeyWidget.generated.h"
 
 /**
@@ -15,16 +18,19 @@ class TUTORIAL_API USkillHotkeyWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public :
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "SkillHotkeyWidget")
-	bool ClearAssignedSpell();
+	virtual void NativeConstruct() override;
+	
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "SkillHotkeyWidget")
-	bool EnableHotkey();
+	UFUNCTION(BlueprintCallable, Category = "SkillHotkeyWidget")
+	void ClearAssignedSpell();
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "SkillHotkeyWidget")
-	bool DisableHotkey();
+	UFUNCTION(BlueprintCallable, Category = "SkillHotkeyWidget")
+	void EnableHotkey();
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "SkillHotkeyWidget")
+	UFUNCTION(BlueprintCallable, Category = "SkillHotkeyWidget")
+	void DisableHotkey();
+
+	UFUNCTION(BlueprintCallable, Category = "SkillHotkeyWidget")
 	void AssignSpell(class ABase_Skill* _Spell);
 
 	/* Get */
@@ -39,6 +45,21 @@ public :
 
 	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
 	const bool& GetDeactivated() const { return m_bDeactivated; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
+	class UTextBlock* GetHotkeyName_Widget() const { return m_pHotkeyName; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
+	class UTextBlock* GetCooldownText_Widget() const { return m_pCooldownText; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
+	class UButton* GetSkillButton_Widget() const { return m_pSkillButton; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
+	class UImage* GetSkillIcon_Widget() const { return m_pSkillIcon; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
+	class UImage* GetColldownImage_Widget() const { return m_pCooldownImage; }
 
 
 	/* Set */
@@ -66,5 +87,18 @@ protected :
 
 	UPROPERTY()
 	bool m_bDeactivated = false;
+
+	UPROPERTY()
+	class UTimelineComponent* m_pCooldownTimeline;
 	
+	UPROPERTY()
+	class UTextBlock* m_pHotkeyName;
+	UPROPERTY()
+	class UTextBlock* m_pCooldownText;
+	UPROPERTY()
+	class UButton* m_pSkillButton;
+	UPROPERTY()
+	class UImage* m_pSkillIcon;
+	UPROPERTY()
+	class UImage* m_pCooldownImage;
 };

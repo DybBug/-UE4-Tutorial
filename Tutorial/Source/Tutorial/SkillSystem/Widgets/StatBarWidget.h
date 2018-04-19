@@ -17,6 +17,11 @@ class TUTORIAL_API UStatBarWidget : public UUserWidget
 	GENERATED_BODY()
 
 public :
+	virtual void NativeConstruct() override;
+
+
+
+
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "StatBarWidget")
 	float GetPercent() const { return m_Percent; }
@@ -83,5 +88,12 @@ protected :
 
 	UPROPERTY(EditInstanceOnly, Category = "StatBarWidget")
 	UMaterialInstanceDynamic* m_pDynamicMaterial = nullptr;
-	
+
+	/* ÆÈ·¿Æ® º¯¼öµé. */
+	UPROPERTY()
+	class UProgressBar* m_pStatBar;
+	UPROPERTY()
+	class UImage* m_pStatLerpBar;
+	UPROPERTY()
+	class UTextBlock* m_pStatText;
 };
