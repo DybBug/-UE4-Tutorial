@@ -84,7 +84,7 @@ void ABase_Skill::OnCastCompleted()
 		m_pHotkeyWidget->GetSkillIcon_Widget()->SetColorAndOpacity(FLinearColor(FColor(0x545454FF)));
 		m_pHotkeyWidget->GetDynamicMaterial()->SetScalarParameterValue("Percent", 1.0f);
 		m_pHotkeyWidget->GetColldownImage_Widget()->SetVisibility(ESlateVisibility::HitTestInvisible);	
-		m_pHotkeyWidget->GetCooldownText_Widget()->SetText(FText::FromString(FString::Printf(TEXT("%d"), &GetCurrStage().Cooldown)));
+		//m_pHotkeyWidget->GetCooldownText_Widget()->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)GetCurrStage().Cooldown)));
 		m_pHotkeyWidget->GetCooldownText_Widget()->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 
@@ -146,7 +146,14 @@ void ABase_Skill::_OnTimelineUpdate()
 
 		float Cooldown = m_pCooldownTimeline->GetTimelineLength() - m_pCooldownTimeline->GetPlaybackPosition();
 		
-		m_pHotkeyWidget->GetCooldownText_Widget()->SetText(FText::FromString(FString::Printf(TEXT("%d"), &Cooldown)));
+		if (Cooldown > 1.0f)
+		{
+			m_pHotkeyWidget->GetCooldownText_Widget()->SetText(FText::FromString(FString::Printf(TEXT("%d"), (int)Cooldown)));
+		}
+		else
+		{
+			m_pHotkeyWidget->GetCooldownText_Widget()->SetText(FText::FromString(FString::Printf(TEXT("%.2f"), Cooldown)));
+		}
 	}
 
 }

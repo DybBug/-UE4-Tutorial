@@ -177,7 +177,7 @@ void ASkillCharacter::GenerateStartingSkills()
 	}
 }
 
-void ASkillCharacter::BeginSpellCast(ABase_Skill * _pCastedSkill)
+void ASkillCharacter::BeginSpellCast(ABase_Skill* _pCastedSkill)
 {
 	m_bIsCasting = true;
 	m_pCurrentSpell = _pCastedSkill;
@@ -187,7 +187,7 @@ void ASkillCharacter::BeginSpellCast(ABase_Skill * _pCastedSkill)
 		USkillHotkeyWidget* pSkillHotkeyWidget = m_pHUD->GetAllHotkeySlots()[i];
 		if (pSkillHotkeyWidget->GetAssignedSpell())
 		{
-			if (pSkillHotkeyWidget->GetAssignedSpell() != _pCastedSkill)
+			if (pSkillHotkeyWidget->GetAssignedSpell() == _pCastedSkill)
 			{
 				pSkillHotkeyWidget->DisableHotkey();
 				break;
