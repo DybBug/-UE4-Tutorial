@@ -21,8 +21,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+
+	// 기술 통보.
+	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
+	virtual void OnSkillNotify();
 
 	UFUNCTION(BlueprintCallable, Category ="Base_Skill")
 	void OnTryCastSpell();
@@ -38,6 +40,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
 	void OnCooldownExpired();
+
+
+	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
+	void PlayAnimation(class UAnimMontage* _pAnimationMontage, float _InPlayRate = 1.0f);
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "Base_Skill")
@@ -70,15 +76,31 @@ public:
 
 protected :
 	UFUNCTION()
-	void _OnTimelineUpdate();
+	void _OnCooldownTimelineUpdate();
+
 	UFUNCTION()
-	void _OnTimelineFinished();
+	void _OnCooldownTimelineFinished();
+
+	UFUNCTION()
+	void _OnCastingTimelineUpdate();
+
+	UFUNCTION()
+	void _OnCastingTimelineFinished();
+
+	UFUNCTION()
+	void _OnCastCompleted();
 
 
 
 protected :
 	UPROPERTY(EditDefaultsOnly, Category = "Base_Skill")
 	FSkillInfo m_SkillInfo;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Base_Skill")
+	class UAnimMontage* m_pSkillAnim;
+
+	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
+	class ASkillCharacter* m_pPlayer;
 
 	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
 	class USkillHotkeyWidget* m_pHotkeyWidget = nullptr;
@@ -92,6 +114,9 @@ protected :
 	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
 	bool m_bCurrentlyCasted = false;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
 	class UTimelineComponent* m_pCooldownTimeline;
+
+	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
+	class UTimelineComponent* m_pCastingTimeline;
 };

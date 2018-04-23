@@ -6,6 +6,8 @@
 #include "Components/ProgressBar.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 void UStatBarWidget::NativeConstruct()
 {

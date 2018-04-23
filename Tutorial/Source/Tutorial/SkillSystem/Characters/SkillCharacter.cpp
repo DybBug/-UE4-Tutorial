@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SkillCharacter.h"
-#include "../Widgets/SkillSystemHUD.h"
 #include "../Widgets/SkillHotkeyWidget.h"
 #include "../SkillActors/Base_Skill.h"
 
@@ -187,7 +186,7 @@ void ASkillCharacter::BeginSpellCast(ABase_Skill* _pCastedSkill)
 		USkillHotkeyWidget* pSkillHotkeyWidget = m_pHUD->GetAllHotkeySlots()[i];
 		if (pSkillHotkeyWidget->GetAssignedSpell())
 		{
-			if (pSkillHotkeyWidget->GetAssignedSpell() == _pCastedSkill)
+			if (pSkillHotkeyWidget->GetAssignedSpell() != _pCastedSkill)
 			{
 				pSkillHotkeyWidget->DisableHotkey();
 				break;
@@ -206,7 +205,7 @@ void ASkillCharacter::EndSpellCast(ABase_Skill * _pCastedSkill)
 		USkillHotkeyWidget* pSkillHotkeyWidget = m_pHUD->GetAllHotkeySlots()[i];
 		if (pSkillHotkeyWidget->GetAssignedSpell())
 		{
-			if (pSkillHotkeyWidget->GetAssignedSpell() == _pCastedSkill)
+			if (pSkillHotkeyWidget->GetAssignedSpell() != _pCastedSkill)
 			{
 				pSkillHotkeyWidget->EnableHotkey();
 				break;

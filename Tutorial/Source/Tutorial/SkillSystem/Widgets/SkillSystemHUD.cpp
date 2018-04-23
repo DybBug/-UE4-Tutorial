@@ -5,7 +5,6 @@
 #include "StatBarWidget.h"
 
 #include "WidgetTree.h"
-#include "Components/VerticalBox.h"
 #include "UObject/ConstructorHelpers.h"
 
 
@@ -13,10 +12,15 @@ void USkillSystemHUD::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	m_pHealthBar = WidgetTree->FindWidget<UStatBarWidget>(FName("WBP_HealthBar"));
-	m_pManaBar = WidgetTree->FindWidget<UStatBarWidget>(FName("WBP_ManaBar"));
-	m_pExpBar = WidgetTree->FindWidget<UStatBarWidget>(FName("WBP_ExpBar"));
-	m_pHotkeyRowContainer = WidgetTree->FindWidget<UVerticalBox>(FName("HotkeyRowContainer"));
+	m_pHealthBar = WidgetTree->FindWidget<UStatBarWidget>("WBP_HealthBar");
+	m_pManaBar = WidgetTree->FindWidget<UStatBarWidget>("WBP_ManaBar");
+	m_pExpBar = WidgetTree->FindWidget<UStatBarWidget>("WBP_ExpBar");
+	m_pHotkeyRowContainer = WidgetTree->FindWidget<UVerticalBox>("HotkeyRowContainer");
+
+	m_pCastingOverlay = WidgetTree->FindWidget<UOverlay>("CastingOverlay");
+	m_pCastingBar = WidgetTree->FindWidget<UProgressBar>("CastingBar");
+	m_pCastedSpellText = WidgetTree->FindWidget<UTextBlock>("CastedSpellText");
+	m_pCastTimeText = WidgetTree->FindWidget<UTextBlock>("CastTimeText");
 	
 	GenerateHotkeys(m_Hotkeys);
 }

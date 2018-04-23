@@ -4,7 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "StatBarWidget.h"
+
 #include "Blueprint/UserWidget.h"
+#include "Components/VerticalBox.h"
+#include "Components/Overlay.h"
+#include "Components/TextBlock.h"
+#include "Components/ProgressBar.h"
 #include "SkillSystemHUD.generated.h"
 
 /**
@@ -24,25 +29,41 @@ public :
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	class UStatBarWidget* GetHealthBar() const { return m_pHealthBar; }
+
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	class UStatBarWidget* GetManaBar() const { return m_pManaBar; }
+
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	class UStatBarWidget* GetExpBar() const { return m_pExpBar; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	const TArray<FKey>& GetHotKeys() const { return m_Hotkeys; }
+
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	const int& GetKeysPerRow() const { return m_KeysPerRow; }
+
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	const TArray<class USkillHotkeyWidget*>& GetAllHotkeySlots() const { return m_AllHotkeySlots; }
 
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UOverlay* GetCastingOverlay() const { return m_pCastingOverlay; }
 
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UTextBlock* GetCastSpellText() const { return m_pCastedSpellText; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UTextBlock* GetCastTimeText() const { return m_pCastTimeText; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UProgressBar* GetCastingBar() const { return m_pCastingBar; }
 
 	/* Set */
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
 	void SetHealthBar(class UStatBarWidget* _Widget) { m_pHealthBar = _Widget; }
+
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
 	void SetManaBar(class UStatBarWidget* _Widget) { m_pManaBar = _Widget; }
+
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
 	void SetExpBar(class UStatBarWidget* _Widget) { m_pExpBar = _Widget; }
 
@@ -61,7 +82,7 @@ protected :
 
 
 	UPROPERTY(EditAnywhere, Category = "SkillSystemHUD")
-		int m_KeysPerRow = 0;
+	int m_KeysPerRow = 0;
 
 	UPROPERTY(BlueprintReadWrite, Category = "SkillSystemHUD")
 	TArray<class USkillHotkeyWidget*> m_AllHotkeySlots;
@@ -70,5 +91,17 @@ protected :
 	/* */
 	UPROPERTY()
 	class UVerticalBox* m_pHotkeyRowContainer;
+
+	UPROPERTY()
+	class UOverlay* m_pCastingOverlay;
+
+	UPROPERTY()
+	class UTextBlock* m_pCastedSpellText;
+
+	UPROPERTY()
+	class UTextBlock* m_pCastTimeText;
+
+	UPROPERTY()
+	class UProgressBar* m_pCastingBar;
 
 };

@@ -20,6 +20,13 @@ class TUTORIAL_API USkillHotkeyWidget : public UUserWidget
 public :
 	virtual void NativeConstruct() override;
 	
+	/*virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+
+	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;*/
 
 	UFUNCTION(BlueprintCallable, Category = "SkillHotkeyWidget")
 	void ClearAssignedSpell();
@@ -32,6 +39,9 @@ public :
 
 	UFUNCTION(BlueprintCallable, Category = "SkillHotkeyWidget")
 	void AssignSpell(class ABase_Skill* _Spell);
+
+	UFUNCTION(BlueprintCallable, Category = "SkillHotkeyWidget")
+	void ResetStyle();
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
@@ -47,19 +57,22 @@ public :
 	const bool& GetDeactivated() const { return m_bDeactivated; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
-	class UTextBlock* GetHotkeyName_Widget() const { return m_pHotkeyName; }
+	class UTextBlock* GetHotkeyName() const { return m_pHotkeyName; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
-	class UTextBlock* GetCooldownText_Widget() const { return m_pCooldownText; }
+	class UTextBlock* GetCooldownText() const { return m_pCooldownText; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
-	class UButton* GetSkillButton_Widget() const { return m_pSkillButton; }
+	class UButton* GetSkillButton() const { return m_pSkillButton; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
-	class UImage* GetSkillIcon_Widget() const { return m_pSkillIcon; }
+	class UImage* GetBaseImage() const { return m_pBaseImage; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
-	class UImage* GetColldownImage_Widget() const { return m_pCooldownImage; }
+	class UImage* GetSkillIcon() const { return m_pSkillIcon; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillHotkeyWidget")
+	class UImage* GetColldownImage() const { return m_pCooldownImage; }
 
 
 	/* Set */
@@ -79,26 +92,42 @@ protected :
 	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = "true"), Category = "SkillHotkeyWidget")
 	FKey m_Hotkey;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
 	class ABase_Skill* m_pAssignedSpell;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
 	class UMaterialInstanceDynamic* m_pDynamicMaterial;	
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
 	bool m_bDeactivated = false;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
+	bool m_bDraggedOver = false;
+
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
+	FLinearColor m_DragOverColor = FColor(0x7FFFD100);
+	
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
+	FLinearColor m_DefaultColor = FColor(0x33FFFFFF);
+
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
 	class UTimelineComponent* m_pCooldownTimeline;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
 	class UTextBlock* m_pHotkeyName;
-	UPROPERTY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
 	class UTextBlock* m_pCooldownText;
-	UPROPERTY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
 	class UButton* m_pSkillButton;
-	UPROPERTY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
+	class UImage* m_pBaseImage;
+
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
 	class UImage* m_pSkillIcon;
-	UPROPERTY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "SkillHotkeyWidget")
 	class UImage* m_pCooldownImage;
 };

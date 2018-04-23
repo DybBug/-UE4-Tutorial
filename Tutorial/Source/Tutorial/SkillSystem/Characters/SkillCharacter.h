@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../Widgets/SkillSystemHUD.h"
 #include "../SkillSystem.h"
 #include "SkillCharacter.generated.h"
 
@@ -50,7 +51,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
 	const FStatData& GetStat(EStats _Stat) const { return m_Stats[_Stat]; }
 
+	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
+	class ABase_Skill* GetCurrentSpell() const { return m_pCurrentSpell; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
 	const bool& GetIsCasting() const { return m_bIsCasting; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
+	class USkillSystemHUD* GetHUD() const { return m_pHUD; }
 
 private:
 	void _SetupStatBars();
@@ -109,6 +117,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "SkillCharacter")
 	TArray<TSubclassOf<class ABase_Skill>> m_StartingSkillClasses;
 
+	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
+	class ABase_Skill* m_pCurrentSpell;
+
 	UPROPERTY()
 	TSubclassOf<class UUserWidget> m_HUDClass = nullptr;
 
@@ -124,8 +135,5 @@ protected:
 	UPROPERTY()
 	bool m_bIsCasting = false;	
 
-
-	UPROPERTY()
-	class ABase_Skill* m_pCurrentSpell;
 	
 };

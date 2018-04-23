@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Image.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "StatBarWidget.generated.h"
 
 /**
