@@ -7,7 +7,7 @@
 ABase_Element::ABase_Element()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 }
 
@@ -18,10 +18,4 @@ void ABase_Element::BeginPlay()
 	
 }
 
-// Called every frame
-void ABase_Element::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 

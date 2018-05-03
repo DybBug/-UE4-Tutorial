@@ -21,8 +21,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	/* Get */
+	const FElementInfo& GetElementInfo() const {return m_ElementInfo;}
+
 
 protected :
 	UPROPERTY(EditDefaultsOnly, Category="Base_Element")

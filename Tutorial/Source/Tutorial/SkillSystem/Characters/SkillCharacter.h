@@ -6,10 +6,12 @@
 #include "GameFramework/Character.h"
 #include "../Widgets/SkillSystemHUD.h"
 #include "../SkillSystem.h"
+#include "../Interfaces/Damageable_Interface.h"
 #include "SkillCharacter.generated.h"
 
+
 UCLASS()
-class TUTORIAL_API ASkillCharacter : public ACharacter
+class TUTORIAL_API ASkillCharacter : public ACharacter, public IDamageable_Interface
 {
 	GENERATED_BODY()
 
@@ -39,6 +41,14 @@ public:
 
 	UFUNCTION()
 	void EndSpellCast(class ABase_Skill* _pCastedSkill);
+
+	/* Interface */
+	virtual void OnReceiveDamage(
+		float _BaseDamage,
+		EDamageTypes _Type,
+		TSubclassOf<class ABase_Element> _ElementClass,
+		int _CritChance, AActor* _pAttacker,
+		class ABase_Skill* _pSpell) override;
 
 
 	/* Get */
@@ -135,5 +145,7 @@ protected:
 	UPROPERTY()
 	bool m_bIsCasting = false;	
 
+	UPROPERTY()
+	TSubclassOf<class ABase_Element> m_ElementClass;
 	
 };

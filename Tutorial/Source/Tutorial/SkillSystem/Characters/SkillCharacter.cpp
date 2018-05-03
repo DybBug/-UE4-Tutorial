@@ -3,6 +3,7 @@
 #include "SkillCharacter.h"
 #include "../Widgets/SkillHotkeyWidget.h"
 #include "../SkillActors/Base_Skill.h"
+#include "../BlueprintFunctionLibraries/Combat_BlueprintFunctionLibrary.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/TimelineComponent.h"
@@ -214,6 +215,34 @@ void ASkillCharacter::EndSpellCast(ABase_Skill * _pCastedSkill)
 	}
 }
 
+//
+/********************* Start of define "interface functions" *********************/
+//
+void ASkillCharacter::OnReceiveDamage(
+	float _BaseDamage, 
+	EDamageTypes _Type, 
+	TSubclassOf<class ABase_Element> _ElementClass, 
+	int _CritChance, 
+	AActor* _pAttacker, 
+	ABase_Skill * _pSpell)
+{
+	int Damage = 0;
+	bool IsCritical = false;
+	EEffectiveness Effectiveness;
+
+	if ((_BaseDamage >= 0.f) && UCombat_BlueprintFunctionLibrary::IsEnemy(_pAttacker))
+	{
+		UCombat_BlueprintFunctionLibrary::CalculateFinalDamage(_BaseDamage, _CritChance, _ElementClass, m_ElementClass, Damage, IsCritical, Effectiveness);
+		ModifyStat(EStats::Health, Damage, true);
+	}
+}
+//
+/********************* End of define "interface functions" *********************/
+//
+
+//
+/********************* Start of define "private functions" *********************/
+//
 void ASkillCharacter::_SetupStatBars()
 {
 	m_Stats[EStats::Health].pBarWidget = m_pHUD->GetHealthBar();
@@ -460,4 +489,7 @@ void ASkillCharacter::_AnyKey()
 		}
 	}
 }
+//
+/********************* End of define "private functions" *********************/
+//
 
