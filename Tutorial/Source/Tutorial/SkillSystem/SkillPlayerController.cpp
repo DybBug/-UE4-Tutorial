@@ -4,15 +4,16 @@
 #include "Characters/SkillCharacter.h"
 #include "GoalDecal.h"
 #include "Characters/SkillCharacter.h"
+#include "Interfaces/Selectable_Interface.h"
 
-#include "GameFramework/CharacterMovementComponent.h"
-
-#include "GameFramework/SpringArmComponent.h"
-#include "UObject/ConstructorHelpers.h"
-#include "Engine/GameEngine.h"
-#include "Engine/World.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "AI/Navigation/NavigationSystem.h"
+#include <GameFramework/CharacterMovementComponent.h>
+#include <GameFramework/SpringArmComponent.h>
+#include <UObject/ConstructorHelpers.h>
+#include <Engine/GameEngine.h>
+#include <Engine/World.h>
+#include <Kismet/KismetMathLibrary.h>
+#include <Kismet/KismetSystemLibrary.h>
+#include <AI/Navigation/NavigationSystem.h>
 
 
 ASkillPlayerController::ASkillPlayerController()
@@ -70,14 +71,35 @@ void ASkillPlayerController::_LMouseButton()
 
 		FHitResult HitResult;
 		
-		if (GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery1, true, HitResult))
+		if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, HitResult))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, TEXT("Hit!!"));
-			FVector GoalDecalLoc = FVector(HitResult.Location.X, HitResult.Location.Y, HitResult.Location.Z);
-			m_pGoalDecal = GWorld->SpawnActor<AGoalDecal>(m_GoalDecalClass, GoalDecalLoc, FRotator(0.f, 0.f, 0.f));
-			m_bHasMouseMovementCommand = true;
-			
-			UNavigationSystem::SimpleMoveToLocation(this, GoalDecalLoc);
+			// 선택한 액터가 선택 가능한 액터면 선택.
+			if (UKismetSystemLibrary::DoesImplementInterface(HitResult.GetActor(), USelectable_Interface::StaticClass()))
+			{
+				// 이전에 선택한 액터가 이번에 선택한 액터와 다르면
+				if (m_pSelectedActor && (HitResult.GetActor() != m_pSelectedActor))
+				{
+					Cast<ISelectable_Interface>(m_pSelectedActor)->OnSelectionEnd(Cast<ASkillCharacter>(GetPawn()));
+				}
+
+				m_pSelectedActor = HitResult.GetActor();	
+				Cast<ISelectable_Interface>(m_pSelectedActor)->OnSelected(Cast<ASkillCharacter>(GetPawn()));
+			}
+			// 그렇지 않으면(ex 바닥) 이동.
+			else
+			{	
+				CancelMovementCommand();
+
+				if (m_pSelectedActor)
+				{
+					Cast<ISelectable_Interface>(m_pSelectedActor)->OnSelectionEnd(Cast<ASkillCharacter>(GetPawn()));
+				}				
+				FVector GoalDecalLoc = FVector(HitResult.Location.X, HitResult.Location.Y, HitResult.Location.Z);
+				m_pGoalDecal = GWorld->SpawnActor<AGoalDecal>(m_GoalDecalClass, GoalDecalLoc, FRotator(0.f, 0.f, 0.f));
+				m_bHasMouseMovementCommand = true;
+
+				UNavigationSystem::SimpleMoveToLocation(this, GoalDecalLoc);			
+			}
 		}
 	}
 }
@@ -87,8 +109,7 @@ void ASkillPlayerController::_LookUp(float _Value)
 	if ((_Value != 0.f) && (m_bCanTurn == true))
 	{
 		if (GetWorld())
-		{			
-
+		{		
 			AddPitchInput(_Value*1.5f);	
 			ControlRotation.Pitch = UKismetMathLibrary::ClampAngle(ControlRotation.Pitch, -40.f, 0.f);
 		}

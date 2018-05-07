@@ -12,10 +12,12 @@
 
 bool UCombat_BlueprintFunctionLibrary::IsEnemy(AActor* _pActor)
 {
-	bool IsEqual = (_pActor->StaticClass() == ABase_Enemy::StaticClass());
-	bool IsChild = UKismetMathLibrary::ClassIsChildOf(_pActor->StaticClass(), ABase_Enemy::StaticClass());
+	
+	//bool IsEqual = (_pActor->StaticClass() == ABase_Enemy::StaticClass());
+	ABase_Enemy* pEnemy = Cast<ABase_Enemy>(_pActor);
+	bool IsChild = UKismetMathLibrary::ClassIsChildOf(_pActor->GetClass(), ABase_Enemy::StaticClass());
 
-	return (IsEqual || IsChild);
+	return (pEnemy || IsChild);
 }
 
 void UCombat_BlueprintFunctionLibrary::CalculateFinalDamage(

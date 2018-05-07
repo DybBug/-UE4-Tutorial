@@ -5,11 +5,12 @@
 #include "CoreMinimal.h"
 #include "StatBarWidget.h"
 
-#include "Blueprint/UserWidget.h"
-#include "Components/VerticalBox.h"
-#include "Components/Overlay.h"
-#include "Components/TextBlock.h"
-#include "Components/ProgressBar.h"
+#include <Blueprint/UserWidget.h>
+#include <Components/VerticalBox.h>
+#include <Components/Overlay.h>
+#include <Components/TextBlock.h>
+#include <Components/ProgressBar.h>
+#include <Components/Border.h>
 #include "SkillSystemHUD.generated.h"
 
 /**
@@ -57,6 +58,19 @@ public :
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	class UProgressBar* GetCastingBar() const { return m_pCastingBar; }
 
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UBorder* GetEnemyBorder() const { return m_pEnemyBorder; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UTextBlock* GetEnemyNameText() const { return m_pEnemyNameText; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UTextBlock* GetEnemyHealthText() const { return m_pEnemyHealthText; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UProgressBar* GetEnemyHealthBar() const { return m_pEnemyHealthBar; }
+
+
 	/* Set */
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
 	void SetHealthBar(class UStatBarWidget* _Widget) { m_pHealthBar = _Widget; }
@@ -103,5 +117,17 @@ protected :
 
 	UPROPERTY()
 	class UProgressBar* m_pCastingBar;
+
+	UPROPERTY()
+	class UBorder* m_pEnemyBorder;
+
+	UPROPERTY()
+	class UTextBlock* m_pEnemyNameText;
+
+	UPROPERTY()
+	class UTextBlock* m_pEnemyHealthText;
+
+	UPROPERTY()
+	class UProgressBar* m_pEnemyHealthBar;
 
 };

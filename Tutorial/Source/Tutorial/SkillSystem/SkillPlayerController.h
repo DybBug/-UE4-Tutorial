@@ -31,6 +31,8 @@ protected:
 	TSubclassOf<class AGoalDecal> m_GoalDecalClass;
 	class AGoalDecal* m_pGoalDecal = nullptr;
 
+	class AActor* m_pSelectedActor = nullptr;
+
 protected :
 
 	/*키 바인드 함수*/

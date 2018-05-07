@@ -21,6 +21,10 @@ void USkillSystemHUD::NativeConstruct()
 	m_pCastingBar = WidgetTree->FindWidget<UProgressBar>("CastingBar");
 	m_pCastedSpellText = WidgetTree->FindWidget<UTextBlock>("CastedSpellText");
 	m_pCastTimeText = WidgetTree->FindWidget<UTextBlock>("CastTimeText");
+	m_pEnemyBorder = WidgetTree->FindWidget<UBorder>("EnemyBorder");
+	m_pEnemyNameText = WidgetTree->FindWidget<UTextBlock>("EnemyNameText");
+	m_pEnemyHealthText = WidgetTree->FindWidget<UTextBlock>("EnemyHealthText");
+	m_pEnemyHealthBar = WidgetTree->FindWidget<UProgressBar>("EnemyHealthBar");
 	
 	GenerateHotkeys(m_Hotkeys);
 }

@@ -4,10 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../SkillSystem.h"
+#include "../Interfaces/Damageable_Interface.h"
+#include "../Interfaces/Selectable_Interface.h"
 #include "Base_Enemy.generated.h"
 
 UCLASS()
-class TUTORIAL_API ABase_Enemy : public ACharacter
+class TUTORIAL_API ABase_Enemy : public ACharacter, 
+	public IDamageable_Interface, public ISelectable_Interface
 {
 	GENERATED_BODY()
 
@@ -18,13 +22,12 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
 	 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Base_Enemy")
-	void NotifyHits();
+	void NotifyHit();
 
 	UFUNCTION(BlueprintCallable, Category = "Base_Enemy")
 	void PerformAttack();
@@ -34,6 +37,20 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Base_Enemy")
 	void OnReset();
+
+	/* Interface Functions*/
+	// Damagable_Interface
+	virtual void OnReceiveDamage(
+		float _BaseDamage,
+		EDamageTypes _Type,
+		TSubclassOf<class ABase_Element> _ElementClass,
+		int _CritChance,
+		AActor* _pAttacker,
+		class ABase_Skill* _pSpell) override;
+
+	// Selectable_Interface
+	virtual void OnSelected(class ASkillCharacter* _pPlayer) override;
+	virtual void OnSelectionEnd(class ASkillCharacter* _pPlayer) override;
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "Base_Enemy/GetFunc")
@@ -75,9 +92,32 @@ public:
 
 private :
 	void _Patrol();
+	void _InitWidgetText();
+	void _UpdateHealthBar();
+	void _OnDeath(AActor* _pKiller);
+	void _OnRespawn();
 
+
+	/* AIPerceptionComponent Bind Function*/
 	UFUNCTION()
 	void _OnPerceptionUpdated(const TArray<AActor*>& _UpdatedActors);
+
+	/* Collision Bind Function */
+	UFUNCTION()
+	void _OnComponentBeginOverlap(
+		UPrimitiveComponent* _pOverlappedComponent,
+		AActor* _pOtherActor,
+		UPrimitiveComponent* _pOtherComp,
+		int _OtherBodyIndex,
+		bool _bFromSweep,
+		const FHitResult& out_SweepResult);
+
+	UFUNCTION()
+	void _OnComponentEndOverlap(
+		UPrimitiveComponent* _pOverlappedComponent, 
+		AActor* _pOtherActor, 
+		UPrimitiveComponent* _pOtherComp, 
+		int32 _OtherBodyIndex);
 
 	/* Timer Bind Functions */
 	UFUNCTION()
@@ -87,26 +127,68 @@ private :
 	void _FollowTargetDistance();
 
 protected :
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy", meta = (ExposeOnSpawn = "true"))
-	float m_PatrolWalkSpeed = 200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	FName m_Name = "#Unknown";
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy", meta = (ExposeOnSpawn = "true"))
-	float m_AggroedWalkSpeed = 600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	int m_Level = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy", meta = (ExposeOnSpawn = "true"))
-	float m_PatrolRadius = 800.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	int m_MaxHealth = 200;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy", meta = (ExponseOnSpawn = "true"))
-	float m_FollowPlayerRadius = 2000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	int m_CurrHealth = m_MaxHealth;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	int m_ExpForKill = 100;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy", meta = (ExposeOnSpawn = "true"))
-	float m_AttackRange = 50.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_DeadBodyTime = 4.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy", meta = (ExposeOnSpawn = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_RespawnDelay = 5.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
 	TArray<class UAnimMontage*> m_AttackAnimMontages;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_PatrolWalkSpeed = 200.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_AggroedWalkSpeed = 600.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_PatrolRadius = 800.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_FollowPlayerRadius = 2000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_AttackRange = 50.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_AttackTraceDistance = 90.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_AttackDamage = 35.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	EDamageTypes m_DamageType = EDamageTypes::Physical;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	TSubclassOf<class ABase_Element> m_ElementClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	float m_CriticalChance = 25.f;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Base_Enemy")
+	class UWidgetComponent* m_pWidget;
+
+	// 이 영역에 들어오면 위젯이 보임.
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Base_Enemy")
+	class USphereComponent* m_pWidgetVisibleDomain;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Base_Enemy")
 	class UAIPerceptionComponent* m_pAIPerception;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
@@ -135,6 +217,15 @@ protected :
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
 	bool m_bIsRunningBack = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	bool m_bDoesRespawn = true;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	bool m_bIsSelected = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Base_Enemy")
+	class ASkillCharacter* m_pSelectingPlayer = nullptr;
 
 	/* Timer Handles */
 	UPROPERTY()

@@ -70,6 +70,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
 	class USkillSystemHUD* GetHUD() const { return m_pHUD; }
 
+	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
+	class ABase_Enemy* GetSelectedEnemy() const { return m_pSelectedEnemy; }
+
+	/* Set */
+	UFUNCTION(BlueprintCallable, Category = "SkillCharacter")
+	void SetSelectedEnemy(class ABase_Enemy* _pNewEnemy);
+
 private:
 	void _SetupStatBars();
 	void _UpdateStat(EStats _Stat); // StatBarWidget의 정보 업데이트.
@@ -109,6 +116,12 @@ private:
 	void _AnyKey();
 
 protected:
+	UPROPERTY(EditAnywhere, Category = "SkillCharacter")
+	TArray<TSubclassOf<class ABase_Skill>> m_StartingSkillClasses;
+
+	UPROPERTY(EditAnywhere, Category = "SkillCharacter")
+	TSubclassOf<class ABase_Element> m_ElementClass;
+
 	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
 	class UCameraComponent* m_pCamera = nullptr;
 
@@ -122,13 +135,13 @@ protected:
 	class UTimelineComponent* m_pManaTimeline = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
-	class UTimelineComponent* m_pExpTimeline = nullptr;
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillCharacter")
-	TArray<TSubclassOf<class ABase_Skill>> m_StartingSkillClasses;
+	class UTimelineComponent* m_pExpTimeline = nullptr;	
 
 	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
 	class ABase_Skill* m_pCurrentSpell;
+
+	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
+	class ABase_Enemy* m_pSelectedEnemy;
 
 	UPROPERTY()
 	TSubclassOf<class UUserWidget> m_HUDClass = nullptr;
@@ -145,7 +158,5 @@ protected:
 	UPROPERTY()
 	bool m_bIsCasting = false;	
 
-	UPROPERTY()
-	TSubclassOf<class ABase_Element> m_ElementClass;
 	
 };

@@ -15,7 +15,7 @@
 AGoalDecal::AGoalDecal()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	m_pScene = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp"));
 	RootComponent = m_pScene;
@@ -25,7 +25,9 @@ AGoalDecal::AGoalDecal()
 
 	m_pBox = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	m_pBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	
+	m_pBox->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
+	m_pBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	m_pBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	m_pBox->OnComponentBeginOverlap.AddDynamic(this, &AGoalDecal::_OnComponentBeginOverlap);
 	m_pBox->SetupAttachment(m_pDecal);
 }
@@ -42,12 +44,6 @@ void AGoalDecal::BeginPlay()
 	
 }
 
-// Called every frame
-void AGoalDecal::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 
 void AGoalDecal::_OnComponentBeginOverlap(
 	UPrimitiveComponent * _pOverlappedComponent, 
@@ -56,10 +52,10 @@ void AGoalDecal::_OnComponentBeginOverlap(
 	int _OtherBodyIndex, 
 	bool _bFromSweep, 
 	const FHitResult & _SweepResult)
-{
-	if (_pOtherActor == m_pController->GetOwner())
+{	
+	AActor* pOwner = m_pController->GetPawn();
+	if (_pOtherActor == pOwner)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, TEXT("Overlap"));
 		m_pController->CancelMovementCommand();
 	}
 

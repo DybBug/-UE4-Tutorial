@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "../SkillSystem.h"
-#include "Damageable_Interface.generated.h"
+#include "Selectable_Interface.generated.h"
+
+class ASkillCharacter;
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UDamageable_Interface : public UInterface
+class USelectable_Interface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -17,18 +18,16 @@ class UDamageable_Interface : public UInterface
 /**
  * 
  */
-class TUTORIAL_API IDamageable_Interface
+class TUTORIAL_API ISelectable_Interface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION()
-	virtual void OnReceiveDamage(
-		float _BaseDamage,
-		EDamageTypes _Type,
-		TSubclassOf<class ABase_Element> _ElementClass, 
-		int _CritChance, AActor* _pAttacker, 
-		class ABase_Skill* _pSpell) = 0;
+	virtual void OnSelected(ASkillCharacter* _pPlayer) = 0;
+
+	UFUNCTION()
+	virtual void OnSelectionEnd(ASkillCharacter* _pPlayer) = 0;
 	
 };

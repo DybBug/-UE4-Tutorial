@@ -5,6 +5,7 @@
 #include "../SkillActors/Base_Skill.h"
 #include "../BlueprintFunctionLibraries/Combat_BlueprintFunctionLibrary.h"
 
+#include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -33,10 +34,18 @@ ASkillCharacter::ASkillCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetCapsuleComponent()->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Overlap);
+
 	m_pSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	m_pSpringArm->TargetArmLength = 650.f;
 	m_pSpringArm->SetRelativeRotation(FRotator(-40.f, 0.f, 0.f));
 	m_pSpringArm->bUsePawnControlRotation = true;
+	m_pSpringArm->bDoCollisionTest = false;
 	m_pSpringArm->SetupAttachment(RootComponent);
 
 	m_pCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
@@ -233,12 +242,17 @@ void ASkillCharacter::OnReceiveDamage(
 	if ((_BaseDamage >= 0.f) && UCombat_BlueprintFunctionLibrary::IsEnemy(_pAttacker))
 	{
 		UCombat_BlueprintFunctionLibrary::CalculateFinalDamage(_BaseDamage, _CritChance, _ElementClass, m_ElementClass, Damage, IsCritical, Effectiveness);
-		ModifyStat(EStats::Health, Damage, true);
+		ModifyStat(EStats::Health, -Damage, true);
 	}
 }
 //
 /********************* End of define "interface functions" *********************/
 //
+
+void ASkillCharacter::SetSelectedEnemy(ABase_Enemy * _pNewEnemy)
+{
+	m_pSelectedEnemy = _pNewEnemy;
+}
 
 //
 /********************* Start of define "private functions" *********************/

@@ -21,12 +21,12 @@ public :
 
 	UFUNCTION()
 	static void CalculateFinalDamage(
-	float _BaseDamage, 
-	int _CritChance, 
-	TSubclassOf<class ABase_Element> _AttackerElementClass, 
-	TSubclassOf<class ABase_Element> _DefenderElementClass,
-	int& out_Damage,
-	bool& out_IsCritical,
-	EEffectiveness& out_Effectiveness);
+		float _BaseDamage, 
+		int _CritChance, 
+		TSubclassOf<class ABase_Element> _AttackerElementClass, 
+		TSubclassOf<class ABase_Element> _DefenderElementClass,
+		int& out_Damage,
+		bool& out_IsCritical,
+		EEffectiveness& out_Effectiveness);
 	
 };
