@@ -7,6 +7,13 @@
 #include "Engine/EngineTypes.h"
 #include "SkillSystem.generated.h"
 
+#define EOT_Player   EObjectTypeQuery::ObjectTypeQuery1
+#define EOT_Enemy    EObjectTypeQuery::ObjectTypeQuery2
+#define EOT_Skill    EObjectTypeQuery::ObjectTypeQuery3
+#define ETT_Selector ETraceTypeQuery::TraceTypeQuery1
+#define ETT_Misc     ETraceTypeQuery::TraceTypeQuery2
+
+
 /* 스텟 게이지*/
 UENUM(BlueprintType)
 enum class EStats : uint8

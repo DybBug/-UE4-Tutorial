@@ -31,10 +31,10 @@ void AAOE_Skill::OnSkillNotify()
 	
 	/* SphereTrace »ý¼º. */
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypeQueries;
-	ObjectTypeQueries.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+	ObjectTypeQueries.Add(EOT_Enemy);
 
-	TArray<AActor*> Actors;
-	Actors.Add(pPlayer);
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(pPlayer);
 
 	TArray<FHitResult> HitResults;
 
@@ -45,7 +45,7 @@ void AAOE_Skill::OnSkillNotify()
 		GetCurrStage().AreaRadius,
 		ObjectTypeQueries,
 		true, 
-		Actors, 
+		IgnoreActors,
 		EDrawDebugTrace::Persistent,
 		HitResults, 
 		true);

@@ -27,14 +27,17 @@ ABase_Enemy::ABase_Enemy()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetCapsuleComponent()->SetCollisionObjectType(UEngineTypes::ConvertToCollisionChannel(EOT_Enemy));
+	GetCapsuleComponent()->SetCollisionResponseToChannel(UEngineTypes::ConvertToCollisionChannel(ETT_Selector) , ECollisionResponse::ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(UEngineTypes::ConvertToCollisionChannel(EOT_Skill), ECollisionResponse::ECR_Block);
 
 	m_pWidgetVisibleDomain = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	m_pWidgetVisibleDomain->SetSphereRadius(1500.f);
 	m_pWidgetVisibleDomain->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	m_pWidgetVisibleDomain->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
+	m_pWidgetVisibleDomain->SetCollisionObjectType(UEngineTypes::ConvertToCollisionChannel(ETT_Misc));
 	m_pWidgetVisibleDomain->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	m_pWidgetVisibleDomain->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	m_pWidgetVisibleDomain->SetCollisionResponseToChannel(UEngineTypes::ConvertToCollisionChannel(EOT_Player), ECollisionResponse::ECR_Overlap);
 	m_pWidgetVisibleDomain->OnComponentBeginOverlap.AddDynamic(this, &ABase_Enemy::_OnComponentBeginOverlap);
 	m_pWidgetVisibleDomain->OnComponentEndOverlap.AddDynamic(this, &ABase_Enemy::_OnComponentEndOverlap);
 	m_pWidgetVisibleDomain->bGenerateOverlapEvents = true;
@@ -85,7 +88,7 @@ void ABase_Enemy::NotifyHit()
 	FVector EndLoc = GetActorLocation() + (GetActorForwardVector() * m_AttackTraceDistance);
 
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjTypeQueries;
-	ObjTypeQueries.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+	ObjTypeQueries.Add(UEngineTypes::ConvertToObjectType(UEngineTypes::ConvertToCollisionChannel(EOT_Player)));
 
 	FHitResult HitResult;
 

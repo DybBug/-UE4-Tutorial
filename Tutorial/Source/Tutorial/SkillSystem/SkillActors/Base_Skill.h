@@ -27,13 +27,13 @@ public:
 	virtual void OnSkillNotify();
 
 	UFUNCTION(BlueprintCallable, Category ="Base_Skill")
-	void OnTryCastSpell();
+	virtual void OnTryCastSpell();
 
 	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
-	void InitializeSpellCast();
+	virtual void InitializeSpellCast();
 
 	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
-	void OnSpellCast();
+	virtual void OnSpellCast();
 
 	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
 	void OnCastCompleted();
@@ -106,7 +106,7 @@ protected :
 	class USkillHotkeyWidget* m_pHotkeyWidget = nullptr;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
-	int m_CurrStageIndex;
+	int m_CurrStageIndex = 0;
 
 	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
 	bool m_bOnCooldown = false;

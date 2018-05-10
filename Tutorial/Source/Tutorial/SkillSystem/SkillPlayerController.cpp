@@ -71,7 +71,7 @@ void ASkillPlayerController::_LMouseButton()
 
 		FHitResult HitResult;
 		
-		if (GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, HitResult))
+		if (GetHitResultUnderCursorByChannel(ETT_Selector, true, HitResult))
 		{
 			// 선택한 액터가 선택 가능한 액터면 선택.
 			if (UKismetSystemLibrary::DoesImplementInterface(HitResult.GetActor(), USelectable_Interface::StaticClass()))

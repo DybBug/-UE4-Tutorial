@@ -1,14 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GoalDecal.h"
+#include "SkillSystem.h"
 
-#include "Components/SceneComponent.h"
-#include "Components/DecalComponent.h"
-#include "Components/BoxComponent.h"
-
-#include "Engine/World.h"
-#include "Engine/GameEngine.h"
-#include "Kismet/GameplayStatics.h"
+#include <Components/SceneComponent.h>
+#include <Components/DecalComponent.h>
+#include <Components/BoxComponent.h>
+		
+#include <Engine/World.h>
+#include <Engine/GameEngine.h>
+#include <Kismet/GameplayStatics.h>
 
 
 // Sets default values
@@ -25,9 +26,9 @@ AGoalDecal::AGoalDecal()
 
 	m_pBox = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	m_pBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	m_pBox->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
+	m_pBox->SetCollisionObjectType(UEngineTypes::ConvertToCollisionChannel(ETT_Misc));
 	m_pBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	m_pBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	m_pBox->SetCollisionResponseToChannel(UEngineTypes::ConvertToCollisionChannel(EOT_Player), ECollisionResponse::ECR_Overlap);
 	m_pBox->OnComponentBeginOverlap.AddDynamic(this, &AGoalDecal::_OnComponentBeginOverlap);
 	m_pBox->SetupAttachment(m_pDecal);
 }
