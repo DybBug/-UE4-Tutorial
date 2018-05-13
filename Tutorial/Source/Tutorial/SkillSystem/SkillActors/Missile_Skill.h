@@ -32,6 +32,12 @@ public :
 	virtual void InitializeSpellCast() override;
 	UFUNCTION()
 	virtual void OnSpellCast() override;
+	
+	UFUNCTION()
+	void StopTimer();
+
+	/* Get */
+	class ABase_Enemy* GetTarget() const { return m_pTarget; }
 
 private :
 	UFUNCTION()
@@ -50,9 +56,6 @@ private :
 
 	UFUNCTION()
 	bool _InAttackRange();
-
-	UFUNCTION()
-	void _StopTimer();
 
 	UFUNCTION()
 	void _DistanceCheck();

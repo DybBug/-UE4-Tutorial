@@ -38,6 +38,7 @@ protected :
 	/*키 바인드 함수*/
 	void _RMouseButton();
 	void _LMouseButton();
+	void _ToggleSkillTree();
 	void _LookUp(float _Value);
 	void _Turn(float _Value);
 	void _MoveForward(float _Value);

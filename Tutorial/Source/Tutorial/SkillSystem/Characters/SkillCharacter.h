@@ -2,13 +2,20 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include <CoreMinimal.h>
+#include <GameFramework/Character.h>
 #include "../Widgets/SkillSystemHUD.h"
 #include "../SkillSystem.h"
 #include "../Interfaces/Damageable_Interface.h"
+#include "../SkillActors/Base_Skill.h"
+
 #include "SkillCharacter.generated.h"
 
+
+class UCameraComponent;
+class USpringArmComponent;
+class USkillTreeComponent;
+class ABase_Skill;
 
 UCLASS()
 class TUTORIAL_API ASkillCharacter : public ACharacter, public IDamageable_Interface
@@ -34,13 +41,19 @@ public:
 	void ModifyStat(EStats _Stat, int _Value, bool _bIsAnimated = false);
 
 	UFUNCTION()
-	void GenerateStartingSkills();
-
-	UFUNCTION()
 	void BeginSpellCast(class ABase_Skill* _pCastedSkill);
 
 	UFUNCTION()
 	void EndSpellCast(class ABase_Skill* _pCastedSkill);
+
+	UFUNCTION()
+	void HasBuff(TSubclassOf<class ABuff_Skill> _BuffClass, bool& out_bHasBuff, class ABuff_Skill*& out_pFoundBuff);
+
+	UFUNCTION()
+	class UBuffWidget* AddBuff(class ABuff_Skill* _pNewBuff);
+
+	UFUNCTION()
+	void RemoveBuff(ABuff_Skill* _pBuff);
 
 	/* Interface */
 	virtual void OnReceiveDamage(
@@ -53,33 +66,47 @@ public:
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
-	class USpringArmComponent* GetSpringArm() const { return m_pSpringArm; }
+	USpringArmComponent* GetSpringArm() const { return m_pSpringArm; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
-	class UCameraComponent* GetCamera() const { return m_pCamera; }
+	UCameraComponent* GetCamera() const { return m_pCamera; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
 	const FStatData& GetStat(EStats _Stat) const { return m_Stats[_Stat]; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
-	class ABase_Skill* GetCurrentSpell() const { return m_pCurrentSpell; }
+	ABase_Skill* GetCurrentSpell() const { return m_pCurrentSpell; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
 	const bool& GetIsCasting() const { return m_bIsCasting; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
-	class USkillSystemHUD* GetHUD() const { return m_pHUD; }
+	USkillSystemHUD* GetHUD() const { return m_pHUD; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
-	class ABase_Enemy* GetSelectedEnemy() const { return m_pSelectedEnemy; }
+	ABase_Enemy* GetSelectedEnemy() const { return m_pSelectedEnemy; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
+	const TSet<TSubclassOf<ABase_Skill>>& GetLearntSpellClasses() const { return m_LearntSpellClasses; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
+	const int& GetCurrLevel() const { return m_CurrLevel; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
+	USkillTreeComponent* GetSkillTreeComponent() const { return m_pSkillTree; }
+
+
 
 	/* Set */
 	UFUNCTION(BlueprintCallable, Category = "SkillCharacter")
-	void SetSelectedEnemy(class ABase_Enemy* _pNewEnemy);
+	void SetSelectedEnemy(ABase_Enemy* _pNewEnemy);
 
 private:
 	void _SetupStatBars();
 	void _UpdateStat(EStats _Stat); // StatBarWidget의 정보 업데이트.
+	void _UpdateLevel(); // LevelText 정보 업데이트.
+
+	void _IncreaseLevel();
 
 	void _SetupRegenerations();
 	void _HealthRegenTick();
@@ -110,44 +137,52 @@ private:
 	UFUNCTION()
 	void _ExpStatLerpTick();
 
+
 	/* 키 입력 관련 함수들. */
-	void _Increase();
-	void _Decrease();
 	void _AnyKey();
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "SkillCharacter")
-	TArray<TSubclassOf<class ABase_Skill>> m_StartingSkillClasses;
+	TSubclassOf<ABase_Element> m_ElementClass;
 
-	UPROPERTY(EditAnywhere, Category = "SkillCharacter")
-	TSubclassOf<class ABase_Element> m_ElementClass;
+	UPROPERTY(VisibleDefaultsOnly, Category = "SkillCharacter")
+	UCameraComponent* m_pCamera = nullptr;
 
-	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
-	class UCameraComponent* m_pCamera = nullptr;
+	UPROPERTY(VisibleDefaultsOnly, Category = "SkillCharacter")
+	USpringArmComponent* m_pSpringArm = nullptr;
 
-	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
-	class USpringArmComponent* m_pSpringArm = nullptr;
+	UPROPERTY(VisibleDefaultsOnly, Category = "SkillCharacter")
+	USkillTreeComponent* m_pSkillTree;
 
-	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
-	class UTimelineComponent* m_pHealthTimeline = nullptr;
+	UPROPERTY(VisibleDefaultsOnly, Category = "SkillCharacter")
+	UTimelineComponent* m_pHealthTimeline = nullptr;
 
-	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
-	class UTimelineComponent* m_pManaTimeline = nullptr;
+	UPROPERTY(VisibleDefaultsOnly, Category = "SkillCharacter")
+	UTimelineComponent* m_pManaTimeline = nullptr;
 
-	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
-	class UTimelineComponent* m_pExpTimeline = nullptr;	
-
-	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
-	class ABase_Skill* m_pCurrentSpell;
+	UPROPERTY(VisibleDefaultsOnly, Category = "SkillCharacter")
+	UTimelineComponent* m_pExpTimeline = nullptr;	
 
 	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
-	class ABase_Enemy* m_pSelectedEnemy;
+	ABase_Skill* m_pCurrentSpell;
+
+	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
+	TArray<ABuff_Skill*> m_pCurrentBuffs;
+
+	UPROPERTY(VisibleAnywhere, Category = "SkillCharacter")
+	ABase_Enemy* m_pSelectedEnemy;
 
 	UPROPERTY()
-	TSubclassOf<class UUserWidget> m_HUDClass = nullptr;
+	TSet<TSubclassOf<ABase_Skill>> m_LearntSpellClasses;
 
 	UPROPERTY()
-	class USkillSystemHUD* m_pHUD = nullptr;
+	TSubclassOf<UUserWidget> m_HUDClass = nullptr;
+
+	UPROPERTY()
+	TSubclassOf<UBuffWidget> m_BuffWidgetClass = nullptr;
+
+	UPROPERTY()
+	USkillSystemHUD* m_pHUD = nullptr;
 
 	UPROPERTY()
 	TMap<EStats, FStatData> m_Stats;
@@ -157,6 +192,12 @@ protected:
 
 	UPROPERTY()
 	bool m_bIsCasting = false;	
+
+	UPROPERTY()
+	int m_CurrLevel = 1;
+
+	UPROPERTY()
+	int m_RestExp = 0;
 
 	
 };

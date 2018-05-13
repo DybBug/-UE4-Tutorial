@@ -149,6 +149,18 @@ void ABase_Skill::PlayAnimation(UAnimMontage* _pAnimationMontage, float _InPlayR
 	GetWorldTimerManager().SetTimer(hTimer, this, &ABase_Skill::_OnCastCompleted, DelayTime);
 }
 
+const FSkillStage& ABase_Skill::GetCurrStage() const
+{
+	return m_SkillInfo.Stages[m_CurrStageIndex];
+}
+
+const FSkillStage& ABase_Skill::GetNextStage() const
+{
+	int NextStageIndex = FMath::Clamp<int>(m_CurrStageIndex + 1, 0, m_SkillInfo.Stages.Num() - 1);
+
+	return m_SkillInfo.Stages[NextStageIndex];
+}
+
 void ABase_Skill::SetSkillInfo(const FSkillInfo& _SkillInfo)
 {
 	m_SkillInfo = _SkillInfo;
@@ -167,6 +179,11 @@ void ABase_Skill::SetOnCooldown(bool _bBool)
 void ABase_Skill::SetCurrentlyCasted(bool _bBool)
 {
 	m_bCurrentlyCasted = _bBool;
+}
+
+void ABase_Skill::SetCurrStageIndex(int _Index)
+{
+	m_CurrStageIndex = _Index;
 }
 
 void ABase_Skill::_OnCooldownTimelineUpdate()

@@ -45,6 +45,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
 	void PlayAnimation(class UAnimMontage* _pAnimationMontage, float _InPlayRate = 1.0f);
 
+	UFUNCTION(BlueprintPure, Category = "Base_Skill")
+	const FSkillStage& GetCurrStage() const;
+
+	UFUNCTION(BlueprintPure, Category = "Base_Skill")
+	const FSkillStage& GetNextStage() const;
+
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "Base_Skill")
 	const FSkillInfo& GetSkillInfo() const { return m_SkillInfo; }
@@ -59,7 +65,7 @@ public:
 	const bool& GetCurrentlyCasted() const { return m_bCurrentlyCasted; }
 
 	UFUNCTION(BlueprintPure, Category = "Base_Skill")
-	const FSkillStage& GetCurrStage() const { return m_SkillInfo.Stages[m_CurrStageIndex]; }
+	const int& GetCurrStageIndex() const { return m_CurrStageIndex; }
 
 	/* Set */
 	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
@@ -73,6 +79,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
 	void SetCurrentlyCasted(bool _bBool);
+
+	UFUNCTION(BlueprintCallable, Category = "Base_Skill")
+	void SetCurrStageIndex(int _Index);
 
 protected :
 	UFUNCTION()
@@ -106,7 +115,7 @@ protected :
 	class USkillHotkeyWidget* m_pHotkeyWidget = nullptr;
 	
 	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
-	int m_CurrStageIndex = 0;
+	int m_CurrStageIndex = -1;
 
 	UPROPERTY(VisibleAnywhere, Category = "Base_Skill")
 	bool m_bOnCooldown = false;

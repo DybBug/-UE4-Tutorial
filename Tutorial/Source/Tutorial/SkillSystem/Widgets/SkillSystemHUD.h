@@ -7,6 +7,7 @@
 
 #include <Blueprint/UserWidget.h>
 #include <Components/VerticalBox.h>
+#include <Components/HorizontalBox.h>
 #include <Components/Overlay.h>
 #include <Components/TextBlock.h>
 #include <Components/ProgressBar.h>
@@ -36,6 +37,9 @@ public :
 
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	class UStatBarWidget* GetExpBar() const { return m_pExpBar; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class USkillTreeWidget* GetSkillTree() const { return m_pSkillTree; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	const TArray<FKey>& GetHotKeys() const { return m_Hotkeys; }
@@ -70,6 +74,13 @@ public :
 	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
 	class UProgressBar* GetEnemyHealthBar() const { return m_pEnemyHealthBar; }
 
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UHorizontalBox* GetBuffContainer() const { return m_pBuffContainer; }
+
+	UFUNCTION(BlueprintPure, Category = "SkillSystemHUD")
+	class UTextBlock* GetLevelText() const { return m_pLevelText; }
+
+
 
 	/* Set */
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
@@ -85,11 +96,15 @@ public :
 protected :
 	UPROPERTY(VisibleAnywhere, Category = "SkillSystemHUD")
 	class UStatBarWidget* m_pHealthBar;
+
 	UPROPERTY(VisibleAnywhere, Category = "SkillSystemHUD")
 	class UStatBarWidget* m_pManaBar;
+
 	UPROPERTY(VisibleAnywhere, Category = "SkillSystemHUD")
 	class UStatBarWidget* m_pExpBar;
 
+	UPROPERTY(VisibleAnywhere, Category = "SkillSystemHUD")
+	class USkillTreeWidget* m_pSkillTree;
 
 	UPROPERTY(EditAnywhere, Category = "SkillSystemHUD")
 	TArray<FKey> m_Hotkeys;
@@ -100,6 +115,8 @@ protected :
 
 	UPROPERTY(BlueprintReadWrite, Category = "SkillSystemHUD")
 	TArray<class USkillHotkeyWidget*> m_AllHotkeySlots;
+
+
 
 
 	/* */
@@ -129,5 +146,11 @@ protected :
 
 	UPROPERTY()
 	class UProgressBar* m_pEnemyHealthBar;
+
+	UPROPERTY()
+	class UHorizontalBox* m_pBuffContainer;
+
+	UPROPERTY()
+	class UTextBlock* m_pLevelText;
 
 };

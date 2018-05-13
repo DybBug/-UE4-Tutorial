@@ -2,22 +2,25 @@
 
 #include "SkillCharacter.h"
 #include "../Widgets/SkillHotkeyWidget.h"
-#include "../SkillActors/Base_Skill.h"
+#include "../SkillActors/Missile_Skill.h"
+#include "../SkillActors/Buff_Skill.h"
 #include "../BlueprintFunctionLibraries/Combat_BlueprintFunctionLibrary.h"
+#include "../Components/SkillTreeComponent.h"
 
-#include "Components/CapsuleComponent.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "Components/TimelineComponent.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/PlayerController.h"
-
-#include "UObject/ConstructorHelpers.h"
-#include "Camera/CameraComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Blueprint/UserWidget.h"
-#include "TimerManager.h"
+#include <Components/CapsuleComponent.h>
+#include <Components/SkeletalMeshComponent.h>
+#include <Components/TimelineComponent.h>
+#include <GameFramework/SpringArmComponent.h>
+#include <GameFramework/CharacterMovementComponent.h>
+#include <GameFramework/PlayerController.h>
+		 
+#include <UObject/ConstructorHelpers.h>
+#include <Camera/CameraComponent.h>
+#include <Kismet/GameplayStatics.h>
+#include <Kismet/KismetMathLibrary.h>
+#include <Kismet/KismetTextLibrary.h>
+#include <Blueprint/UserWidget.h>
+#include <TimerManager.h>
 
 
 
@@ -52,6 +55,8 @@ ASkillCharacter::ASkillCharacter()
 	m_pCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	m_pCamera->SetupAttachment(m_pSpringArm);	
 
+	m_pSkillTree = CreateDefaultSubobject<USkillTreeComponent>(TEXT("SkillTreeComp"));	
+
 	m_pHealthTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("TimelineComp_Health"));
 	m_pHealthTimeline->SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
 
@@ -66,6 +71,12 @@ ASkillCharacter::ASkillCharacter()
 	if (WBP_HUD.Succeeded())
 	{
 		m_HUDClass = WBP_HUD.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> WBP_BuffWidget(TEXT("WidgetBlueprint'/Game/TutorialContent/SkillSystem/Widgets/WBP_Buff.WBP_Buff_C'"));
+	if (WBP_BuffWidget.Succeeded())
+	{
+		m_BuffWidgetClass = WBP_BuffWidget.Class;
 	}
 
 	m_Stats.Add(EStats::Health);
@@ -119,7 +130,10 @@ void ASkillCharacter::BeginPlay()
 		_UpdateStat(EStats::Mana);
 		_UpdateStat(EStats::Exp);
 
-		GenerateStartingSkills();
+		_UpdateLevel();
+
+		m_pSkillTree->SetupTree();
+	
 	}
 
 }
@@ -129,17 +143,12 @@ void ASkillCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
-
 }
 
 // Called to bind functionality to input
 void ASkillCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindKey(EKeys::Equals, IE_Pressed, this, &ASkillCharacter::_Increase);
-	PlayerInputComponent->BindKey(EKeys::Hyphen, IE_Pressed, this, &ASkillCharacter::_Decrease);
 
 	PlayerInputComponent->BindKey(EKeys::AnyKey, IE_Pressed, this, &ASkillCharacter::_AnyKey);
 
@@ -151,6 +160,12 @@ void ASkillCharacter::ModifyStat(EStats _Stat, int _Value, bool _bIsAnimated)
 
 	if (_bIsAnimated)
 	{
+		// 수정할 스탯이 경험치이고 그 값이 최대값이 넘었을 경우.
+		if ((_Stat == EStats::Exp) && ((StatRef.CurrValue + _Value) >= StatRef.MaxValue ))
+		{
+			m_RestExp += ((StatRef.CurrValue + _Value) - StatRef.MaxValue);
+		}
+		
 		StatRef.CurrValue = UKismetMathLibrary::Clamp((StatRef.CurrValue + _Value), StatRef.MinValue, StatRef.MaxValue);
 
 		float LerpAlpha = UKismetMathLibrary::Abs(UKismetMathLibrary::Clamp(_Value, -StatRef.CurrValue, StatRef.MaxValue - StatRef.CurrValue)) / StatRef.MaxValue;
@@ -158,6 +173,7 @@ void ASkillCharacter::ModifyStat(EStats _Stat, int _Value, bool _bIsAnimated)
 		_LerpStatDisplay(_Stat, LerpTime, _Value > 0);
 
 		_HandleRegeneration(_Stat);
+		
 	}
 
 	else
@@ -169,23 +185,6 @@ void ASkillCharacter::ModifyStat(EStats _Stat, int _Value, bool _bIsAnimated)
 	}
 }
 
-void ASkillCharacter::GenerateStartingSkills()
-{
-	for (int i = 0; i < m_StartingSkillClasses.Num(); ++i)
-	{
-		ABase_Skill* pSpell = GetWorld()->SpawnActor<ABase_Skill>(m_StartingSkillClasses[i]);
-
-		for (int j = 0; j < m_pHUD->GetAllHotkeySlots().Num(); ++j)
-		{
-			USkillHotkeyWidget* pSkillHotkeyWidget = m_pHUD->GetAllHotkeySlots()[j];
-			if (!pSkillHotkeyWidget->GetAssignedSpell())
-			{
-				pSkillHotkeyWidget->AssignSpell(pSpell);
-				break;
-			}
-		}
-	}
-}
 
 void ASkillCharacter::BeginSpellCast(ABase_Skill* _pCastedSkill)
 {
@@ -206,7 +205,7 @@ void ASkillCharacter::BeginSpellCast(ABase_Skill* _pCastedSkill)
 	}
 }
 
-void ASkillCharacter::EndSpellCast(ABase_Skill * _pCastedSkill)
+void ASkillCharacter::EndSpellCast(ABase_Skill* _pCastedSkill)
 {
 	m_bIsCasting = false;
 	m_pCurrentSpell = nullptr;
@@ -222,6 +221,67 @@ void ASkillCharacter::EndSpellCast(ABase_Skill * _pCastedSkill)
 				break;
 			}
 		}
+	}
+}
+
+void ASkillCharacter::HasBuff(TSubclassOf<class ABuff_Skill> _BuffClass, bool & out_bHasBuff, ABuff_Skill*& out_pFoundBuff)
+{
+	ABuff_Skill* pCurrBuff = nullptr;
+	for (int i = 0; i < m_pCurrentBuffs.Num(); ++i)
+	{
+		if (m_pCurrentBuffs[i]->GetClass() == _BuffClass)
+		{
+			pCurrBuff = m_pCurrentBuffs[i];
+			break;
+		}
+	}
+
+	if (pCurrBuff)
+	{
+		out_bHasBuff = true;
+		out_pFoundBuff = pCurrBuff;
+		return;
+	}
+	else
+	{
+		out_bHasBuff = false;
+		out_pFoundBuff = nullptr;
+	}
+
+}
+
+UBuffWidget* ASkillCharacter::AddBuff(ABuff_Skill* _pNewBuff)
+{
+	bool bIsSuccess = m_pCurrentBuffs.Contains(_pNewBuff);
+
+	if (bIsSuccess)
+	{
+		return nullptr;
+	}
+	else
+	{
+		m_pCurrentBuffs.Add(_pNewBuff);
+		UBuffWidget* pWidget = CreateWidget<UBuffWidget>(GetWorld(), m_BuffWidgetClass);
+		pWidget->SetIcon(_pNewBuff->GetBuffIcon());
+		m_pHUD->GetBuffContainer()->AddChildToHorizontalBox(pWidget);
+		return pWidget;
+	}
+}
+
+void ASkillCharacter::RemoveBuff(ABuff_Skill * _pBuff)
+{
+	bool bIsSuccess = m_pCurrentBuffs.Contains(_pBuff);
+
+	if (bIsSuccess)
+	{
+		// UKismetSystemLibrary::RemoveItem(_pBuff);
+		m_pCurrentBuffs.Remove(_pBuff);
+		_pBuff->GetBuffWidget()->RemoveFromParent();
+		return;
+	}
+	else
+	{
+		return;
 	}
 }
 
@@ -274,6 +334,20 @@ void ASkillCharacter::_UpdateStat(EStats _Stat)
 	Stat.pBarWidget->SetPercent(FMath::Clamp(((float)Stat.DisplayedValue / (float)Stat.MaxValue), 0.f, 1.f));
 
 	_HandleRegeneration(_Stat);
+}
+
+void ASkillCharacter::_UpdateLevel()
+{
+	m_pHUD->GetLevelText()->SetText(UKismetTextLibrary::Conv_IntToText(m_CurrLevel));
+}
+
+void ASkillCharacter::_IncreaseLevel()
+{
+	++m_CurrLevel;
+	
+	_UpdateLevel();
+
+	m_pSkillTree->AddSkillPoints(1);
 }
 
 void ASkillCharacter::_SetupRegenerations()
@@ -351,6 +425,19 @@ void ASkillCharacter::_OnManaStatLerpEnd()
 
 void ASkillCharacter::_OnExpStatLerpEnd()
 {
+	if (m_Stats[EStats::Exp].CurrValue >= m_Stats[EStats::Exp].MaxValue)
+	{
+		ModifyStat(EStats::Exp, -m_Stats[EStats::Exp].CurrValue, false);
+		_IncreaseLevel();
+
+		if (m_RestExp > 0)
+		{
+			ModifyStat(EStats::Exp, m_RestExp, true);
+			m_RestExp = 0;			
+		}
+
+		return;
+	}
 	m_Stats[EStats::Exp].bCurrentlyAnimated = false;
 	m_Stats[EStats::Exp].pBarWidget->GetWidgetFromName("StatLerpBar")->SetVisibility(ESlateVisibility::Hidden);
 }
@@ -476,16 +563,6 @@ void ASkillCharacter::_ExpStatLerpTick()
 	m_Stats[EStats::Exp].pBarWidget->GetDynamicMaterial()->SetScalarParameterValue(Name, Value);
 
 	_UpdateStat(EStats::Exp);
-}
-
-void ASkillCharacter::_Increase()
-{
-	ModifyStat(EStats::Mana, 100, true);
-}
-
-void ASkillCharacter::_Decrease()
-{
-	ModifyStat(EStats::Mana, -100, true);
 }
 
 void ASkillCharacter::_AnyKey()

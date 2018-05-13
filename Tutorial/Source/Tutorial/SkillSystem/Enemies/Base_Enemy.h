@@ -96,6 +96,7 @@ private :
 	void _UpdateHealthBar();
 	void _OnDeath(AActor* _pKiller);
 	void _OnRespawn();
+	void _DestroyActiveMissiles();
 
 
 	/* AIPerceptionComponent Bind Function*/

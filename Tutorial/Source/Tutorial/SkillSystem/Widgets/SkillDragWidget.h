@@ -20,7 +20,10 @@ public :
 
 	/* Get */
 	class UImage* GetSkillIcon() const { return m_pSkillIcon; }
-	
+
+	/*Set*/
+	void SetSkillTexture(UTexture2D* _pNewTexture);
+
 protected :
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn = "true"), Category = "SkillDragWidget")
 	class UTexture2D* m_pSkillTexture;

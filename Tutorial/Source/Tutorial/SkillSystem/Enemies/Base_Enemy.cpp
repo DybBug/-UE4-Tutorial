@@ -3,6 +3,7 @@
 #include "Base_Enemy.h"
 #include "../Characters/SkillCharacter.h"
 #include "../Widgets/EnemyWidget.h"
+#include "../SkillActors/Missile_Skill.h"
 #include "../BlueprintFunctionLibraries/Combat_BlueprintFunctionLibrary.h"
 
 #include <UObject/ConstructorHelpers.h>
@@ -92,7 +93,7 @@ void ABase_Enemy::NotifyHit()
 
 	FHitResult HitResult;
 
-	if (UKismetSystemLibrary::LineTraceSingleForObjects(this, StartLoc, EndLoc, ObjTypeQueries, true, TArray<AActor*>(), EDrawDebugTrace::None, HitResult, true))
+	if (UKismetSystemLibrary::LineTraceSingleForObjects(this, StartLoc, EndLoc, ObjTypeQueries, true, TArray<AActor*>(), EDrawDebugTrace::Persistent, HitResult, true))
 	{
 		// 액터에 인터페이스가 있는가??
 		if (UKismetSystemLibrary::DoesImplementInterface(HitResult.GetActor(), UDamageable_Interface::StaticClass()))
@@ -233,7 +234,7 @@ void ABase_Enemy::OnSelected(ASkillCharacter * _pPlayer)
 
 
 #define LOCTEXT_NAMESPACE "EnemyName"
-		FText EnemyName = FText::Format(LOCTEXT("EnemyName", "{0} (Lv. {1}"),  FText::FromName(m_Name), m_Level);
+		FText EnemyName = FText::Format(LOCTEXT("EnemyName", "{0} (Lv. {1})"),  FText::FromName(m_Name), m_Level);
 #undef LOCTEXT_NAMESPACE
 		m_pSelectingPlayer->GetHUD()->GetEnemyNameText()->SetText(EnemyName);
 		m_pSelectingPlayer->GetHUD()->GetEnemyBorder()->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
@@ -347,6 +348,8 @@ void ABase_Enemy::_UpdateHealthBar()
 
 void ABase_Enemy::_OnDeath(AActor* _pKiller)
 {
+	_DestroyActiveMissiles();
+
 	StopAnimMontage();
 	m_bIsDead = true;
 
@@ -416,6 +419,19 @@ void ABase_Enemy::_OnRespawn()
 
 	_UpdateHealthBar();
 	_Patrol();
+}
+
+void ABase_Enemy::_DestroyActiveMissiles()
+{
+	TArray<AActor*> LocActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMissile_Skill::StaticClass(), LocActors);
+	for (int i = 0; i < LocActors.Num(); ++i)
+	{
+		if (Cast<AMissile_Skill>(LocActors[i])->GetTarget() == this)
+		{
+			LocActors[i]->Destroy();
+		}
+	}
 }
 
 void ABase_Enemy::_OnPerceptionUpdated(const TArray<AActor*>& _UpdatedActors)

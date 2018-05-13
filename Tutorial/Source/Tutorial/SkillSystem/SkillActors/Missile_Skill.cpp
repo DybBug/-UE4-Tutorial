@@ -47,14 +47,18 @@ void AMissile_Skill::BeginPlay()
 
 void AMissile_Skill::OnSkillNotify()
 {	
+
+	if (!m_pPlayer->GetSelectedEnemy() || m_pPlayer->GetSelectedEnemy()->GetIsDead())
+	{
+		return;
+	}
 	AMissile_Skill* pMissile = GetWorld()->SpawnActor<AMissile_Skill>(m_ActorClass, m_pPlayer->GetActorLocation(),FRotator(0.f, 0.f, 0.f));
-	pMissile->_OnFire(m_pTarget);
+	pMissile->_OnFire(m_pPlayer->GetSelectedEnemy());
 }
 
 void AMissile_Skill::OnTryCastSpell()
-{
-	m_pTarget = m_pPlayer->GetSelectedEnemy();
-	if (!m_bOnCooldown && !m_bCurrentlyCasted && m_pTarget)
+{	
+	if (!m_bOnCooldown && !m_bCurrentlyCasted && m_pPlayer->GetSelectedEnemy())
 	{
 		if (!m_pPlayer->GetIsCasting() )
 		{
@@ -77,14 +81,18 @@ void AMissile_Skill::InitializeSpellCast()
 }
 
 void AMissile_Skill::OnSpellCast()
-{
-	
+{	
 	FRotator Rot = UKismetMathLibrary::FindLookAtRotation(m_pPlayer->GetActorLocation(), m_pPlayer->GetSelectedEnemy()->GetActorLocation());
 	m_pPlayer->SetActorRotation(Rot);
 
 	ABase_Skill::OnSpellCast();
-
 }
+
+void AMissile_Skill::StopTimer()
+{
+	UKismetSystemLibrary::K2_ClearAndInvalidateTimerHandle(GetWorld(), m_hDistanceTimer);
+}
+
 
 void AMissile_Skill::_OnComponentHit(
 	UPrimitiveComponent* _pHitComponent, 
@@ -93,12 +101,19 @@ void AMissile_Skill::_OnComponentHit(
 	FVector _NormalImpulse,
 	const FHitResult& out_Hit)
 {
-	if (m_pTarget == _pOtherActor)
+	if (Cast<ABase_Enemy>(_pOtherActor))
 	{
-		UParticleSystemComponent* pParticle = UGameplayStatics::SpawnEmitterAtLocation(this, m_pImpectEffect, GetActorLocation());
-		m_pTarget->OnReceiveDamage(GetCurrStage().Damage, GetCurrStage().DamageType, m_SkillInfo.ElementClass, GetCurrStage().CriticalChance, m_pPlayer, this);
-		Destroy();
-	}
+		if (m_pTarget == _pOtherActor)
+		{
+			UParticleSystemComponent* pParticle = UGameplayStatics::SpawnEmitterAtLocation(this, m_pImpectEffect, GetActorLocation());
+			m_pTarget->OnReceiveDamage(GetCurrStage().Damage, GetCurrStage().DamageType, m_SkillInfo.ElementClass, GetCurrStage().CriticalChance, m_pPlayer, this);
+			Destroy();
+		}
+		else
+		{
+			Destroy();
+		}
+	}	
 }
 
 void AMissile_Skill::_OnFire(ABase_Enemy* _pTarget)
@@ -130,10 +145,6 @@ bool AMissile_Skill::_InAttackRange()
 	return (Distance <= GetCurrStage().Range);
 }
 
-void AMissile_Skill::_StopTimer()
-{
-	UKismetSystemLibrary::K2_ClearAndInvalidateTimerHandle(GetWorld(), m_hDistanceTimer);
-}
 
 void AMissile_Skill::_DistanceCheck()
 {
@@ -141,7 +152,7 @@ void AMissile_Skill::_DistanceCheck()
 	{
 		if (_InAttackRange())
 		{
-			_StopTimer();
+			StopTimer();
 			_ManaCheck();
 		}
 		else
@@ -151,6 +162,6 @@ void AMissile_Skill::_DistanceCheck()
 	}
 	else
 	{
-		_StopTimer();
+		StopTimer();
 	}
 }

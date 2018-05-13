@@ -5,6 +5,7 @@
 #include "GoalDecal.h"
 #include "Characters/SkillCharacter.h"
 #include "Interfaces/Selectable_Interface.h"
+#include "Components/SkillTreeComponent.h"
 
 #include <GameFramework/CharacterMovementComponent.h>
 #include <GameFramework/SpringArmComponent.h>
@@ -38,6 +39,7 @@ void ASkillPlayerController::SetupInputComponent()
 	InputComponent->BindAction("RMouseButton", IE_Pressed, this, &ASkillPlayerController::_RMouseButton);
 	InputComponent->BindAction("RMouseButton", IE_Released, this, &ASkillPlayerController::_RMouseButton);
 	InputComponent->BindAction("LMouseButton", IE_Pressed, this, &ASkillPlayerController::_LMouseButton);
+	InputComponent->BindAction("ToggleSkillTree", IE_Pressed, this, &ASkillPlayerController::_ToggleSkillTree);
 
 	InputComponent->BindAxis("LookUp", this, &ASkillPlayerController::_LookUp);
 	InputComponent->BindAxis("Turn", this, &ASkillPlayerController::_Turn);
@@ -104,6 +106,11 @@ void ASkillPlayerController::_LMouseButton()
 	}
 }
 
+void ASkillPlayerController::_ToggleSkillTree()
+{
+	Cast<ASkillCharacter>(GetPawn())->GetSkillTreeComponent()->HandleShowCommand();
+}
+
 void ASkillPlayerController::_LookUp(float _Value)
 {
 	if ((_Value != 0.f) && (m_bCanTurn == true))
@@ -149,7 +156,7 @@ void ASkillPlayerController::_MoveForward(float _Value)
 void ASkillPlayerController::_MoveRight(float _Value)
 {
 	if (_Value != 0.f)
-	{
+	{		
 		if (m_bHasMouseMovementCommand == true)
 		{
 			CancelMovementCommand();

@@ -2,7 +2,7 @@
 
 #include "SkillSystemHUD.h"
 #include "HotkeyRowWidget.h"
-#include "StatBarWidget.h"
+#include "SkillTreeWidget.h"
 
 #include "WidgetTree.h"
 #include "UObject/ConstructorHelpers.h"
@@ -15,6 +15,8 @@ void USkillSystemHUD::NativeConstruct()
 	m_pHealthBar = WidgetTree->FindWidget<UStatBarWidget>("WBP_HealthBar");
 	m_pManaBar = WidgetTree->FindWidget<UStatBarWidget>("WBP_ManaBar");
 	m_pExpBar = WidgetTree->FindWidget<UStatBarWidget>("WBP_ExpBar");
+	m_pSkillTree = WidgetTree->FindWidget<USkillTreeWidget>("WBP_SkillTree");
+
 	m_pHotkeyRowContainer = WidgetTree->FindWidget<UVerticalBox>("HotkeyRowContainer");
 
 	m_pCastingOverlay = WidgetTree->FindWidget<UOverlay>("CastingOverlay");
@@ -25,7 +27,9 @@ void USkillSystemHUD::NativeConstruct()
 	m_pEnemyNameText = WidgetTree->FindWidget<UTextBlock>("EnemyNameText");
 	m_pEnemyHealthText = WidgetTree->FindWidget<UTextBlock>("EnemyHealthText");
 	m_pEnemyHealthBar = WidgetTree->FindWidget<UProgressBar>("EnemyHealthBar");
-	
+	m_pBuffContainer = WidgetTree->FindWidget<UHorizontalBox>("BuffContainer");
+	m_pLevelText = WidgetTree->FindWidget<UTextBlock>("LevelText");
+
 	GenerateHotkeys(m_Hotkeys);
 }
 
