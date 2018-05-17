@@ -16,9 +16,9 @@
 #include <Blueprint/WidgetBlueprintLibrary.h>
 
 
-void USkillTreeEntryWidget::NativeConstruct()
+bool USkillTreeEntryWidget::Initialize()
 {
-	Super::NativeConstruct();
+	bool Result = Super::Initialize();
 
 	m_pStageText = WidgetTree->FindWidget<UTextBlock>("StageText");
 	m_pSkillIcon = WidgetTree->FindWidget<UImage>("SkillIcon");
@@ -29,13 +29,7 @@ void USkillTreeEntryWidget::NativeConstruct()
 	m_pPlusButton->OnClicked.AddDynamic(this, &USkillTreeEntryWidget::_OnPlusButtonClicked);
 	m_pMinusButton->OnClicked.AddDynamic(this, &USkillTreeEntryWidget::_OnMinusButtonClicked);
 
-	if (UKismetSystemLibrary::IsValidClass(m_SkillClass))
-	{
-		m_pSkill = GetWorld()->SpawnActor<ABase_Skill>(m_SkillClass);
-		UpdateStageText();
-		UpdateIcon();
-		UpdateUpgradeBox();
-	}
+	return Result;
 }
 
 FReply USkillTreeEntryWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
@@ -60,27 +54,39 @@ void USkillTreeEntryWidget::NativeOnDragDetected(const FGeometry & InGeometry, c
 	if (bIsOnHotkey)
 	{
 		return;
-	}	
+	}
 
-	USkillDragWidget* pDragWidget = CreateWidget<USkillDragWidget>(GetWorld(), USkillDragWidget::StaticClass());
+	UClass* DragWidgetClass = LoadClass<USkillDragWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/SkillSystem/Widgets/WBP_SkillDrag.WBP_SkillDrag_C'"));
+	USkillDragWidget* pDragWidget = CreateWidget<USkillDragWidget>(GetWorld(), DragWidgetClass);
 	UTexture2D* pIcon = m_pSkill->GetCurrStage().pOverrideIcon ? m_pSkill->GetCurrStage().pOverrideIcon : m_pSkill->GetSkillInfo().pIcon;
 	pDragWidget->SetSkillTexture(pIcon);
 
 	UDragDropOperation* pOper = UWidgetBlueprintLibrary::CreateDragDropOperation(USkillDragDropOperation::StaticClass());
-	pOper->DefaultDragVisual = pDragWidget;
-	pOper->Pivot = EDragPivot::MouseDown;
-	Cast<USkillDragDropOperation>(pOper)->SetSkillActor(m_pSkill);
+	USkillDragDropOperation* pSkillOper = Cast<USkillDragDropOperation>(pOper);
+	pSkillOper->DefaultDragVisual = pDragWidget;
+	pSkillOper->Pivot = EDragPivot::MouseDown;	
+	pSkillOper->SetSkillActor(m_pSkill);
 
+	OutOperation = pOper;
 }
 
 void USkillTreeEntryWidget::Initialize(const TSubclassOf<ABase_Skill>& _SkillClass, USubTreeWidget* _pSubTreeWidget)
 {
 	m_SkillClass = _SkillClass;
 	m_pSubTreeWidget = _pSubTreeWidget;
+
+	if (UKismetSystemLibrary::IsValidClass(m_SkillClass))
+	{
+		m_pSkill = GetWorld()->SpawnActor<ABase_Skill>(m_SkillClass);
+
+		UpdateStageText();
+		UpdateIcon();
+		UpdateUpgradeBox();
+	}
 }
 
 int USkillTreeEntryWidget::AmountOfStages()
-{	
+{
 	return m_pSkill->GetSkillInfo().Stages.Num();
 }
 
@@ -89,15 +95,21 @@ void USkillTreeEntryWidget::UpdateStageText()
 #define LOCTEXT_NAMESPACE "StageText"
 	FText StageText = FText::Format(LOCTEXT("StageText", "{0} / {1}"), m_pSkill->GetCurrStageIndex() + 1, AmountOfStages());
 #undef LOCTEXT_NAMESPACE
-	
+
 	m_pStageText->SetText(StageText);
 }
 
 void USkillTreeEntryWidget::UpdateIcon()
 {
-	UTexture2D* pTempIcon = (m_pSkill->GetCurrStage().pOverrideIcon) ? m_pSkill->GetCurrStage().pOverrideIcon : m_pSkill->GetSkillInfo().pIcon;
-
-	UTexture2D* pIcon = (m_pSkill->GetCurrStageIndex() < 0) ? m_pSkill->GetSkillInfo().pIcon : pTempIcon;
+	UTexture2D* pIcon;
+	if (m_pSkill->GetCurrStageIndex() < 0)
+	{
+		pIcon = m_pSkill->GetSkillInfo().pIcon;
+	}
+	else
+	{
+		pIcon = (m_pSkill->GetCurrStage().pOverrideIcon) ? m_pSkill->GetCurrStage().pOverrideIcon : m_pSkill->GetSkillInfo().pIcon;
+	}
 
 	m_pSkillIcon->SetBrushFromTexture(pIcon);
 }

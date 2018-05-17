@@ -7,10 +7,17 @@
 #include <Components/TextBlock.h>
 #include <Components/Button.h>
 
-void UTreeCategoryWidget::NativeConstruct()
+bool UTreeCategoryWidget::Initialize()
 {
+	Super::Initialize();
 	m_pCategoryName = WidgetTree->FindWidget<UTextBlock>("CategoryName");
 	m_pCategoryButton = WidgetTree->FindWidget<UButton>("CategoryButton");
+
+	m_pCategoryButton->OnClicked.AddDynamic(this, &UTreeCategoryWidget::_OnClicked);
+	m_pCategoryButton->OnHovered.AddDynamic(this, &UTreeCategoryWidget::_OnHovered);
+	m_pCategoryButton->OnUnhovered.AddDynamic(this, &UTreeCategoryWidget::_OnUnhovered);
+	
+	return true;
 }
 
 void UTreeCategoryWidget::Initialize(FText _NewCategory, USkillTreeWidget* _pSkillTreeWidget, int _Index)

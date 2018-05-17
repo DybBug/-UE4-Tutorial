@@ -9,9 +9,9 @@
 #include "Components/Image.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
-void UStatBarWidget::NativeConstruct()
+bool UStatBarWidget::Initialize()
 {
-	Super::NativeConstruct();
+	bool Result = Super::Initialize();
 	
 	m_pStatBar =     WidgetTree->FindWidget<UProgressBar>(FName("StatBar"));
 	m_pStatLerpBar = WidgetTree->FindWidget<UImage>(FName("StatLerpBar"));
@@ -19,6 +19,8 @@ void UStatBarWidget::NativeConstruct()
 
 	m_pDynamicMaterial = m_pStatLerpBar->GetDynamicMaterial();
 	m_pDynamicMaterial->SetVectorParameterValue("Color", m_LerpColor);
+
+	return Result;
 }
 
 

@@ -87,7 +87,7 @@ public:
 	ABase_Enemy* GetSelectedEnemy() const { return m_pSelectedEnemy; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
-	const TSet<TSubclassOf<ABase_Skill>>& GetLearntSpellClasses() const { return m_LearntSpellClasses; }
+	TSet<TSubclassOf<ABase_Skill>>& GetLearntSpellClasses() { return m_LearntSpellClasses; }
 
 	UFUNCTION(BlueprintPure, Category = "SkillCharacter")
 	const int& GetCurrLevel() const { return m_CurrLevel; }

@@ -35,7 +35,7 @@ public:
 
 	void HandleShowCommand();
 
-	void ActivateConnenctions(const TSubclassOf<ABase_Skill>& _ForSpell);
+	void ActivateConnections(const TSubclassOf<ABase_Skill>& _ForSpell);
 
 	void UpdateAllEntries();
 
@@ -73,8 +73,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "SkillTreeComponent")
 	void SetPlayer(ASkillCharacter* _pPlayer);
-
-
 
 protected :
 	UPROPERTY(EditAnywhere, Category = "SkillTreeComponent")

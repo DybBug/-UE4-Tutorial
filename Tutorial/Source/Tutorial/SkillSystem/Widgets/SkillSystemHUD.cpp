@@ -10,7 +10,7 @@
 
 void USkillSystemHUD::NativeConstruct()
 {
-	Super::NativeConstruct();
+	 Super::NativeConstruct();
 
 	m_pHealthBar = WidgetTree->FindWidget<UStatBarWidget>("WBP_HealthBar");
 	m_pManaBar = WidgetTree->FindWidget<UStatBarWidget>("WBP_ManaBar");
@@ -31,6 +31,7 @@ void USkillSystemHUD::NativeConstruct()
 	m_pLevelText = WidgetTree->FindWidget<UTextBlock>("LevelText");
 
 	GenerateHotkeys(m_Hotkeys);
+	
 }
 
 void USkillSystemHUD::GenerateHotkeys(const TArray<FKey>& _Key)

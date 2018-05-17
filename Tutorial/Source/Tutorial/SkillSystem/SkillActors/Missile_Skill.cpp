@@ -119,6 +119,7 @@ void AMissile_Skill::_OnComponentHit(
 void AMissile_Skill::_OnFire(ABase_Enemy* _pTarget)
 {
 	m_pTarget = _pTarget;
+	m_CurrStageIndex++;
 	m_pCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	m_pMovement->MaxSpeed = GetCurrStage().MissileSpeed;
 	m_pMovement->InitialSpeed = GetCurrStage().MissileSpeed;

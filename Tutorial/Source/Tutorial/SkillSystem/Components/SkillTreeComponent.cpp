@@ -11,6 +11,7 @@
 
 #include <Kismet/GameplayStatics.h>
 #include <Blueprint/WidgetBlueprintLibrary.h>
+#include <Containers/Set.h>
 
 
 // Sets default values for this component's properties
@@ -43,6 +44,7 @@ void USkillTreeComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 void USkillTreeComponent::SetupTree()
 {
+	m_pSkillTreeWidget = m_pPlayer->GetHUD()->GetSkillTree();
 	m_pPlayer->GetHUD()->GetSkillTree()->Initialize(this);
 	m_bTreeSetUp = true;
 }
@@ -65,7 +67,7 @@ void USkillTreeComponent::HandleShowCommand()
 	}
 }
 
-void USkillTreeComponent::ActivateConnenctions(const TSubclassOf<ABase_Skill>& _ForSpell)
+void USkillTreeComponent::ActivateConnections(const TSubclassOf<ABase_Skill>& _ForSpell)
 {
 	for (int i = 0; i < m_pSkillTreeWidget->GetSubTreeWidget().Num(); ++i)
 	{
@@ -120,13 +122,11 @@ void USkillTreeComponent::UpgradeSpell(ABase_Skill * _pSkill, USkillTreeEntryWid
 
 		if (m_pUpgradedSpell->GetCurrStageIndex() == 0)
 		{
-			TSet<ABase_Skill> Skills;
-			Skills.Add(_pSkill, nullptr);
-
+			//TSubclassOf<ABase_Enemy> EnemyClass = m_pUpgradedSpell->StaticClass();
 			m_pPlayer->GetLearntSpellClasses().Add(m_pUpgradedSpell->GetClass());
 
 			m_pEntryWidget->OnSpellLearned();
-			ActivateConnenctions(m_pUpgradedSpell->GetClass());		
+			ActivateConnections(m_pUpgradedSpell->GetClass());		
 		}
 
 		m_pEntryWidget->UpdateStageText();

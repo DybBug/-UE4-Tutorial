@@ -6,11 +6,13 @@
 #include <Components/Image.h>
 
 
-void UConnectionWidget::NativeConstruct()
+bool UConnectionWidget::Initialize()
 {
-	Super::NativeConstruct();
+	bool Result = Super::Initialize();
 
 	m_pLine = WidgetTree->FindWidget<UImage>("Line");
+
+	return Result;
 }
 
 void UConnectionWidget::Initialize(const TSubclassOf<ABase_Skill>& _ForSpellClass)

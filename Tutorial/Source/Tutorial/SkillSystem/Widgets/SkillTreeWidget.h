@@ -24,7 +24,7 @@ class TUTORIAL_API USkillTreeWidget : public UUserWidget
 	GENERATED_BODY()
 
 public :
-	virtual void NativeConstruct() override;
+	virtual bool Initialize() override;
 
 	void Initialize(USkillTreeComponent* _pAssignedSkillTree);
 

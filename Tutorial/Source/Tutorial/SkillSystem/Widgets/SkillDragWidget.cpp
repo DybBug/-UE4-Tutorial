@@ -6,10 +6,12 @@
 
 void USkillDragWidget::NativeConstruct()
 {
+	//bool Result = Super::Initialize();
 	Super::NativeConstruct();
-
 	m_pSkillIcon = WidgetTree->FindWidget<UImage>(TEXT("SkillIcon"));
 	m_pSkillIcon->SetBrushFromTexture(m_pSkillTexture);
+
+	//return Result;
 }
 
 void USkillDragWidget::SetSkillTexture(UTexture2D * _pNewTexture)

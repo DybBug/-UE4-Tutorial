@@ -15,7 +15,7 @@ class TUTORIAL_API UStatBarWidget : public UUserWidget
 	GENERATED_BODY()
 
 public :
-	virtual void NativeConstruct() override;
+	virtual bool Initialize() override;
 
 
 

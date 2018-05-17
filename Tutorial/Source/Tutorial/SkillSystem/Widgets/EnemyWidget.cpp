@@ -5,11 +5,13 @@
 #include <WidgetTree.h>
 
 
-void UEnemyWidget::NativeConstruct()
+bool UEnemyWidget::Initialize()
 {
-	Super::NativeConstruct();
+	bool Result = Super::Initialize();
 
 	m_pLevelNameText = WidgetTree->FindWidget<UTextBlock>(TEXT("LevelNameText"));
 	m_pHealthBar = WidgetTree->FindWidget<UProgressBar>(TEXT("HealthBar"));
+
+	return Result;
 }
 

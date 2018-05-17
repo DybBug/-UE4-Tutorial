@@ -2,6 +2,7 @@
 
 #include "SkillCharacter.h"
 #include "../Widgets/SkillHotkeyWidget.h"
+#include "../Widgets/SkillTreeWidget.h"
 #include "../SkillActors/Missile_Skill.h"
 #include "../SkillActors/Buff_Skill.h"
 #include "../BlueprintFunctionLibraries/Combat_BlueprintFunctionLibrary.h"
@@ -348,6 +349,9 @@ void ASkillCharacter::_IncreaseLevel()
 	_UpdateLevel();
 
 	m_pSkillTree->AddSkillPoints(1);
+
+	m_pHUD->GetSkillTree()->UpdateLevel();
+	m_pSkillTree->UpdateAllEntries();
 }
 
 void ASkillCharacter::_SetupRegenerations()

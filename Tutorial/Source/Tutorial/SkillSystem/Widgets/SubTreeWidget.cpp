@@ -10,10 +10,12 @@
 #include <Components/CanvasPanelSlot.h>
 
 
-void USubTreeWidget::NativeConstruct()
+bool USubTreeWidget::Initialize()
 {
-	Super::NativeConstruct();
+	bool Result = Super::Initialize();
 	m_pCanvas = WidgetTree->FindWidget<UCanvasPanel>("Canvas");
+
+	return Result;
 }
 
 void USubTreeWidget::Initialize(const FSubTreeContent& _NewContent, USkillTreeWidget* _pSkillTreeWidget)
@@ -31,9 +33,10 @@ void USubTreeWidget::GenerateContent()
 	m_pConnectionWidgets.Empty();
 
 	// 胶懦飘府浚飘府 困连 积己.
+	UClass* SkillEntryWidgetClass = LoadClass<USkillTreeEntryWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/SkillSystem/Widgets/WBP_SkillTreeEntry.WBP_SkillTreeEntry_C'"));
 	for (int i = 0; i < m_Content.Skills.Num(); ++i)
 	{
-		USkillTreeEntryWidget* pEntryWidget =  CreateWidget<USkillTreeEntryWidget>(GetWorld(), USkillTreeEntryWidget::StaticClass());
+		USkillTreeEntryWidget* pEntryWidget =  CreateWidget<USkillTreeEntryWidget>(GetWorld(), SkillEntryWidgetClass);
 		pEntryWidget->Initialize(m_Content.Skills[i].Spell, this);
 		m_pSkillTreeEntryWidgets.Add(pEntryWidget);
 
@@ -44,9 +47,10 @@ void USubTreeWidget::GenerateContent()
 	}
 
 	// 牧池记困连 积己.
+	UClass* ConnectionWidgetClass = LoadClass<UConnectionWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/SkillSystem/Widgets/WBP_Connection.WBP_Connection_C'"));
 	for (int i = 0; i < m_Content.Connections.Num(); ++i)
 	{
-		UConnectionWidget* pConnectionWidget = CreateWidget<UConnectionWidget>(GetWorld(), UConnectionWidget::StaticClass());
+		UConnectionWidget* pConnectionWidget = CreateWidget<UConnectionWidget>(GetWorld(), ConnectionWidgetClass);
 		pConnectionWidget->Initialize(m_Content.Connections[i].ForSkillClass);
 		m_pConnectionWidgets.Add(pConnectionWidget);
 	

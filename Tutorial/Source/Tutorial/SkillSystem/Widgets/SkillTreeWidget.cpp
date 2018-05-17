@@ -13,8 +13,9 @@
 #include <Components/WidgetSwitcher.h>
 #include <Kismet/KismetTextLibrary.h>
 
-void USkillTreeWidget::NativeConstruct()
+bool USkillTreeWidget::Initialize()
 {
+	bool Result = Super::Initialize();
 	m_pCloseButton     = WidgetTree->FindWidget<UButton>("CloseButton");
 	m_pSpText          = WidgetTree->FindWidget<UTextBlock>("SpText");
 	m_pLevelText       = WidgetTree->FindWidget<UTextBlock>("LevelText");
@@ -22,6 +23,8 @@ void USkillTreeWidget::NativeConstruct()
 	m_pSubTreeSwitcher = WidgetTree->FindWidget<UWidgetSwitcher>("SubTreeSwitcher");
 
 	m_pCloseButton->OnClicked.AddDynamic(this, &USkillTreeWidget::_OnCloseButtonClicked);
+
+	return Result;
 }
 
 void USkillTreeWidget::Initialize(USkillTreeComponent * _pAssignedSkillTree)
@@ -52,14 +55,16 @@ void USkillTreeWidget::GenerateCategories()
 	m_TreeCategoryWidgets.Empty();
 	m_SubTreeWidgets.Empty();
 
+	UClass* TreeCategoryWidgetClass = LoadClass<UTreeCategoryWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/SkillSystem/Widgets/WBP_TreeCategory.WBP_TreeCategory_C'"));
+	UClass* SubTreeWidgetClass = LoadClass<USubTreeWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/SkillSystem/Widgets/WBP_SubTree.WBP_SubTree_C'"));
 	for (int i = 0; i < m_TreeCategories.Num(); ++i)
 	{
-		UTreeCategoryWidget* pTreeCategoryWidget = CreateWidget<UTreeCategoryWidget>(GetWorld(), UTreeCategoryWidget::StaticClass());
+		UTreeCategoryWidget* pTreeCategoryWidget = CreateWidget<UTreeCategoryWidget>(GetWorld(), TreeCategoryWidgetClass);
 		pTreeCategoryWidget->Initialize(FText::FromName(m_TreeCategories[i].Name), this, i);
 		m_TreeCategoryWidgets.Add(pTreeCategoryWidget);
 		m_pCategoriesBox->AddChild(pTreeCategoryWidget);
 
-		USubTreeWidget* pSubTreeWidget = CreateWidget<USubTreeWidget>(GetWorld(), USubTreeWidget::StaticClass());
+		USubTreeWidget* pSubTreeWidget = CreateWidget<USubTreeWidget>(GetWorld(), SubTreeWidgetClass);
 		pSubTreeWidget->Initialize(m_TreeCategories[i].Content, this);
 		m_SubTreeWidgets.Add(pSubTreeWidget);
 		m_pSubTreeSwitcher->AddChild(pSubTreeWidget);

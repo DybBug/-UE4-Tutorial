@@ -18,7 +18,7 @@ class TUTORIAL_API UEnemyWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public :
-	virtual void NativeConstruct() override;
+	virtual bool Initialize() override;
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "EnemyWidget/Get")
