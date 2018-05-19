@@ -28,76 +28,133 @@ void USkillHotkeyWidget::NativeConstruct()
 #undef LOCTEXT_NAMESPACE
 
 	m_pDynamicMaterial = m_pCooldownImage->GetDynamicMaterial();
+
+	m_pSkillButton->OnClicked.AddDynamic(this, &USkillHotkeyWidget::_OnSkillButtonClicked);
 }
-//
-//FReply USkillHotkeyWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
-//{
-//	FReply Result = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-//
-//	if (m_pAssignedSpell)
-//	{
-//		if (!m_pAssignedSpell->GetOnCooldown() && InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
-//		{
-//			FEventReply EventReply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);		
-//			Result = EventReply.NativeReply;
-//		}
-//	}
-//
-//	return Result;
-//}
-//
-//void USkillHotkeyWidget::NativeOnDragDetected(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent, UDragDropOperation *& OutOperation)
-//{
-//	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
-//
-//	UClass* pWBP_SkillDragClass = LoadClass<USkillDragWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/SkillSystem/Widgets/WBP_SkillDrag.WBP_SkillDrag_C'"));
-//	USkillDragWidget* pWidget = CreateWidget<USkillDragWidget>(GetWorld(), pWBP_SkillDragClass);
-//
-//	if (m_pAssignedSpell->GetCurrStage().pOverrideIcon)
-//	{
-//		pWidget->Init(m_pAssignedSpell->GetCurrStage().pOverrideIcon);
-//	}
-//	else
-//	{
-//		pWidget->Init(m_pAssignedSpell->GetSkillInfo().pIcon);
-//	} 
-//	UClass* pClass = USkillDragDropOperation::StaticClass();
-//	UDragDropOperation* Oper = UWidgetBlueprintLibrary::CreateDragDropOperation(pClass);
-//	USkillDragDropOperation* pOperation = Cast<USkillDragDropOperation>(Oper);
-//	
-//
-//	OutOperation = pOperation;
-//}
-//
-//bool USkillHotkeyWidget::NativeOnDragOver(const FGeometry & InGeometry, const FDragDropEvent & InDragDropEvent, UDragDropOperation * InOperation)
-//{
-//	Super::NativeOnDragOver(InGeometry, InDragDropEvent, InOperation);
-//
-//	USkillDragDropOperation* pOperation = Cast<USkillDragDropOperation>(InOperation);
-//
-//	if (!m_bDraggedOver && 
-//		(pOperation->GetFromHotkey() != this) && 
-//		!m_pAssignedSpell)
-//	{
-//		m_bDraggedOver = true;
-//		m_pBaseImage->SetColorAndOpacity(m_DragOverColor);
-//
-//		return true;
-//	}
-//
-//	return false;
-//}
-//
-//void USkillHotkeyWidget::NativeOnDragLeave(const FDragDropEvent & InDragDropEvent, UDragDropOperation * InOperation)
-//{
-//	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
-//
-//	if (m_bDraggedOver)
-//	{
-//		USkillDragDropOperation* pOperation = Cast<USkillDragDropOperation>(InOperation);
-//		ResetStyle();
-//	}
-//}
+
+FReply USkillHotkeyWidget::NativeOnPreviewMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)
+{
+	FReply Result = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	if (m_pAssignedSpell)
+	{
+		if (!m_pAssignedSpell->GetOnCooldown() && InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
+		{
+			FEventReply EventReply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);		
+			Result = EventReply.NativeReply;
+		}
+	}
+
+	return Result;
+}
+
+void USkillHotkeyWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+{
+	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
+	UClass* pWBP_SkillDragClass = LoadClass<USkillDragWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/SkillSystem/Widgets/WBP_SkillDrag.WBP_SkillDrag_C'"));
+	USkillDragWidget* pWidget = CreateWidget<USkillDragWidget>(GetWorld(), pWBP_SkillDragClass);
+
+	if (m_pAssignedSpell->GetCurrStage().pOverrideIcon)
+	{
+		pWidget->SetSkillTexture(m_pAssignedSpell->GetCurrStage().pOverrideIcon);
+	}
+	else
+	{
+		pWidget->SetSkillTexture(m_pAssignedSpell->GetSkillInfo().pIcon);
+	} 
+	
+	UDragDropOperation* Oper = UWidgetBlueprintLibrary::CreateDragDropOperation(USkillDragDropOperation::StaticClass());
+	USkillDragDropOperation* pSkillOper = Cast<USkillDragDropOperation>(Oper);	
+	
+	pSkillOper->DefaultDragVisual = pWidget;
+	pSkillOper->SetFromHotkey(this);
+	pSkillOper->SetSkillActor(m_pAssignedSpell);
+
+	OutOperation = pSkillOper;
+}
+
+bool USkillHotkeyWidget::NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	Super::NativeOnDragOver(InGeometry, InDragDropEvent, InOperation);
+
+	USkillDragDropOperation* pOperation = Cast<USkillDragDropOperation>(InOperation);
+
+	if (!m_bDraggedOver && 
+		(pOperation->GetFromHotkey() != this) && 
+		!m_pAssignedSpell)
+	{
+		m_bDraggedOver = true;
+		m_pBaseImage->SetColorAndOpacity(m_DragOverColor);
+
+		return true;
+	}
+	return false;
+}
+
+bool USkillHotkeyWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+
+	USkillDragDropOperation* pSkillOper = Cast<USkillDragDropOperation>(InOperation);
+	if (pSkillOper)
+	{
+		if (pSkillOper->GetFromHotkey() != this)
+		{
+			if (m_pAssignedSpell)
+			{
+				if (m_pAssignedSpell->GetOnCooldown())
+				{
+					return true;
+				}
+
+				ABase_Skill* pTempAssignedSpell = m_pAssignedSpell;
+				ClearAssignedSpell();
+
+				if (pSkillOper->GetFromHotkey())
+				{
+					pSkillOper->GetFromHotkey()->ClearAssignedSpell();
+					AssignSpell(pSkillOper->GetSkillActor());
+					pSkillOper->GetFromHotkey()->AssignSpell(pTempAssignedSpell);
+				}
+				else
+				{
+					AssignSpell(pSkillOper->GetSkillActor());
+				}
+
+				ResetStyle();
+				return true;
+			}
+			else
+			{
+				if (pSkillOper->GetFromHotkey())
+				{
+					pSkillOper->GetFromHotkey()->ClearAssignedSpell();
+				}
+
+				AssignSpell(pSkillOper->GetSkillActor());
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void USkillHotkeyWidget::NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
+
+	if (m_bDraggedOver)
+	{
+		USkillDragDropOperation* pOperation = Cast<USkillDragDropOperation>(InOperation);
+		ResetStyle();
+	}
+}
+
+void USkillHotkeyWidget::_OnSkillButtonClicked()
+{
+	GetAssignedSpell()->OnTryCastSpell();
+}
 
 void USkillHotkeyWidget::SetDynamicMaterial(UMaterialInstanceDynamic* _pMaterial)
 {

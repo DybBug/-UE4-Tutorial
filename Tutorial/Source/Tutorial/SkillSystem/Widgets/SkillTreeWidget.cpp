@@ -5,6 +5,7 @@
 #include "../Characters/SkillCharacter.h"
 #include "../Widgets/TreeCategoryWidget.h"
 #include "../Widgets/SubTreeWidget.h"
+#include "../DragDropOperations/WidgetDragDropOperation.h"
 
 #include <WidgetTree.h>
 #include <Components/Button.h>
@@ -12,6 +13,9 @@
 #include <Components/ScrollBox.h>
 #include <Components/WidgetSwitcher.h>
 #include <Kismet/KismetTextLibrary.h>
+#include <Blueprint/WidgetBlueprintLibrary.h>
+#include <Blueprint/SlateBlueprintLibrary.h>
+
 
 bool USkillTreeWidget::Initialize()
 {
@@ -90,6 +94,34 @@ void USkillTreeWidget::OnCategoryClicked(int _Index)
 		m_pSubTreeSwitcher->SetActiveWidgetIndex(m_CurrSelectedIndex);		
 	}
 }
+
+FReply USkillTreeWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	FReply Result = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	FEventReply Event = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
+	
+	Result = Event.NativeReply;
+
+	return Result;
+}
+
+void USkillTreeWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
+{
+	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
+	FVector2D Offset = USlateBlueprintLibrary::AbsoluteToLocal(InGeometry, InMouseEvent.GetScreenSpacePosition());
+	UWidgetDragDropOperation* pWidgetOper = Cast<UWidgetDragDropOperation>(UWidgetBlueprintLibrary::CreateDragDropOperation(UWidgetDragDropOperation::StaticClass()));
+	pWidgetOper->Initialize(this, Offset);
+	pWidgetOper->DefaultDragVisual = this;
+	//pWidgetOper->Offset = FVector2D(0.f, 0.f);
+	pWidgetOper->Pivot = EDragPivot::MouseDown;
+
+	RemoveFromParent();
+
+	OutOperation = pWidgetOper;	
+}
+
 
 void USkillTreeWidget::_OnCloseButtonClicked()
 {

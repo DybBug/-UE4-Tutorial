@@ -41,6 +41,11 @@ public :
 	UFUNCTION(BlueprintPure, Category = "SkillTreeWidget")
 	const TArray<USubTreeWidget*>& GetSubTreeWidget() const { return m_SubTreeWidgets; }
 
+protected :
+	virtual FReply NativeOnMouseButtonDown( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent ) override;
+	virtual void NativeOnDragDetected( const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation ) override;
+
+
 private :
 	/* Bind */
 	UFUNCTION()

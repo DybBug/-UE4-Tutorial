@@ -48,6 +48,8 @@ FReply USkillTreeEntryWidget::NativeOnMouseButtonDown(const FGeometry & InGeomet
 
 void USkillTreeEntryWidget::NativeOnDragDetected(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent, UDragDropOperation *& OutOperation)
 {
+	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
+
 	USkillHotkeyWidget* pHotkeyWidget;
 	bool bIsOnHotkey = m_pSubTreeWidget->GetSkillTreeWidget()->GetSkillTree()->SkillOnHotkey(m_pSkill, pHotkeyWidget);
 

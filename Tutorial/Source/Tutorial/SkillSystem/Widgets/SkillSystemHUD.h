@@ -92,6 +92,9 @@ public :
 	UFUNCTION(BlueprintCallable, Category = "SkillSystemHUD")
 	void SetExpBar(class UStatBarWidget* _Widget) { m_pExpBar = _Widget; }
 
+private :
+	virtual bool NativeOnDrop(const FGeometry& _InGeometry, const FDragDropEvent& _InDragDropEvent, UDragDropOperation* _pInOperation) override;
+
 	
 protected :
 	UPROPERTY(VisibleAnywhere, Category = "SkillSystemHUD")

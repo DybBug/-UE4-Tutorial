@@ -2,10 +2,15 @@
 
 #include "SkillSystemHUD.h"
 #include "HotkeyRowWidget.h"
+#include "SkillHotkeyWidget.h"
 #include "SkillTreeWidget.h"
+#include "../DragDropOperations/SkillDragDropOperation.h"
+#include "../DragDropOperations/WidgetDragDropOperation.h"
 
-#include "WidgetTree.h"
-#include "UObject/ConstructorHelpers.h"
+#include <WidgetTree.h>
+#include <UObject/ConstructorHelpers.h>
+#include <Blueprint/SlateBlueprintLibrary.h>
+
 
 
 void USkillSystemHUD::NativeConstruct()
@@ -66,6 +71,31 @@ void USkillSystemHUD::GenerateHotkeys(const TArray<FKey>& _Key)
 		}
 		GenerateHotkeys(LocHotkeys);
 	}
+}
+
+bool USkillSystemHUD::NativeOnDrop(const FGeometry& _InGeometry, const FDragDropEvent& _InDragDropEvent, UDragDropOperation* _pInOperation)
+{
+	Super::NativeOnDrop(_InGeometry, _InDragDropEvent, _pInOperation);
+	
+	if (USkillDragDropOperation* _pSkillOper = Cast<USkillDragDropOperation>(_pInOperation))
+	{
+		if (_pSkillOper->GetFromHotkey())
+		{
+			_pSkillOper->GetFromHotkey()->ClearAssignedSpell();
+			return true;
+		}
+	}
+	else if(UWidgetDragDropOperation* _pWidgetOper = Cast<UWidgetDragDropOperation>(_pInOperation))
+	{
+		_pWidgetOper->GetDraggedWidget()->AddToViewport();
+
+		FVector2D Loc    = USlateBlueprintLibrary::AbsoluteToLocal(_InGeometry, _InDragDropEvent.GetScreenSpacePosition());				
+		FVector2D Offset = _pWidgetOper->GetCustomOffset();
+		_pWidgetOper->GetDraggedWidget()->SetPositionInViewport( Loc - Offset, false);
+
+		return true;
+	}
+	return false;
 }
 
 

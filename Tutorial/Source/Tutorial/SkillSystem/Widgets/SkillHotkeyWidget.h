@@ -19,14 +19,6 @@ class TUTORIAL_API USkillHotkeyWidget : public UUserWidget
 	
 public :
 	virtual void NativeConstruct() override;
-	
-	/*virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-
-	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
-
-	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
-
-	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;*/
 
 	UFUNCTION(BlueprintCallable, Category = "SkillHotkeyWidget")
 	void ClearAssignedSpell();
@@ -87,6 +79,18 @@ public :
 	
 	UFUNCTION(BlueprintCallable, Category = "SkillHotkeyWidget")
 	void SetDeactivated(bool _bBool);
+
+protected :
+	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& _InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+private :
+	/* OnClicked */
+	UFUNCTION()
+	void _OnSkillButtonClicked();
 
 protected :
 	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn = "true"), Category = "SkillHotkeyWidget")
