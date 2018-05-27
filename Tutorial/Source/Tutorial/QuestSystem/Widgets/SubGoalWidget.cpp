@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SubGoalWidget.h"
+#include "../Actors/QuestManager.h"
 #include "../Actors/QuestActors/Quest_Base.h"
+#include "QuestWidget.h"
 
 #include <WidgetTree.h>
-#include <Components/Border.h>
-#include <Components/Button.h>
-#include <Components/TextBlock.h>
+
 
 void USubGoalWidget::NativeConstruct()
 {
@@ -15,6 +15,8 @@ void USubGoalWidget::NativeConstruct()
 	m_pGoalBorder   = WidgetTree->FindWidget<UBorder>(TEXT("GoalBorder"));
 	m_pSelectButton = WidgetTree->FindWidget<UButton>(TEXT("SelectButton"));
 	m_pGoalText     = WidgetTree->FindWidget<UTextBlock>(TEXT("GoalText"));
+
+	m_pSelectButton->OnClicked.AddDynamic(this, &USubGoalWidget::_OnSelectButtonClicked);
 
 	Update();
 }
@@ -76,4 +78,16 @@ void USubGoalWidget::Update()
 	}
 
 	m_GoalIndex = m_pAssignedQuest->GetQuestInfo().SubGoals.Find(m_GoalInfo);
+}
+
+void USubGoalWidget::_OnSelectButtonClicked()
+{
+	if (m_pQuestWidget->IsCurrQuest())
+	{
+		m_pQuestWidget->SelectSubGoal(this);
+	}
+	else
+	{
+		m_pQuestWidget->GetQuestManager()->SelectNewQuest(m_pAssignedQuest, this);
+	}
 }

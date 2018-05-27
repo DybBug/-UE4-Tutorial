@@ -5,11 +5,14 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "../QuestSystem.h"
+
+#include <Components/Border.h>
+#include <Components/Button.h>
+#include <Components/TextBlock.h>
+
 #include "SubGoalWidget.generated.h"
 
-class UBorder;
-class UButton;
-class UTextBlock;
+
 class AQuest_Base;
 class UQuestWidget;
 /**
@@ -28,6 +31,16 @@ public :
 	void Update();
 
 
+	/* Get */
+	UBorder*    GetGoalBorder()   const { return m_pGoalBorder; }
+	UButton*    GetSelectButton() const { return m_pSelectButton; }
+	UTextBlock* GetGoalText()     const { return m_pGoalText; }
+	
+	const int& GetGoalIndex() const { return m_GoalIndex; }
+
+protected :
+	UFUNCTION()
+	void _OnSelectButtonClicked();
 
 	
 protected :

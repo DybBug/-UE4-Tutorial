@@ -3,10 +3,10 @@
 #include "QuestWidget.h"
 #include "SubGoalWidget.h"
 #include "../Actors/QuestActors/Quest_Base.h"
+#include "../Actors/QuestManager.h"
 
 #include <WidgetTree.h>
-#include <Components/TextBlock.h>
-#include <Components/VerticalBox.h>
+
 
 void UQuestWidget::NativeConstruct()
 {
@@ -29,9 +29,11 @@ void UQuestWidget::GenerateSubWidgets()
 
 	m_pSubGoalBox->ClearChildren();
 
+	UClass* pSubGoaltWidgetClass = LoadClass<USubGoalWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/QuestSystem/Widgets/WB_SubGoal.WB_SubGoal_C'"));
+
 	for (int i = 0; i < m_pAssignedQuest->GetCurrGoals().Num(); ++i)
 	{
-		USubGoalWidget* pSubGoalWidget = CreateWidget<USubGoalWidget>(GetWorld(), USubGoalWidget::StaticClass());
+		USubGoalWidget* pSubGoalWidget = CreateWidget<USubGoalWidget>(GetWorld(), pSubGoaltWidgetClass);
 
 		pSubGoalWidget->Initialize(m_pAssignedQuest->GetCurrGoals()[i], m_pAssignedQuest, this);
 
@@ -56,7 +58,7 @@ void UQuestWidget::UpdateQuest()
 			}
 			case EQuestCategories::Side_Quest :
 			{
-				m_pQuestName->SetColorAndOpacity(FSlateColor(FColor(0x747affff)));
+				m_pQuestName->SetColorAndOpacity(FSlateColor(FColor(0xff747aff)));
 				break;
 			}
 			case EQuestCategories::Events :
@@ -72,4 +74,36 @@ void UQuestWidget::UpdateQuest()
 		}
 		GenerateSubWidgets();
 	}
+}
+
+bool UQuestWidget::IsCurrQuest()
+{	
+	return (m_pAssignedQuest == m_pQuestManager->GetCurrQuest());
+}
+
+void UQuestWidget::SelectSubGoal(USubGoalWidget* _pClickedSubGoal)
+{
+	if (m_pSelectedSubGoalWidget)
+	{
+		m_pSelectedSubGoalWidget->GetGoalBorder()->SetContentColorAndOpacity(FLinearColor(FColor(0x7FFFFFFF))); // a = 7F.
+		m_pSelectedSubGoalWidget->GetSelectButton()->SetIsEnabled(true);
+	}
+	
+	if (_pClickedSubGoal)
+	{
+		m_pSelectedSubGoalWidget = _pClickedSubGoal;
+		m_pSelectedSubGoalWidget->GetGoalBorder()->SetContentColorAndOpacity(FLinearColor::White);
+		m_pSelectedSubGoalWidget->GetSelectButton()->SetIsEnabled(false);		
+		
+		m_pAssignedQuest->SetSelectedSubGoalIndex(m_pSelectedSubGoalWidget->GetGoalIndex());
+
+		m_pQuestManager->OnSwitchSubQuest();
+	}
+	
+}
+
+void UQuestWidget::OnQuestSelected(USubGoalWidget* _pClickedSubGoal)
+{
+	m_pQuestName->SetIsEnabled(true);
+	SelectSubGoal(_pClickedSubGoal);
 }

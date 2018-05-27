@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+
+#include <Components/TextBlock.h>
+#include <Components/VerticalBox.h>
+
 #include "QuestWidget.generated.h"
 
-class UTextBlock;
-class UVerticalBox;
+
 class AQuestManager;
 class AQuest_Base;
 class USubGoalWidget;
@@ -26,6 +29,20 @@ public :
 	void Initialize(AQuestManager* _pQuestManager, AQuest_Base* _pAssignedQuest);
 	void GenerateSubWidgets();
 	void UpdateQuest();
+	bool IsCurrQuest();
+	void SelectSubGoal(USubGoalWidget* _pClickedSubGoal);
+	void OnQuestSelected(USubGoalWidget* _pClickedSubGoal);
+
+	/* Get */ 
+	UTextBlock*    GetQuestName()    const { return m_pQuestName; }
+	UVerticalBox*  GetSubGoalBox()   const { return m_pSubGoalBox; }
+	AQuestManager* GetQuestManager() const { return m_pQuestManager; }
+
+	const TArray<USubGoalWidget*>& GetSubGoalWidgets() const { return m_SubGoalWidgets; }
+
+	/* Set */
+	void SetSelectedSubGoalWidget(USubGoalWidget* _pSelectedWidget) { m_pSelectedSubGoalWidget = _pSelectedWidget; }
+
 
 protected :
 	UTextBlock* m_pQuestName;

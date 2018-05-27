@@ -10,6 +10,7 @@
 #include <Kismet/GameplayStatics.h>
 #include <Kismet/KismetMathLibrary.h>
 #include <Kismet/KismetTextLibrary.h>
+#include <Blueprint/WidgetBlueprintLibrary.h>
 #include <Particles/ParticleSystemComponent.h>
 #include <Components/ChildActorComponent.h>
 #include <PaperSpriteComponent.h>
@@ -101,7 +102,12 @@ void AQuestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAxis("MoveForward", this, &AQuestCharacter::_MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AQuestCharacter::_MoveRight);
+
 	PlayerInputComponent->BindKey(EKeys::F, IE_Pressed, this, &AQuestCharacter::_FKey);
+	PlayerInputComponent->BindKey(EKeys::G, IE_Pressed, this, &AQuestCharacter::_GKey);
+	PlayerInputComponent->BindKey(EKeys::I, IE_Pressed, this, &AQuestCharacter::_IKey);
 
 }
 
@@ -148,8 +154,75 @@ void AQuestCharacter::AddExpPoints(int _Amount)
 	}
 }
 
+void AQuestCharacter::_MoveForward(float _Value)
+{
+	if (_Value == 0.f)
+	{
+		return;
+	}
+
+	FRotator Rot = GetControlRotation();
+	FVector Forward = FRotationMatrix(Rot).GetScaledAxis(EAxis::X);
+
+	AddMovementInput(Forward, _Value);
+
+	m_pQuestManager->OnPlayerMove();
+}
+
+void AQuestCharacter::_MoveRight(float _Value)
+{
+	if (_Value == 0.f)
+	{
+		return;
+	}
+
+	FRotator Rot = GetControlRotation();
+	FVector Right = FRotationMatrix(Rot).GetScaledAxis(EAxis::Y);
+
+	AddMovementInput(Right, _Value);
+
+	m_pQuestManager->OnPlayerMove();
+}
+
 void AQuestCharacter::_FKey()
 {
 	AddExpPoints(100);
 }
+
+void AQuestCharacter::_GKey()
+{
+	static bool bSwitch = false;
+
+	if (!bSwitch)
+	{
+		UClass* pQuestClass1 = LoadClass<AQuest_Base>(nullptr, TEXT("Blueprint'/Game/TutorialContent/QuestSystem/Actors/BP_Quest_Test1.BP_Quest_Test1_C'"));
+		m_pQuestManager->AddNewQuest(pQuestClass1, false);
+	}
+	else
+	{
+		UClass* pQuestClass2 = LoadClass<AQuest_Base>(nullptr, TEXT("Blueprint'/Game/TutorialContent/QuestSystem/Actors/BP_Quest_Test2.BP_Quest_Test2_C'"));
+		m_pQuestManager->AddNewQuest(pQuestClass2, false);
+	}
+
+	bSwitch = !bSwitch;
+}
+
+void AQuestCharacter::_IKey()
+{
+	APlayerController* pController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	if (!m_bWidgetInput)
+	{
+		UWidgetBlueprintLibrary::SetInputMode_GameAndUI(pController, m_pHUD, false, false);
+		pController->bShowMouseCursor = true;
+		m_bWidgetInput = true;
+	}
+	else
+	{
+		UWidgetBlueprintLibrary::SetInputMode_GameOnly(pController);
+		pController->bShowMouseCursor = false;
+		m_bWidgetInput = false;
+	}
+}
+
 

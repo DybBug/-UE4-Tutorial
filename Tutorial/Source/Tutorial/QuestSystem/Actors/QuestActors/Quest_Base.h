@@ -24,10 +24,16 @@ public:
 	bool GoToNextSubGoals();
 
 	/* Get */
-	const FQuestInfo& GetQuestInfo() const { return m_QuestInfo; }
-	const int& GetCurrHuntedAmount() const { return m_CurrHuntedAmount; }
-	const TArray<FGoalInfo>& GetCurrGoals() const {return m_CurrGoals;}
+	const FQuestInfo&        GetQuestInfo()        const { return m_QuestInfo; }
+	const int&               GetCurrHuntedAmount() const { return m_CurrHuntedAmount; }
+	const TArray<FGoalInfo>& GetCurrGoals()        const {return m_CurrGoals;}
+	UQuestWidget*            GetQuestWidget()      const { return m_pQuestWidget; }
 
+	const int& GetSelectedSubGoalIndex() const { return m_SelectedSubGoalIndex; }
+
+	/* Set */
+	void SetSelectedSubGoalIndex(int _Index)            { m_SelectedSubGoalIndex = _Index; }
+	void SetQuestWidget(UQuestWidget* _pNewQuestWidget) { m_pQuestWidget = _pNewQuestWidget; }
 
 protected :
 	UPROPERTY(EditAnywhere, Category = "Quest_Base")
@@ -35,7 +41,6 @@ protected :
 
 	UPROPERTY(EditAnywhere, Category = "Quest_Base")
 	TArray<int> m_StartingSubGoalIndices;
-
 
 
 	UPROPERTY(VisibleAnywhere, Category = "Quest_Base|DoNotTouch!")

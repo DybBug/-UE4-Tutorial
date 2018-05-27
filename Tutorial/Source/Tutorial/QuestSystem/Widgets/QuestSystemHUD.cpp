@@ -12,10 +12,14 @@ void UQuestSystemHUD::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	m_pExpBar        = WidgetTree->FindWidget<UProgressBar>(TEXT("ExpBar"));
-	m_pCharacterIcon = WidgetTree->FindWidget<UImage>(TEXT("CharacterIcon"));
-	m_pExpText       = WidgetTree->FindWidget<UTextBlock>(TEXT("ExpText"));
-	m_pLevelText     = WidgetTree->FindWidget<UTextBlock>(TEXT("LevelText"));
+	m_pExpBar         = WidgetTree->FindWidget<UProgressBar>(TEXT("ExpBar"));
+	m_pCharacterIcon  = WidgetTree->FindWidget<UImage>(TEXT("CharacterIcon"));
+	m_pExpText        = WidgetTree->FindWidget<UTextBlock>(TEXT("ExpText"));
+	m_pLevelText      = WidgetTree->FindWidget<UTextBlock>(TEXT("LevelText"));
+	m_pQuestList      = WidgetTree->FindWidget<UScrollBox>(TEXT("QuestList"));
+	m_pDistanceBorder = WidgetTree->FindWidget<UBorder>(TEXT("DistanceBorder"));
+	m_pDistanceText   = WidgetTree->FindWidget<UTextBlock>(TEXT("DistanceText"));
+	m_pMiniMapWidget  = WidgetTree->FindWidget<UMiniMapWidget>(TEXT("WB_MiniMap"));
 }
 
 
@@ -23,7 +27,9 @@ UQuestWidget* UQuestSystemHUD::AddQuestToList(AQuest_Base* _pQuestActor)
 {
 	if (_pQuestActor)
 	{
-		UQuestWidget* pQuestWidget =  CreateWidget<UQuestWidget>(GetWorld(), UQuestWidget::StaticClass());
+		UClass* pQuestWidgetClass = LoadClass<UQuestWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/QuestSystem/Widgets/WB_Quest.WB_Quest_C'"));
+		UQuestWidget* pQuestWidget =  CreateWidget<UQuestWidget>(GetWorld(), pQuestWidgetClass);
+		
 		pQuestWidget->Initialize(m_pQuestManager, _pQuestActor);
 
 		m_QuestWidgets.Add(pQuestWidget);

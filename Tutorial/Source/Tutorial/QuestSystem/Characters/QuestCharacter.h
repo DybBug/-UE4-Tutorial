@@ -41,7 +41,20 @@ public:
 
 protected :
 	UFUNCTION()
+	void _MoveForward(float _Value);
+
+	UFUNCTION()
+	void _MoveRight(float _Value);
+
+
+	UFUNCTION()
 	void _FKey();
+
+	UFUNCTION()
+	void _GKey();
+
+	UFUNCTION()
+	void _IKey();
 	
 protected :
 	UPROPERTY(VisibleDefaultsOnly, Category = "QuestCharacter|Camera")
@@ -81,5 +94,7 @@ protected :
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "QuestCharacter|ExpSystem")
 	float m_NextExpMultiplier = 1.5;
+
+	bool m_bWidgetInput = false;
 
 };

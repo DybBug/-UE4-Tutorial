@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "GoalActor.generated.h"
 
+class UPaperSpriteComponent;
+
 UCLASS()
 class TUTORIAL_API AGoalActor : public AActor
 {
@@ -15,14 +17,16 @@ public:
 	// Sets default values for this actor's properties
 	AGoalActor();
 
-protected:
-	// Called when the game starts or when spawned
+protected :
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
+protected :
+	UPROPERTY(VisibleDefaultsOnly, Category = "GoalActor|Components")
+	USceneComponent* m_pScene;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "GoalActor|Components")
+	UPaperSpriteComponent* m_pMiniMapIcon;
 	
 	
 };
