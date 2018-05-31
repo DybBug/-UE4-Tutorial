@@ -79,6 +79,7 @@ void AQuestManager::SelectNewQuest(AQuest_Base * _pQuest, USubGoalWidget * _pSub
 	if (m_pCurrQuest)
 	{
 		m_pCurrQuest->GetQuestWidget()->GetQuestName()->SetIsEnabled(false);
+		m_pCurrQuest->GetQuestWidget()->SelectSubGoal(nullptr);
 		m_pCurrQuest->GetQuestWidget()->SetSelectedSubGoalWidget(nullptr);	
 	}
 
@@ -124,7 +125,7 @@ int AQuestManager::DistanceToGoal()
 {
 	float Distance = FVector::DistXY(m_pPlayer->GetActorLocation(), m_pCurrGoalActor->GetActorLocation());
 
-	return UKismetMathLibrary::Round(Distance); // 가장 가까운 정수로 반올림.
+	return UKismetMathLibrary::Round(Distance/100.f); // 가장 가까운 정수로 반올림.
 }
 
 void AQuestManager::UpdateDirectionArrow()

@@ -39,6 +39,7 @@ public :
 	AQuestManager* GetQuestManager() const { return m_pQuestManager; }
 
 	const TArray<USubGoalWidget*>& GetSubGoalWidgets() const { return m_SubGoalWidgets; }
+	USubGoalWidget* GetSelectedSubGoalWidget() const { return m_pSelectedSubGoalWidget; }
 
 	/* Set */
 	void SetSelectedSubGoalWidget(USubGoalWidget* _pSelectedWidget) { m_pSelectedSubGoalWidget = _pSelectedWidget; }

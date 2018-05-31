@@ -2,7 +2,11 @@
 
 #include "QuestCharacter.h"
 #include "../Widgets/QuestSystemHUD.h"
+#include "../Widgets/QuestWidget.h"
+#include "../Widgets/SubGoalWidget.h"
 #include "../Actors/QuestManager.h"
+#include "../Actors/QuestActors/Quest_Base.h"
+#include "../Interfaces/Interactable_Interface.h"
 
 #include <UObject/ConstructorHelpers.h>
 #include <Camera/CameraComponent.h>
@@ -13,6 +17,7 @@
 #include <Blueprint/WidgetBlueprintLibrary.h>
 #include <Particles/ParticleSystemComponent.h>
 #include <Components/ChildActorComponent.h>
+#include <Components/CapsuleComponent.h>
 #include <PaperSpriteComponent.h>
 
 
@@ -57,6 +62,16 @@ AQuestCharacter::AQuestCharacter()
 	m_pLevelUpEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("LevelUpEffect"));
 	m_pLevelUpEffect->SetAutoActivate(false);
 	m_pLevelUpEffect->SetupAttachment(RootComponent);
+
+	m_pInteractionCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("InteractionCapsule"));
+	m_pInteractionCapsule->SetRelativeLocation(FVector(90.f, 0.f, 0.f));
+	m_pInteractionCapsule->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
+	m_pInteractionCapsule->SetCapsuleHalfHeight(240.f);
+	m_pInteractionCapsule->SetCapsuleRadius(110.f);
+	m_pInteractionCapsule->OnComponentBeginOverlap.AddDynamic(this, &AQuestCharacter::_OnBeginOverlap);
+	m_pInteractionCapsule->OnComponentEndOverlap.AddDynamic(this, &AQuestCharacter::_OnEndOverlap);
+	m_pInteractionCapsule->SetupAttachment(RootComponent);
+
 
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClass(TEXT("WidgetBlueprint'/Game/TutorialContent/QuestSystem/Widgets/WB_HUD.WB_HUD_C'"));
@@ -105,9 +120,11 @@ void AQuestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis("MoveForward", this, &AQuestCharacter::_MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AQuestCharacter::_MoveRight);
 
-	PlayerInputComponent->BindKey(EKeys::F, IE_Pressed, this, &AQuestCharacter::_FKey);
-	PlayerInputComponent->BindKey(EKeys::G, IE_Pressed, this, &AQuestCharacter::_GKey);
-	PlayerInputComponent->BindKey(EKeys::I, IE_Pressed, this, &AQuestCharacter::_IKey);
+	PlayerInputComponent->BindKey(EKeys::E,   IE_Pressed, this, &AQuestCharacter::_EKey);
+	PlayerInputComponent->BindKey(EKeys::F,   IE_Pressed, this, &AQuestCharacter::_FKey);
+	PlayerInputComponent->BindKey(EKeys::G,   IE_Pressed, this, &AQuestCharacter::_GKey);
+	PlayerInputComponent->BindKey(EKeys::I,   IE_Pressed, this, &AQuestCharacter::_IKey);
+	PlayerInputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &AQuestCharacter::_TabKey);
 
 }
 
@@ -154,6 +171,35 @@ void AQuestCharacter::AddExpPoints(int _Amount)
 	}
 }
 
+
+void AQuestCharacter::_OnBeginOverlap(
+	UPrimitiveComponent* _pOverlappedComponent, 
+	AActor* _pOtherActor, 
+	UPrimitiveComponent* _pOtherComp, 
+	int32 _OtherBodyIndex, 
+	bool _bFromSweep,
+	const FHitResult & _SweepResult)
+{
+	// 인터페이스가 있는가?
+	if (UKismetSystemLibrary::DoesImplementInterface(_pOtherActor, UInteractable_Interface::StaticClass()))
+	{
+		Cast<IInteractable_Interface>(_pOtherActor)->OnEnterPlayerRadius(this);
+	}
+}
+
+void AQuestCharacter::_OnEndOverlap(
+	UPrimitiveComponent*  _pOverlappedComponent, 
+	AActor*  _pOtherActor, 
+	UPrimitiveComponent*  _pOtherComp, 
+	int32 _OtherBodyIndex)
+{
+	// 인터페이스가 있는가?
+	if (UKismetSystemLibrary::DoesImplementInterface(_pOtherActor, UInteractable_Interface::StaticClass()))
+	{
+		Cast<IInteractable_Interface>(_pOtherActor)->OnLeavePlayerRadius(this);
+	}
+}
+
 void AQuestCharacter::_MoveForward(float _Value)
 {
 	if (_Value == 0.f)
@@ -184,6 +230,21 @@ void AQuestCharacter::_MoveRight(float _Value)
 	m_pQuestManager->OnPlayerMove();
 }
 
+void AQuestCharacter::_EKey()
+{
+	TArray<AActor*> OverlappingActors;
+	m_pInteractionCapsule->GetOverlappingActors(OverlappingActors);
+
+	for (int i = 0; i < OverlappingActors.Num(); ++i)
+	{
+		if (UKismetSystemLibrary::DoesImplementInterface(OverlappingActors[i], UInteractable_Interface::StaticClass()))
+		{
+			Cast<IInteractable_Interface>(OverlappingActors[i])->OnInteractWith(this);
+			break;
+		}
+	}
+}
+
 void AQuestCharacter::_FKey()
 {
 	AddExpPoints(100);
@@ -191,20 +252,8 @@ void AQuestCharacter::_FKey()
 
 void AQuestCharacter::_GKey()
 {
-	static bool bSwitch = false;
-
-	if (!bSwitch)
-	{
-		UClass* pQuestClass1 = LoadClass<AQuest_Base>(nullptr, TEXT("Blueprint'/Game/TutorialContent/QuestSystem/Actors/BP_Quest_Test1.BP_Quest_Test1_C'"));
-		m_pQuestManager->AddNewQuest(pQuestClass1, false);
-	}
-	else
-	{
-		UClass* pQuestClass2 = LoadClass<AQuest_Base>(nullptr, TEXT("Blueprint'/Game/TutorialContent/QuestSystem/Actors/BP_Quest_Test2.BP_Quest_Test2_C'"));
-		m_pQuestManager->AddNewQuest(pQuestClass2, false);
-	}
-
-	bSwitch = !bSwitch;
+	UClass* pQuestClass2 = LoadClass<AQuest_Base>(nullptr, TEXT("Blueprint'/Game/TutorialContent/QuestSystem/Actors/BP_Quest_Test2.BP_Quest_Test2_C'"));
+	m_pQuestManager->AddNewQuest(pQuestClass2, false);	
 }
 
 void AQuestCharacter::_IKey()
@@ -222,6 +271,22 @@ void AQuestCharacter::_IKey()
 		UWidgetBlueprintLibrary::SetInputMode_GameOnly(pController);
 		pController->bShowMouseCursor = false;
 		m_bWidgetInput = false;
+	}
+}
+
+void AQuestCharacter::_TabKey()
+{
+	AQuest_Base* pCurrQuest = m_pQuestManager->GetCurrQuest();
+	if (pCurrQuest)
+	{
+		UQuestWidget* pQuestWidget = pCurrQuest->GetQuestWidget();
+		if (pQuestWidget->GetSubGoalWidgets().Num() > 1)
+		{
+			int Index = pQuestWidget->GetSubGoalWidgets().Find(pQuestWidget->GetSelectedSubGoalWidget());
+			Index = (Index < (pQuestWidget->GetSubGoalWidgets().Num() - 1)) ? ++Index : 0;			
+
+			pQuestWidget->SelectSubGoal(pQuestWidget->GetSubGoalWidgets()[Index]);
+		}
 	}
 }
 

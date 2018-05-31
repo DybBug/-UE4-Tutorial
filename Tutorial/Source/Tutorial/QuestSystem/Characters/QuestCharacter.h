@@ -37,15 +37,36 @@ public:
 	void AddExpPoints(int _Amount);
 
 	/* Get */
-	UQuestSystemHUD* GetHUD() const { return m_pHUD; };
+	UQuestSystemHUD* GetHUD() const { return m_pHUD; }
+	AQuestManager* GetQuestManager() const { return m_pQuestManager; }
 
 protected :
+
+protected :
+	UFUNCTION()
+	void _OnBeginOverlap(
+		UPrimitiveComponent* _pOverlappedComponent, 
+		AActor*              _pOtherActor, 
+		UPrimitiveComponent* _pOtherComp, 
+		int32                 _OtherBodyIndex,
+		bool                  _bFromSweep, 
+		const FHitResult&     _SweepResult);
+
+	UFUNCTION()
+	void _OnEndOverlap(
+		UPrimitiveComponent* _pOverlappedComponent, 
+		AActor*              _pOtherActor, 
+		UPrimitiveComponent* _pOtherComp, 
+		int32                _OtherBodyIndex);
+
 	UFUNCTION()
 	void _MoveForward(float _Value);
 
 	UFUNCTION()
 	void _MoveRight(float _Value);
 
+	UFUNCTION()
+	void _EKey();
 
 	UFUNCTION()
 	void _FKey();
@@ -55,6 +76,9 @@ protected :
 
 	UFUNCTION()
 	void _IKey();
+
+	UFUNCTION()
+	void _TabKey();
 	
 protected :
 	UPROPERTY(VisibleDefaultsOnly, Category = "QuestCharacter|Camera")
@@ -74,6 +98,9 @@ protected :
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "QuestCharacter|ParticleSystem")
 	UParticleSystemComponent* m_pLevelUpEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "QuestCharacter|Collision")
+	UCapsuleComponent* m_pInteractionCapsule;
 
 
 	TSubclassOf<UUserWidget> m_pHUDClass;
