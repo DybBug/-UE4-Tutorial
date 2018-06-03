@@ -53,6 +53,7 @@ void AQuestManager::OnSwitchSubQuest()
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		m_pCurrGoalActor = GetWorld()->SpawnActor<AGoalActor>(m_GoalActorClass, m_CurrSubGoal.GoalLocation.Location, FRotator(0.f, 0.f, 0.f), Params);
+		m_pCurrGoalActor->Initialize(m_CurrSubGoal.bUseRadius, m_CurrSubGoal.Radius, m_CurrSubGoal.CircleColor);
 		
 		m_CurrDistance = DistanceToGoal();
 		m_pHUD->GetDistanceText()->SetText(UKismetTextLibrary::Conv_IntToText(m_CurrDistance));
@@ -99,8 +100,9 @@ bool AQuestManager::AddNewQuest(TSubclassOf<AQuest_Base> _NewQuestClass, bool _b
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn; // 충돌 무시하고 항상 충돌.
 		AQuest_Base* pSpawnedQuestActor = GetWorld()->SpawnActor<AQuest_Base>(_NewQuestClass, SpawnParams);
+		pSpawnedQuestActor->Initialize(this);
 
-		m_QuestActors.Add(pSpawnedQuestActor);
+		m_CurrQuestActors.Add(pSpawnedQuestActor);
 
 		pSpawnedQuestActor->SetupStartingGoals();
 
@@ -109,12 +111,20 @@ bool AQuestManager::AddNewQuest(TSubclassOf<AQuest_Base> _NewQuestClass, bool _b
 
 		pQuestWidget->UpdateQuest();
 
-		if (_bDirectlyStart || (m_QuestActors.Num() <= 1))
+		if (_bDirectlyStart || (m_CurrQuestActors.Num() <= 1))
 		{
 			USubGoalWidget* pSubGoalidget = pSpawnedQuestActor->GetQuestWidget()->GetSubGoalWidgets()[0];
-			SelectNewQuest(pSpawnedQuestActor, pSubGoalidget);
+			SelectNewQuest(pSpawnedQuestActor, pSubGoalidget);			
 		}
 
+		if (m_pHUD->GetSlideOut())
+		{
+			UWidgetAnimation* pSlideOutAnim = m_pHUD->GetWidgetAnimation("SlideOut");
+			m_pHUD->PlayAnimation(pSlideOutAnim, 0.f, 1, EUMGSequencePlayMode::Reverse);
+
+			m_pHUD->SetSlideOut(false);
+			return true;
+		}
 		return true;
 	}
 

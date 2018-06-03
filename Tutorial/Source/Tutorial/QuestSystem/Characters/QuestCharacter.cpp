@@ -120,10 +120,12 @@ void AQuestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis("MoveForward", this, &AQuestCharacter::_MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AQuestCharacter::_MoveRight);
 
+	PlayerInputComponent->BindKey(EKeys::B,   IE_Pressed, this, &AQuestCharacter::_BKey);
 	PlayerInputComponent->BindKey(EKeys::E,   IE_Pressed, this, &AQuestCharacter::_EKey);
 	PlayerInputComponent->BindKey(EKeys::F,   IE_Pressed, this, &AQuestCharacter::_FKey);
 	PlayerInputComponent->BindKey(EKeys::G,   IE_Pressed, this, &AQuestCharacter::_GKey);
 	PlayerInputComponent->BindKey(EKeys::I,   IE_Pressed, this, &AQuestCharacter::_IKey);
+	PlayerInputComponent->BindKey(EKeys::J,   IE_Pressed, this, &AQuestCharacter::_JKey);
 	PlayerInputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &AQuestCharacter::_TabKey);
 
 }
@@ -230,6 +232,27 @@ void AQuestCharacter::_MoveRight(float _Value)
 	m_pQuestManager->OnPlayerMove();
 }
 
+void AQuestCharacter::_BKey()
+{
+	if (m_pHUD->GetQuestWidgets().Num() >= 1)
+	{
+		UWidgetAnimation* pSlideOutAnim = m_pHUD->GetWidgetAnimation("SlideOut");
+		bool bSuccessed = m_pHUD->IsAnimationPlaying(pSlideOutAnim);
+
+		if (bSuccessed)
+		{
+			m_pHUD->ReverseAnimation(pSlideOutAnim);		
+		}
+		else
+		{
+			EUMGSequencePlayMode::Type UMGPlayMode = m_pHUD->GetSlideOut() ? EUMGSequencePlayMode::Reverse : EUMGSequencePlayMode::Forward;
+			m_pHUD->PlayAnimation(pSlideOutAnim, 0.f, 1, UMGPlayMode);
+		}
+
+		m_pHUD->SetSlideOut(!m_pHUD->GetSlideOut());
+	}
+}
+
 void AQuestCharacter::_EKey()
 {
 	TArray<AActor*> OverlappingActors;
@@ -271,6 +294,14 @@ void AQuestCharacter::_IKey()
 		UWidgetBlueprintLibrary::SetInputMode_GameOnly(pController);
 		pController->bShowMouseCursor = false;
 		m_bWidgetInput = false;
+	}
+}
+
+void AQuestCharacter::_JKey()
+{
+	if (m_pQuestManager->GetCurrQuestActors().Num() > 0)
+	{
+		m_pQuestManager->GetCurrQuestActors()[0]->CompleteSubGoal(0);
 	}
 }
 

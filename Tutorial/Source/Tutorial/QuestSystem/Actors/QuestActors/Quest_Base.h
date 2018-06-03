@@ -9,6 +9,8 @@
 
 
 class UQuestWidget;
+class UQuestListEntryWidget;
+class AQuestManager;
 
 UCLASS()
 class TUTORIAL_API AQuest_Base : public AActor
@@ -19,9 +21,12 @@ public:
 	// Sets default values for this actor's properties
 	AQuest_Base();
 
+	void Initialize(AQuestManager* _pQuestManager);
 	void UpdateSubGoals();
 	void SetupStartingGoals();
 	bool GoToNextSubGoals();
+
+	bool CompleteSubGoal(int _SubGoalIndex);
 
 	/* Get */
 	const FQuestInfo&        GetQuestInfo()        const { return m_QuestInfo; }
@@ -42,7 +47,6 @@ protected :
 	UPROPERTY(EditAnywhere, Category = "Quest_Base")
 	TArray<int> m_StartingSubGoalIndices;
 
-
 	UPROPERTY(VisibleAnywhere, Category = "Quest_Base|DoNotTouch!")
 	TArray<int> m_CurrGoalIndices;
 	
@@ -57,4 +61,21 @@ protected :
 
 	UPROPERTY(VisibleAnywhere, Category = "Quest_Base|DoNotTouch!")
 	UQuestWidget* m_pQuestWidget;
+
+	UPROPERTY(VisibleAnywhere, Category = "Quest_Base|DoNotTouch!")
+	UQuestListEntryWidget* m_pListEntryWidget;
+
+	UPROPERTY(VisibleAnywhere, Category = "Quest_Base|DoNotTouch!")
+	TArray<FCompletedGoal> m_CompletedSubGoals;
+
+	UPROPERTY(VisibleAnywhere, Category = "Quest_Base|DoNotTouch!")
+	EQuestStates m_CurrState;
+
+	UPROPERTY(VisibleAnywhere, Category = "Quest_Base|DoNotTouch!")
+	FText m_CurrDescription;
+
+
+	AQuestManager* m_pQuestManager;
+
+
 };

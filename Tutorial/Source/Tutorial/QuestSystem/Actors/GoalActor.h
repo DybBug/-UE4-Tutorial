@@ -23,6 +23,9 @@ protected :
 public :
 	void Initialize(bool _bUseRadius, float _Radius, const FLinearColor& _CircleColor);
 
+	UFUNCTION(BlueprintCallable, Category = "GoalActor")
+	void UseRadius();
+
 
 protected :
 	UPROPERTY(VisibleDefaultsOnly, Category = "GoalActor|Components")

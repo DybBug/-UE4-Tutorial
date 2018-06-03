@@ -1,8 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Quest_Base.h"
+#include "../../Widgets/QuestWidget.h"
+#include "../../Widgets/SubGoalWidget.h"
+#include "../QuestManager.h"
+
 
 #include <Kismet/KismetMathLibrary.h>
+#include <Kismet/KismetArrayLibrary.h>
 
 // Sets default values
 AQuest_Base::AQuest_Base()
@@ -12,6 +17,11 @@ AQuest_Base::AQuest_Base()
 
 	m_StartingSubGoalIndices.SetNum(1);
 
+}
+
+void AQuest_Base::Initialize(AQuestManager* _pQuestManager)
+{
+	m_pQuestManager = _pQuestManager;
 }
 
 void AQuest_Base::UpdateSubGoals()
@@ -30,6 +40,9 @@ void AQuest_Base::SetupStartingGoals()
 	m_CurrGoalIndices = m_StartingSubGoalIndices;
 
 	UpdateSubGoals();
+	
+	m_CurrDescription = m_QuestInfo.Description;
+
 }
 
 bool AQuest_Base::GoToNextSubGoals()
@@ -50,5 +63,48 @@ bool AQuest_Base::GoToNextSubGoals()
 		return true;
 	}
 
+	return false;
+}
+
+bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex)
+{
+	if (m_CurrGoalIndices.Contains(_SubGoalIndex))
+	{
+		FGoalInfo CurrGoalInfo = m_QuestInfo.SubGoals[_SubGoalIndex];
+
+		FCompletedGoal CompletedGoal(_SubGoalIndex, CurrGoalInfo, true);
+		m_CompletedSubGoals.Add(CompletedGoal);
+
+		int CurrWidgetIndex = m_CurrGoalIndices.Find(_SubGoalIndex);
+
+		m_CurrGoalIndices.Remove(_SubGoalIndex);
+
+		m_pQuestWidget->GetSubGoalWidgets()[CurrWidgetIndex]->RemoveFromParent();	
+		m_pQuestWidget->GetSubGoalWidgets().RemoveAt(CurrWidgetIndex);
+
+		for (int i = 0; i < CurrGoalInfo.FollowingSubGoalIndices.Num(); ++i)
+		{
+			int FollowingSubGoalIndex = CurrGoalInfo.FollowingSubGoalIndices[i];
+
+			m_CurrGoalIndices.Add(FollowingSubGoalIndex);
+
+			FGoalInfo SubGoal = m_QuestInfo.SubGoals[FollowingSubGoalIndex];
+			m_CurrGoals.Add(SubGoal);		
+			
+			UClass* pWidget = LoadClass<USubGoalWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/QuestSystem/Widgets/WB_SubGoal.WB_SubGoal_C'"));
+			USubGoalWidget* pSubGoalWidget = CreateWidget<USubGoalWidget>(GetWorld(), pWidget);
+			pSubGoalWidget->Initialize(SubGoal, this, m_pQuestWidget);
+
+			m_pQuestWidget->GetSubGoalWidgets().Add(pSubGoalWidget);
+			m_pQuestWidget->GetSubGoalBox()->AddChild(pSubGoalWidget);
+		}
+
+		if ((_SubGoalIndex == m_SelectedSubGoalIndex) && (m_pQuestManager->GetCurrQuest() == this))
+		{
+			m_pQuestWidget->SelectSubGoal(m_pQuestWidget->GetSubGoalWidgets()[0]);
+		}
+		return true;
+		
+	}
 	return false;
 }

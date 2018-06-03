@@ -10,6 +10,7 @@
 #include <Components/TextBlock.h>
 #include <Components/ScrollBox.h>
 #include <Components/Border.h>
+#include <Animation/WidgetAnimation.h>
 
 #include "QuestSystemHUD.generated.h"
 
@@ -29,7 +30,7 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
-	UQuestWidget * AddQuestToList(AQuest_Base* _pQuestActor);
+	UQuestWidget* AddQuestToList(AQuest_Base* _pQuestActor);
 
 	/* Get */
 	UProgressBar*   GetExpBar()         const { return m_pExpBar; }
@@ -41,8 +42,18 @@ public:
 	UTextBlock*     GetDistanceText()   const { return m_pDistanceText; }
 	UMiniMapWidget* GetMiniMapWidget()  const { return m_pMiniMapWidget; }
 
+	const TArray<UQuestWidget*>&          GetQuestWidgets()     const { return m_QuestWidgets; }
+	const TMap<FName, UWidgetAnimation*>& GetWidgetAnimations() const { return m_WidgetAnimations; }
+	UWidgetAnimation* GetWidgetAnimation(FName _Name)           const { return m_WidgetAnimations[_Name]; }
+
+
+	const bool& GetSlideOut() const { return m_bSlideOut; }
+
 	/* Set */
 	void SetQuestManager(AQuestManager* _pQuestManager) { m_pQuestManager = _pQuestManager; }
+	void SetSlideOut(bool _bBool) { m_bSlideOut = _bBool; }
+private :
+	void _SetupWidgetAnimations();
 protected :
 	UPROPERTY()
 	UProgressBar* m_pExpBar;
@@ -70,5 +81,10 @@ protected :
 	AQuestManager* m_pQuestManager;
 
 	TArray<UQuestWidget*> m_QuestWidgets;
+
+	bool m_bSlideOut = true;
+
+	/* Widget Animations */
+	TMap<FName, UWidgetAnimation*> m_WidgetAnimations;
 	
 };

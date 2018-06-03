@@ -38,6 +38,7 @@ public:
 
 	/* Get */
 	AQuest_Base* GetCurrQuest() const { return m_pCurrQuest; }
+	const TArray<AQuest_Base*>& GetCurrQuestActors() const { return m_CurrQuestActors; }
 	const TArray<TSubclassOf<AQuest_Base>>& GetAllQuestClasses() const { return m_AllQuestClasses; }
 
 	/* Set */
@@ -48,7 +49,10 @@ protected:
 	
 	UQuestSystemHUD* m_pHUD;
 
-	TArray<AQuest_Base*> m_QuestActors;
+	TArray<AQuest_Base*> m_CurrQuestActors;
+	TArray<AQuest_Base*> m_CompletedQuestActors;
+	TArray<AQuest_Base*> m_FailedQuestActors;
+
 	AQuest_Base* m_pCurrQuest;
 
 	TArray<TSubclassOf<AQuest_Base>> m_AllQuestClasses;

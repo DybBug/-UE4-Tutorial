@@ -5,6 +5,7 @@
 
 #include <WidgetTree.h>
 #include <Components/ScrollBoxSlot.h>
+#include <MovieScene.h>
 
 
 
@@ -20,8 +21,9 @@ void UQuestSystemHUD::NativeConstruct()
 	m_pDistanceBorder = WidgetTree->FindWidget<UBorder>(TEXT("DistanceBorder"));
 	m_pDistanceText   = WidgetTree->FindWidget<UTextBlock>(TEXT("DistanceText"));
 	m_pMiniMapWidget  = WidgetTree->FindWidget<UMiniMapWidget>(TEXT("WB_MiniMap"));
-}
 
+	_SetupWidgetAnimations();
+}
 
 UQuestWidget* UQuestSystemHUD::AddQuestToList(AQuest_Base* _pQuestActor)
 {
@@ -43,3 +45,35 @@ UQuestWidget* UQuestSystemHUD::AddQuestToList(AQuest_Base* _pQuestActor)
 	}
 	return nullptr;
 }
+
+void UQuestSystemHUD::_SetupWidgetAnimations()
+{
+	UProperty* pProperty = GetClass()->PropertyLink;
+
+	// #.이 클래스의 모든 속성을 실행하여 위젯 애니메이션을 찾기.
+	while (pProperty != nullptr)
+	{
+		// #.찾은 속성이 '오브젝트 속성'이라면...
+		if (pProperty->GetClass() == UObjectProperty::StaticClass())
+		{
+			UObjectProperty* pObjProperty = Cast<UObjectProperty>(pProperty);
+
+			// #. '오브젝트 속성'이 위젯 애니메이션이라면...
+			if (pObjProperty->PropertyClass == UWidgetAnimation::StaticClass())
+			{
+				UObject* pObj = pObjProperty->GetObjectPropertyValue_InContainer(this, 0);
+
+				UWidgetAnimation* pWidgetAnim = Cast<UWidgetAnimation>(pObj);
+
+				if (pWidgetAnim != nullptr && pWidgetAnim->MovieScene != nullptr)
+				{
+					FName AnimName = pWidgetAnim->MovieScene->GetFName();
+					m_WidgetAnimations.Add(AnimName, pWidgetAnim);
+				}
+			}
+		}
+		// #. 다음 속성으로 이동.
+		pProperty = pProperty->PropertyLinkNext;
+	}
+}
+

@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EngineMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "QuestSystem.generated.h"
+
+#define CONVERT_TO_STRING(eType, eValue) ( (FindObject<UEnum>(ANY_PACKAGE, eType, true) != nullptr) ? (FindObject<UEnum>(ANY_PACKAGE, eType, true)->GetNameStringByIndex((uint8)eValue)) : FString("Convert Failed!") );
 
 UENUM(BlueprintType)
 enum class EQuestCategories : uint8
@@ -29,6 +32,22 @@ enum class ERegions : uint8
 	Kanto  UMETA(DisplayName = "KANTO"),
 	Johto  UMETA(DisplayName = "JOHTO"),
 	Sinnoh UMETA(DisplayName = "SINNOH")
+};
+
+UENUM(BlueprintType)
+enum class EQuestStates : uint8
+{
+	Current_Quests   UMETA(DisplayName = "CURRENT_QUEST"),
+	Completed_Quests UMETA(DisplayName = "COMPLETED_QUEST"),
+	Failed_Quests    UMETA(DisplayName = "FAILED_QUEST")
+};
+
+UENUM(BlueprintType)
+enum class EGoalState : uint8
+{
+	Current UMETA(DisplayName = "CURRENT"),
+	Success UMETA(DisplayName = "SUCCESS"),
+	Failed  UMETA(DisplayName = "FAILED")
 };
 
 USTRUCT(BlueprintType)
@@ -94,6 +113,16 @@ public :
 
 	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
 	TArray<int> FollowingSubGoalIndices;
+
+	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
+	bool bUseRadius = false;
+
+	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
+	float Radius = 500.f;
+
+	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
+	FLinearColor CircleColor = FLinearColor::White;
+
 };
 
 USTRUCT(BlueprintType)
@@ -126,3 +155,25 @@ public :
 	UPROPERTY(EditAnywhere, Category = "FQuestInfo")
 	TArray<FGoalInfo> SubGoals;
 };
+
+USTRUCT(BlueprintType)
+struct FCompletedGoal
+{
+	GENERATED_BODY()
+
+public :
+	FCompletedGoal() {};
+	FCompletedGoal(const int& _Index, const FGoalInfo& _Info, const bool& _Successful)
+		: GoalIndex(_Index), 
+		  GoalInfo(_Info), 
+		  bSuccessful(_Successful)
+	{
+		return;
+	}
+
+public :
+	int GoalIndex;
+	FGoalInfo GoalInfo;
+	bool bSuccessful;
+};
+

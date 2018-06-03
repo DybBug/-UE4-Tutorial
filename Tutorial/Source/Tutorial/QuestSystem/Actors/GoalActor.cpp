@@ -55,5 +55,16 @@ void AGoalActor::Initialize(bool _bUseRadius, float _Radius, const FLinearColor&
 	m_bUseRadius = _bUseRadius;
 	m_Radius = _Radius;
 	m_CircleColor = _CircleColor;
+
+	UseRadius();
+}
+
+void AGoalActor::UseRadius()
+{
+	m_pMiniMapIcon->SetVisibility(!m_bUseRadius);
+
+	m_pMiniMapRadius->SetRelativeScale3D(FVector(m_Radius/500.f, 1.f, m_Radius/500.f));
+	m_pMiniMapRadius->SetVisibility(m_bUseRadius);
+	m_pMiniMapRadius->SetSpriteColor(m_CircleColor);
 }
 

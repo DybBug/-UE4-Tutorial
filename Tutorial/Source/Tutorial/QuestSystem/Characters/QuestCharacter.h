@@ -66,6 +66,9 @@ protected :
 	void _MoveRight(float _Value);
 
 	UFUNCTION()
+	void _BKey();
+
+	UFUNCTION()
 	void _EKey();
 
 	UFUNCTION()
@@ -76,6 +79,9 @@ protected :
 
 	UFUNCTION()
 	void _IKey();
+
+	UFUNCTION()
+	void _JKey();
 
 	UFUNCTION()
 	void _TabKey();
