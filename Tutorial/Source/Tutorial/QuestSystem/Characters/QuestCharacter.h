@@ -27,6 +27,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual float TakeDamage(
+		float _DamageAmount,
+		FDamageEvent const& _DamageEvent,
+		AController* _pEventInstigator,
+		AActor* _pDamageCauser) override;
+
+
 public:	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -34,13 +41,17 @@ public:
 	void OnLevelUp();
 	void UpdateExp();
 	void UpdateLevel();
+	void UpdateHealth();
 	void AddExpPoints(int _Amount);
 
 	/* Get */
 	UQuestSystemHUD* GetHUD() const { return m_pHUD; }
 	AQuestManager* GetQuestManager() const { return m_pQuestManager; }
+	
+	const int& GetCurrLevel() const { return m_CurrLevel; }
 
 protected :
+	void _ToggleInputMode();
 
 protected :
 	UFUNCTION()
@@ -78,6 +89,9 @@ protected :
 	void _GKey();
 
 	UFUNCTION()
+	void _HKey();
+
+	UFUNCTION()
 	void _IKey();
 
 	UFUNCTION()
@@ -85,6 +99,9 @@ protected :
 
 	UFUNCTION()
 	void _TabKey();
+
+	UFUNCTION()
+	void _LeftMouseButton();
 	
 protected :
 	UPROPERTY(VisibleDefaultsOnly, Category = "QuestCharacter|Camera")
@@ -122,12 +139,20 @@ protected :
 	UPROPERTY(VisibleAnywhere,BlueprintReadWrite, Category = "QuestCharacter|ExpSystem")
 	int m_CurrExp = 0;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "QuestCharacter|ExpSystem")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuestCharacter|ExpSystem")
 	int m_ExpForNextLevel = 150;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "QuestCharacter|ExpSystem")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuestCharacter|ExpSystem")
 	float m_NextExpMultiplier = 1.5;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuestCharacter|HealthSystem")
+	int m_MaxHealth = 500;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "QuestCharacter|HealthSystem")
+	int m_CurrHealth = 500;
+
 	bool m_bWidgetInput = false;
+
+	bool m_bCanAttack = true;
 
 };

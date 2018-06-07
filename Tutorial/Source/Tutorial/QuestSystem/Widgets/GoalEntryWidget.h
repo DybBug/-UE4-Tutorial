@@ -4,8 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "../QuestSystem.h"
 #include "GoalEntryWidget.generated.h"
 
+class UQuestJournalWidget;
+class UImage;
+class UTextBlock;
 /**
  * 
  */
@@ -13,8 +17,23 @@ UCLASS()
 class TUTORIAL_API UGoalEntryWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+public :
+	void Initialize(const FGoalInfo& _Info, const EGoalState& _State, UQuestJournalWidget* _pWidget);
+
+protected :
+	virtual void NativeConstruct() override;
+
+protected :
+	void _Update();
 	
-	
-	
+protected :
+	UImage* m_pGoalState;
+	UTextBlock* m_pGoalText;
+
+	FGoalInfo m_GoalInfo;
+	EGoalState m_State;
+
+	UQuestJournalWidget* m_pJournalWidget;
 	
 };

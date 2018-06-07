@@ -6,9 +6,12 @@
 #include "Blueprint/UserWidget.h"
 #include "../QuestSystem.h"
 
-#include <Components/TextBlock.h>
+
 #include "QuestCategoryWidget.generated.h"
 
+class UTextBlock;
+class UButton;
+class UVerticalBox;
 /**
  * 
  */
@@ -25,11 +28,19 @@ protected :
 public :
 	/* Get */
 	UTextBlock* GetCategoryName() const { return m_pCategoryName; }
+	UVerticalBox* GetQuestBox() const { return m_pQuestBox; }
+private :
+	UFUNCTION()
+	void _OnClicked();
 
 protected :
-	UTextBlock* m_pCategoryName;
+	UButton*      m_pExpandButton;
+	UTextBlock*   m_pCategoryName;
+	UVerticalBox* m_pQuestBox;
 
 	UPROPERTY(EditAnywhere, Category = "QuestCategoryWidget")
 	EQuestStates m_Category;
+
+	bool m_bExpanded;
 	
 };

@@ -9,6 +9,7 @@
 #include "../Interfaces/Selectable_Interface.h"
 #include "Base_Enemy.generated.h"
 
+
 UCLASS()
 class TUTORIAL_API ABase_Enemy : public ACharacter, 
 	public IDamageable_Interface, public ISelectable_Interface

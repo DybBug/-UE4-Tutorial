@@ -7,6 +7,7 @@
 #include "../Widgets/QuestWidget.h"
 #include "../Widgets/MiniMapWidget.h"
 #include "../Widgets/QuestSystemHUD.h"
+#include "../Widgets/QuestJournalWidget.h"
 
 #include <Engine/World.h>
 #include <Kismet/KismetMathLibrary.h>
@@ -110,6 +111,8 @@ bool AQuestManager::AddNewQuest(TSubclassOf<AQuest_Base> _NewQuestClass, bool _b
 		pSpawnedQuestActor->SetQuestWidget(pQuestWidget);
 
 		pQuestWidget->UpdateQuest();
+
+		m_pHUD->GetQuestJournalWidget()->AddEntry(pSpawnedQuestActor);
 
 		if (_bDirectlyStart || (m_CurrQuestActors.Num() <= 1))
 		{

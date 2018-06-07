@@ -18,6 +18,7 @@ class AQuestManager;
 class UQuestWidget;
 class AQuest_Base;
 class UMiniMapWidget;
+class UQuestJournalWidget;
 /**
  * 
  */
@@ -33,14 +34,17 @@ public:
 	UQuestWidget* AddQuestToList(AQuest_Base* _pQuestActor);
 
 	/* Get */
-	UProgressBar*   GetExpBar()         const { return m_pExpBar; }
-	UImage*         GetCharacterIcon()  const { return m_pCharacterIcon; }
-	UTextBlock*     GetExpText()        const { return m_pExpText; }
-	UTextBlock*     GetLevelText()      const { return m_pLevelText; }
-	UScrollBox*     GetQuestList()      const { return m_pQuestList; }
-	UBorder*        GetDistanceBorder() const { return m_pDistanceBorder; }
-	UTextBlock*     GetDistanceText()   const { return m_pDistanceText; }
-	UMiniMapWidget* GetMiniMapWidget()  const { return m_pMiniMapWidget; }
+	UProgressBar*        GetExpBar()         const { return m_pExpBar; }
+	UTextBlock*          GetExpText()        const { return m_pExpText; }
+	UProgressBar*        GetHealthBar()      const { return m_pHealthBar; }
+	UTextBlock*          GetHealthText()     const { return m_pHealthText; }
+	UImage*              GetCharacterIcon()  const { return m_pCharacterIcon; }
+	UTextBlock*          GetLevelText()      const { return m_pLevelText; }
+	UScrollBox*          GetQuestList()      const { return m_pQuestList; }
+	UBorder*             GetDistanceBorder() const { return m_pDistanceBorder; }
+	UTextBlock*          GetDistanceText()   const { return m_pDistanceText; }
+	UMiniMapWidget*      GetMiniMapWidget()  const { return m_pMiniMapWidget; }
+	UQuestJournalWidget* GetQuestJournalWidget() const { return m_pJournalWidget; }
 
 	const TArray<UQuestWidget*>&          GetQuestWidgets()     const { return m_QuestWidgets; }
 	const TMap<FName, UWidgetAnimation*>& GetWidgetAnimations() const { return m_WidgetAnimations; }
@@ -59,10 +63,16 @@ protected :
 	UProgressBar* m_pExpBar;
 
 	UPROPERTY()
-	UImage* m_pCharacterIcon;
+	UTextBlock* m_pExpText;
 
 	UPROPERTY()
-	UTextBlock* m_pExpText;
+	UProgressBar* m_pHealthBar;
+
+	UPROPERTY()
+	UTextBlock* m_pHealthText;
+
+	UPROPERTY()
+	UImage* m_pCharacterIcon;	
 
 	UPROPERTY()
 	UTextBlock* m_pLevelText;
@@ -77,6 +87,8 @@ protected :
 	UTextBlock* m_pDistanceText;
 
 	UMiniMapWidget* m_pMiniMapWidget;
+
+	UQuestJournalWidget* m_pJournalWidget;
 	
 	AQuestManager* m_pQuestManager;
 

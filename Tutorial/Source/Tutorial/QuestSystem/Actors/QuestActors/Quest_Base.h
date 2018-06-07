@@ -27,18 +27,24 @@ public:
 	bool GoToNextSubGoals();
 
 	bool CompleteSubGoal(int _SubGoalIndex);
+	bool SelectedInJournal();
 
 	/* Get */
 	const FQuestInfo&        GetQuestInfo()        const { return m_QuestInfo; }
 	const int&               GetCurrHuntedAmount() const { return m_CurrHuntedAmount; }
-	const TArray<FGoalInfo>& GetCurrGoals()        const {return m_CurrGoals;}
+	const TArray<FGoalInfo>& GetCurrGoals()        const { return m_CurrGoals;}
 	UQuestWidget*            GetQuestWidget()      const { return m_pQuestWidget; }
+	const FText&             GetCurrDescription()  const { return m_CurrDescription; }
+	const EQuestStates&      GetCurrState()        const { return m_CurrState; }
 
 	const int& GetSelectedSubGoalIndex() const { return m_SelectedSubGoalIndex; }
+	TArray<FCompletedGoal> GetCompletedSubGoals() { return m_CompletedSubGoals; }
+
 
 	/* Set */
-	void SetSelectedSubGoalIndex(int _Index)            { m_SelectedSubGoalIndex = _Index; }
-	void SetQuestWidget(UQuestWidget* _pNewQuestWidget) { m_pQuestWidget = _pNewQuestWidget; }
+	void SetSelectedSubGoalIndex(int _Index)                 { m_SelectedSubGoalIndex = _Index; }
+	void SetQuestWidget(UQuestWidget* _pNewQuestWidget)      { m_pQuestWidget = _pNewQuestWidget; }
+	void SetListEntryWidget(UQuestListEntryWidget* _pWidget) { m_pListEntryWidget = _pWidget; }
 
 protected :
 	UPROPERTY(EditAnywhere, Category = "Quest_Base")

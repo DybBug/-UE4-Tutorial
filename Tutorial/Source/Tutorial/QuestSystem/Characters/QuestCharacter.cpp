@@ -4,6 +4,8 @@
 #include "../Widgets/QuestSystemHUD.h"
 #include "../Widgets/QuestWidget.h"
 #include "../Widgets/SubGoalWidget.h"
+#include "../Widgets/QuestJournalWidget.h"
+#include "../Widgets/QuestListEntryWidget.h"
 #include "../Actors/QuestManager.h"
 #include "../Actors/QuestActors/Quest_Base.h"
 #include "../Interfaces/Interactable_Interface.h"
@@ -107,9 +109,20 @@ void AQuestCharacter::BeginPlay()
 
 		m_pQuestManager->SetHUD(m_pHUD);
 		
+		m_pHUD->GetQuestJournalWidget()->Initialize(m_pQuestManager);
+
 		UpdateLevel();
 		UpdateExp();
+		UpdateHealth();
 	}	
+}
+
+float AQuestCharacter::TakeDamage(float _DamageAmount, FDamageEvent const& _DamageEvent, AController* _pEventInstigator, AActor* _pDamageCauser)
+{
+	m_CurrHealth -= _DamageAmount;
+	UpdateHealth();
+
+	return _DamageAmount;
 }
 
 // Called to bind functionality to input
@@ -124,9 +137,13 @@ void AQuestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindKey(EKeys::E,   IE_Pressed, this, &AQuestCharacter::_EKey);
 	PlayerInputComponent->BindKey(EKeys::F,   IE_Pressed, this, &AQuestCharacter::_FKey);
 	PlayerInputComponent->BindKey(EKeys::G,   IE_Pressed, this, &AQuestCharacter::_GKey);
+	PlayerInputComponent->BindKey(EKeys::H,   IE_Pressed, this, &AQuestCharacter::_HKey);
 	PlayerInputComponent->BindKey(EKeys::I,   IE_Pressed, this, &AQuestCharacter::_IKey);
 	PlayerInputComponent->BindKey(EKeys::J,   IE_Pressed, this, &AQuestCharacter::_JKey);
 	PlayerInputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &AQuestCharacter::_TabKey);
+
+	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &AQuestCharacter::_LeftMouseButton);
+
 
 }
 
@@ -137,6 +154,17 @@ void AQuestCharacter::OnLevelUp()
 	m_CurrLevel++;
 
 	UpdateLevel();
+
+	TArray<UQuestListEntryWidget*> AllQuestListEntryWidgets = m_pHUD->GetQuestJournalWidget()->GetAllQuestEntryWidgets();
+	for (int i = 0; i < AllQuestListEntryWidgets.Num(); ++i)
+	{
+		AllQuestListEntryWidgets[i]->UpdateLevelColor();
+	}
+
+	if (m_pHUD->GetQuestJournalWidget()->GetCurrQuestWidget())
+	{
+		m_pHUD->GetQuestJournalWidget()->UpdateSuggestedLevelColor();
+	}
 
 	UGameplayStatics::PlaySound2D(GetWorld(), m_pLevelUpSound, 0.5f, 1.2f);
 	m_pLevelUpEffect->SetActive(true);
@@ -157,6 +185,16 @@ void AQuestCharacter::UpdateLevel()
 	m_pHUD->GetLevelText()->SetText(UKismetTextLibrary::Conv_IntToText(m_CurrLevel));
 }
 
+void AQuestCharacter::UpdateHealth()
+{
+#define LOCTEXT_NAMESPACE "HealthText"
+	FText HealthText = FText::Format(LOCTEXT("HealthText", "{0} / {1}"), m_CurrHealth, m_MaxHealth);
+#undef LOCTEXT_NAMESPACE
+
+	m_pHUD->GetHealthText()->SetText(HealthText);
+	m_pHUD->GetHealthBar()->SetPercent((float)m_CurrHealth / (float)m_MaxHealth);
+}
+
 void AQuestCharacter::AddExpPoints(int _Amount)
 {
 	m_CurrExp += _Amount;
@@ -170,6 +208,24 @@ void AQuestCharacter::AddExpPoints(int _Amount)
 	else
 	{
 		UpdateExp();
+	}
+}
+
+void AQuestCharacter::_ToggleInputMode()
+{
+	APlayerController* pController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	if (!m_bWidgetInput)
+	{
+		UWidgetBlueprintLibrary::SetInputMode_GameAndUI(pController, m_pHUD, false, false);
+		pController->bShowMouseCursor = true;
+		m_bWidgetInput = true;
+	}
+	else
+	{
+		UWidgetBlueprintLibrary::SetInputMode_GameOnly(pController);
+		pController->bShowMouseCursor = false;
+		m_bWidgetInput = false;
 	}
 }
 
@@ -279,31 +335,33 @@ void AQuestCharacter::_GKey()
 	m_pQuestManager->AddNewQuest(pQuestClass2, false);	
 }
 
-void AQuestCharacter::_IKey()
-{
-	APlayerController* pController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-
-	if (!m_bWidgetInput)
-	{
-		UWidgetBlueprintLibrary::SetInputMode_GameAndUI(pController, m_pHUD, false, false);
-		pController->bShowMouseCursor = true;
-		m_bWidgetInput = true;
-	}
-	else
-	{
-		UWidgetBlueprintLibrary::SetInputMode_GameOnly(pController);
-		pController->bShowMouseCursor = false;
-		m_bWidgetInput = false;
-	}
-}
-
-void AQuestCharacter::_JKey()
+void AQuestCharacter::_HKey()
 {
 	if (m_pQuestManager->GetCurrQuestActors().Num() > 0)
 	{
 		m_pQuestManager->GetCurrQuestActors()[0]->CompleteSubGoal(0);
 	}
 }
+
+void AQuestCharacter::_IKey()
+{
+	_ToggleInputMode();
+}
+
+void AQuestCharacter::_JKey()
+{
+	if (m_bWidgetInput)
+	{
+		m_pHUD->GetQuestJournalWidget()->SetVisibility(ESlateVisibility::Hidden);
+			
+	}
+	else
+	{
+		m_pHUD->GetQuestJournalWidget()->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	}
+	_ToggleInputMode();	
+}
+
 
 void AQuestCharacter::_TabKey()
 {
@@ -318,6 +376,34 @@ void AQuestCharacter::_TabKey()
 
 			pQuestWidget->SelectSubGoal(pQuestWidget->GetSubGoalWidgets()[Index]);
 		}
+	}
+}
+
+void AQuestCharacter::_LeftMouseButton()
+{
+	if (m_bCanAttack)
+	{
+		m_bCanAttack = false;
+		UParticleSystem* pParticle = LoadObject<UParticleSystem>(nullptr, TEXT("ParticleSystem'/Game/TutorialContent/SkillSystem/SkillActors/Effects/FlameNova/P_FlameNova.P_FlameNova'"));
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), pParticle, GetActorLocation());
+
+		TArray<TEnumAsByte<EObjectTypeQuery>> ObjTypes;
+		ObjTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+
+		TArray<AActor*> IgnoreActor;
+		IgnoreActor.Add(this);
+		TArray<FHitResult> HitResults;
+		UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), GetActorLocation(), GetActorLocation(), 300.f, ObjTypes, true, IgnoreActor, EDrawDebugTrace::Persistent, HitResults, true);
+
+		for (int i = 0; i < HitResults.Num(); ++i)
+		{
+			UGameplayStatics::ApplyDamage(HitResults[i].GetActor(), 80.f, nullptr, this, UDamageType::StaticClass());
+		}
+
+		FTimerHandle hTimer;
+		GetWorldTimerManager().SetTimer(hTimer, [&]() {
+			m_bCanAttack = true;
+		},1, false, 1);
 	}
 }
 

@@ -40,6 +40,8 @@ public:
 	AQuest_Base* GetCurrQuest() const { return m_pCurrQuest; }
 	const TArray<AQuest_Base*>& GetCurrQuestActors() const { return m_CurrQuestActors; }
 	const TArray<TSubclassOf<AQuest_Base>>& GetAllQuestClasses() const { return m_AllQuestClasses; }
+	UQuestSystemHUD* GetHUD() const { return m_pHUD; }
+
 
 	/* Set */
 	void SetHUD(UQuestSystemHUD* _pHUD) { m_pHUD = _pHUD; }

@@ -3,6 +3,8 @@
 #include "Quest_Base.h"
 #include "../../Widgets/QuestWidget.h"
 #include "../../Widgets/SubGoalWidget.h"
+#include "../../Widgets/QuestSystemHUD.h"
+#include "../../Widgets/QuestJournalWidget.h"
 #include "../QuestManager.h"
 
 
@@ -75,11 +77,24 @@ bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex)
 		FCompletedGoal CompletedGoal(_SubGoalIndex, CurrGoalInfo, true);
 		m_CompletedSubGoals.Add(CompletedGoal);
 
+		if (CurrGoalInfo.bUpdateQuestDescription)
+		{
+#define LOCTEXT_NAMESPACE "Description"
+			FText Format = FText::Format(LOCTEXT("Description", "{0} {1}"), m_CurrDescription, CurrGoalInfo.UpdateDescription);
+#undef LOCTEXT_NAMESPACE
+			m_CurrDescription = Format;
+
+			if (SelectedInJournal())
+			{
+				m_pQuestManager->GetHUD()->GetQuestJournalWidget()->UpdateDescription();
+			}
+		}
+
 		int CurrWidgetIndex = m_CurrGoalIndices.Find(_SubGoalIndex);
 
 		m_CurrGoalIndices.Remove(_SubGoalIndex);
 
-		m_pQuestWidget->GetSubGoalWidgets()[CurrWidgetIndex]->RemoveFromParent();	
+		m_pQuestWidget->GetSubGoalWidgets()[CurrWidgetIndex]->RemoveFromParent();
 		m_pQuestWidget->GetSubGoalWidgets().RemoveAt(CurrWidgetIndex);
 
 		for (int i = 0; i < CurrGoalInfo.FollowingSubGoalIndices.Num(); ++i)
@@ -89,8 +104,8 @@ bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex)
 			m_CurrGoalIndices.Add(FollowingSubGoalIndex);
 
 			FGoalInfo SubGoal = m_QuestInfo.SubGoals[FollowingSubGoalIndex];
-			m_CurrGoals.Add(SubGoal);		
-			
+			m_CurrGoals.Add(SubGoal);
+
 			UClass* pWidget = LoadClass<USubGoalWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/QuestSystem/Widgets/WB_SubGoal.WB_SubGoal_C'"));
 			USubGoalWidget* pSubGoalWidget = CreateWidget<USubGoalWidget>(GetWorld(), pWidget);
 			pSubGoalWidget->Initialize(SubGoal, this, m_pQuestWidget);
@@ -99,12 +114,27 @@ bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex)
 			m_pQuestWidget->GetSubGoalBox()->AddChild(pSubGoalWidget);
 		}
 
+		if (SelectedInJournal())
+		{
+			m_pQuestManager->GetHUD()->GetQuestJournalWidget()->GenerateSubGoals();
+		}
+
 		if ((_SubGoalIndex == m_SelectedSubGoalIndex) && (m_pQuestManager->GetCurrQuest() == this))
 		{
 			m_pQuestWidget->SelectSubGoal(m_pQuestWidget->GetSubGoalWidgets()[0]);
 		}
 		return true;
 		
+	}
+	return false;
+}
+
+bool AQuest_Base::SelectedInJournal()
+{
+	if (m_pQuestManager->GetHUD()->GetQuestJournalWidget()->GetSelectedQuest() != nullptr &&
+		m_pQuestManager->GetHUD()->GetQuestJournalWidget()->GetSelectedQuest() == this)
+	{
+		return true;
 	}
 	return false;
 }

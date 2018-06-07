@@ -53,17 +53,17 @@ void UQuestWidget::UpdateQuest()
 		{
 			case EQuestCategories::Main_Quest :
 			{
-				m_pQuestName->SetColorAndOpacity(FSlateColor(FColor(0xff5f00ff)));
+				m_pQuestName->SetColorAndOpacity(FSlateColor(FColor(0xffff5f00)));
 				break;
 			}
 			case EQuestCategories::Side_Quest :
 			{
-				m_pQuestName->SetColorAndOpacity(FSlateColor(FColor(0xff747aff)));
+				m_pQuestName->SetColorAndOpacity(FSlateColor(FColor(0xffff747a)));
 				break;
 			}
 			case EQuestCategories::Events :
 			{
-				m_pQuestName->SetColorAndOpacity(FSlateColor(FColor(0xff3122ff)));
+				m_pQuestName->SetColorAndOpacity(FSlateColor(FColor(0xffff3122)));
 				break;
 			}
 			default :
