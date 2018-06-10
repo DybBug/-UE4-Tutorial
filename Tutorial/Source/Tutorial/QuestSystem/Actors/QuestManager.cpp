@@ -8,6 +8,7 @@
 #include "../Widgets/MiniMapWidget.h"
 #include "../Widgets/QuestSystemHUD.h"
 #include "../Widgets/QuestJournalWidget.h"
+#include "../Widgets/SubgoalWidget.h"
 
 #include <Engine/World.h>
 #include <Kismet/KismetMathLibrary.h>
@@ -105,10 +106,10 @@ bool AQuestManager::AddNewQuest(TSubclassOf<AQuest_Base> _NewQuestClass, bool _b
 
 		m_CurrQuestActors.Add(pSpawnedQuestActor);
 
-		pSpawnedQuestActor->SetupStartingGoals();
-
 		UQuestWidget* pQuestWidget = m_pHUD->AddQuestToList(pSpawnedQuestActor);
 		pSpawnedQuestActor->SetQuestWidget(pQuestWidget);
+
+		pSpawnedQuestActor->SetupStartingGoals();
 
 		pQuestWidget->UpdateQuest();
 
@@ -179,5 +180,60 @@ void AQuestManager::OnPlayerMove()
 		
 	}
 
+}
+
+void AQuestManager::OnEnemyKilled(TSubclassOf<ABase2_Enemy> _Class)
+{
+	m_KilledEnemyClass = _Class;
+
+	for (int CurrQuestActorIndex = 0; CurrQuestActorIndex < m_CurrQuestActors.Num(); ++CurrQuestActorIndex)
+	{
+		TArray<FGoalInfo> CurrGoals = m_CurrQuestActors[CurrQuestActorIndex]->GetCurrGoals();
+		for (int CurrGoalIndex = 0; CurrGoalIndex < CurrGoals.Num(); ++CurrGoalIndex)
+		{
+			if (CurrGoals[CurrGoalIndex].Type == EGoalTypes::Hunt &&
+				CurrGoals[CurrGoalIndex].GoalClass == m_KilledEnemyClass)
+			{
+				int CurrHuntedAmount = m_CurrQuestActors[CurrQuestActorIndex]->GetCurrHuntedAmounts()[CurrGoalIndex] + 1;
+
+				if (CurrHuntedAmount >= CurrGoals[CurrGoalIndex].AmountToHunt)
+				{
+					int CompleteIndex = m_CurrQuestActors[CurrQuestActorIndex]->GetCurrGoalIndices()[CurrGoalIndex];
+					m_CurrQuestActors[CurrQuestActorIndex]->CompleteSubGoal(CompleteIndex);
+				}
+				else
+				{					
+					m_CurrQuestActors[CurrQuestActorIndex]->GetCurrHuntedAmounts()[CurrGoalIndex] = CurrHuntedAmount;
+					
+					m_CurrQuestActors[CurrQuestActorIndex]->GetQuestWidget()->GetSubGoalWidgets()[CurrGoalIndex]->Update();
+					
+					if (m_CurrQuestActors[CurrQuestActorIndex]->SelectedInJournal())
+					{
+						m_pHUD->GetQuestJournalWidget()->GenerateSubGoals();
+					}
+				}
+			}
+		}
+		
+	}
+}
+
+void AQuestManager::OnObjectFound(TSubclassOf<AObject_Base> _FoundObjectClass)
+{
+	m_FoundObjectClass = _FoundObjectClass;
+
+	for (int CurrQuestActorIndex = 0; CurrQuestActorIndex < m_CurrQuestActors.Num(); ++CurrQuestActorIndex)
+	{
+		TArray<FGoalInfo> CurrGoals = m_CurrQuestActors[CurrQuestActorIndex]->GetCurrGoals();
+		for (int CurrGoalIndex = 0; CurrGoalIndex < CurrGoals.Num(); ++CurrGoalIndex)
+		{
+			if (CurrGoals[CurrGoalIndex].Type == EGoalTypes::Find &&
+				CurrGoals[CurrGoalIndex].GoalClass == m_FoundObjectClass)
+			{
+				int Index = m_CurrQuestActors[CurrQuestActorIndex]->GetCurrGoalIndices()[CurrGoalIndex];
+				m_CurrQuestActors[CurrQuestActorIndex]->CompleteSubGoal(Index);
+			}
+		}
+	}
 }
 

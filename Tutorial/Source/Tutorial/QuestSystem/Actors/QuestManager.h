@@ -12,6 +12,8 @@ class UQuestSystemHUD;
 class AQuest_Base;
 class AGoalActor;
 class USubGoalWidget;
+class ABase2_Enemy;
+class AObject_Base;
 
 UCLASS()
 class TUTORIAL_API AQuestManager : public AActor
@@ -36,11 +38,16 @@ public:
 
 	void OnPlayerMove(); // 플레이어가 움직일때마다 호출.
 
+	void OnEnemyKilled(TSubclassOf<ABase2_Enemy> _Class);
+
+	void OnObjectFound(TSubclassOf<AObject_Base> _FoundObjectClass);
+
 	/* Get */
 	AQuest_Base* GetCurrQuest() const { return m_pCurrQuest; }
-	const TArray<AQuest_Base*>& GetCurrQuestActors() const { return m_CurrQuestActors; }
-	const TArray<TSubclassOf<AQuest_Base>>& GetAllQuestClasses() const { return m_AllQuestClasses; }
+	TArray<AQuest_Base*>& GetCurrQuestActors()  { return m_CurrQuestActors; }
+	TArray<TSubclassOf<AQuest_Base>>& GetAllQuestClasses()  { return m_AllQuestClasses; }
 	UQuestSystemHUD* GetHUD() const { return m_pHUD; }
+	AQuestCharacter* GetPlayer() const { return m_pPlayer; }
 
 
 	/* Set */
@@ -66,4 +73,7 @@ protected:
 
 	int m_CurrDistance;
 	int m_ShowDirectionArrowAmount = 10;
+
+	TSubclassOf<ABase2_Enemy> m_KilledEnemyClass;
+	TSubclassOf<AObject_Base> m_FoundObjectClass;
 };

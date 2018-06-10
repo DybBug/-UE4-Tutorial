@@ -23,8 +23,9 @@ public  :
 public :
 	/* Get */
 	UTextBlock* GetName() const { return m_pName; }
+	UTextBlock* GetInteractText() const { return m_pInteractText; }
 
 protected :
 	UTextBlock* m_pName;
-	
+	UTextBlock* m_pInteractText;
 };

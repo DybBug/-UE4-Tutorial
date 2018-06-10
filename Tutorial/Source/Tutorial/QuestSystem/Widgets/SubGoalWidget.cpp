@@ -30,6 +30,8 @@ void USubGoalWidget::Initialize(const FGoalInfo& _GoalInfo, AQuest_Base* _Quest,
 
 void USubGoalWidget::Update()
 {
+	m_HuntIndex = m_pAssignedQuest->GetCurrGoals().Find(m_GoalInfo);
+	
 	if (m_GoalInfo.bCustomGoal)
 	{
 		m_pGoalText->SetText(m_GoalInfo.GoalText);	
@@ -51,7 +53,7 @@ void USubGoalWidget::Update()
 				FormatText = FText::Format(LOCTEXT("HuntText", "Hunt {0}{1} : {2} / {3}!"), 
 						m_GoalInfo.AdditionalName,
 						m_GoalInfo.AmountToHunt > 1 ? FText::FromString(""): FText::FromString("s"),
-						m_pAssignedQuest->GetCurrHuntedAmount(),
+						m_pAssignedQuest->GetCurrHuntedAmounts()[m_HuntIndex],
 						m_GoalInfo.AmountToHunt);
 				break;
 			}

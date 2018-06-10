@@ -8,7 +8,8 @@ bool UInteractionWidget::Initialize()
 {
 	Super::Initialize();
 
-	m_pName = WidgetTree->FindWidget<UTextBlock>(TEXT("Name"));
+	m_pName         = WidgetTree->FindWidget<UTextBlock>(TEXT("Name"));
+	m_pInteractText = WidgetTree->FindWidget<UTextBlock>(TEXT("InteractText"));
 
 	return false;
 }

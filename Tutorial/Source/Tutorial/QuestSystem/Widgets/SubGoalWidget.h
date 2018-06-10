@@ -53,4 +53,5 @@ protected :
 	UQuestWidget* m_pQuestWidget;
 	
 	int m_GoalIndex;
+	int m_HuntIndex;
 };

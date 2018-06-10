@@ -6,6 +6,7 @@
 #include "../../Widgets/QuestSystemHUD.h"
 #include "../../Widgets/QuestJournalWidget.h"
 #include "../QuestManager.h"
+#include "../../Characters/QuestCharacter.h"
 
 
 #include <Kismet/KismetMathLibrary.h>
@@ -32,19 +33,24 @@ void AQuest_Base::UpdateSubGoals()
 
 	for (int i = 0; i < m_CurrGoalIndices.Num(); ++i)
 	{
-		m_CurrGoals.Add(m_QuestInfo.SubGoals[i]);
+		m_CurrGoals.Add(m_QuestInfo.SubGoals[m_CurrGoalIndices[i]]);
 	}
 }
 
 void AQuest_Base::SetupStartingGoals()
 {
 	m_CurrGoalIndices.Empty();
-	m_CurrGoalIndices = m_StartingSubGoalIndices;
 
-	UpdateSubGoals();
-	
 	m_CurrDescription = m_QuestInfo.Description;
 
+	for(int i = 0; i < m_StartingSubGoalIndices.Num(); ++i)
+	{
+		AddGoalForIndex(m_StartingSubGoalIndices[i]);
+	}
+
+	m_CurrHuntedAmounts.SetNum(m_CurrGoalIndices.Num());
+
+	UpdateSubGoals();	
 }
 
 bool AQuest_Base::GoToNextSubGoals()
@@ -92,26 +98,19 @@ bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex)
 
 		int CurrWidgetIndex = m_CurrGoalIndices.Find(_SubGoalIndex);
 
+		m_CurrHuntedAmounts.RemoveAt(CurrWidgetIndex);
+
 		m_CurrGoalIndices.Remove(_SubGoalIndex);
+		m_CurrGoals.RemoveAt(CurrWidgetIndex);
 
 		m_pQuestWidget->GetSubGoalWidgets()[CurrWidgetIndex]->RemoveFromParent();
 		m_pQuestWidget->GetSubGoalWidgets().RemoveAt(CurrWidgetIndex);
 
+		OnGoalCompleted(_SubGoalIndex); //??
+
 		for (int i = 0; i < CurrGoalInfo.FollowingSubGoalIndices.Num(); ++i)
 		{
-			int FollowingSubGoalIndex = CurrGoalInfo.FollowingSubGoalIndices[i];
-
-			m_CurrGoalIndices.Add(FollowingSubGoalIndex);
-
-			FGoalInfo SubGoal = m_QuestInfo.SubGoals[FollowingSubGoalIndex];
-			m_CurrGoals.Add(SubGoal);
-
-			UClass* pWidget = LoadClass<USubGoalWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/QuestSystem/Widgets/WB_SubGoal.WB_SubGoal_C'"));
-			USubGoalWidget* pSubGoalWidget = CreateWidget<USubGoalWidget>(GetWorld(), pWidget);
-			pSubGoalWidget->Initialize(SubGoal, this, m_pQuestWidget);
-
-			m_pQuestWidget->GetSubGoalWidgets().Add(pSubGoalWidget);
-			m_pQuestWidget->GetSubGoalBox()->AddChild(pSubGoalWidget);
+			AddGoalForIndex(CurrGoalInfo.FollowingSubGoalIndices[i]);
 		}
 
 		if (SelectedInJournal())
@@ -137,4 +136,83 @@ bool AQuest_Base::SelectedInJournal()
 		return true;
 	}
 	return false;
+}
+
+void AQuest_Base::OnGoalCompleted(int _GoalIndex)
+{
+}
+
+FGoalInfo AQuest_Base::GoalAtIndex(int _Index)
+{
+	return m_QuestInfo.SubGoals[_Index];
+}
+
+bool AQuest_Base::GoalAlreadyFound(int _GoalIndex)
+{
+	bool LoclBool = false;
+
+	if (GoalAtIndex(_GoalIndex).Type == EGoalTypes::Find)
+	{
+		TArray<TSubclassOf<AObject_Base>> ObtainObjectClasses = m_pQuestManager->GetPlayer()->GetObtainedObjectClasses();
+		for (int i = 0; i < ObtainObjectClasses.Num(); ++i)
+		{
+			if (ObtainObjectClasses[i] == GoalAtIndex(_GoalIndex).GoalClass)
+			{
+				LoclBool = true;
+				break;
+			}
+		}		
+
+		return LoclBool;
+	}
+
+	return false;
+}
+
+void AQuest_Base::AddGoalForIndex(int _Index)
+{
+	if (GoalAlreadyFound(_Index))
+	{
+		FCompletedGoal CompletedGoal(_Index, GoalAtIndex(_Index), true);
+		m_CompletedSubGoals.Add(CompletedGoal);
+
+		OnGoalCompleted(_Index);
+
+		if (GoalAtIndex(_Index).bUpdateQuestDescription)
+		{
+#define LOCTEXT_NAMESPACE "Description"
+			FText Format = FText::Format(LOCTEXT("Description", "{0} {1}"), m_CurrDescription, GoalAtIndex(_Index).UpdateDescription);
+#undef LOCTEXT_NAMESPACE
+			m_CurrDescription = Format;
+
+			if (SelectedInJournal())
+			{
+				m_pQuestManager->GetHUD()->GetQuestJournalWidget()->UpdateDescription();
+			}
+		}
+
+		for (int i = 0; i < GoalAtIndex(_Index).FollowingSubGoalIndices.Num(); ++i)
+		{
+			AddGoalForIndex(GoalAtIndex(_Index).FollowingSubGoalIndices[i]);
+		}
+	}
+	else
+	{
+		m_CurrGoalIndices.Add(_Index);
+
+		if (m_CurrGoalIndices.Last() > (m_CurrHuntedAmounts.Num() - 1))
+		{
+			m_CurrHuntedAmounts.Add(0);
+		}			
+
+		FGoalInfo SubGoal = GoalAtIndex(_Index);
+		m_CurrGoals.Add(SubGoal);
+
+		UClass* pWidget = LoadClass<USubGoalWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/QuestSystem/Widgets/WB_SubGoal.WB_SubGoal_C'"));
+		USubGoalWidget* pSubGoalWidget = CreateWidget<USubGoalWidget>(GetWorld(), pWidget);
+		pSubGoalWidget->Initialize(SubGoal, this, m_pQuestWidget);
+
+		m_pQuestWidget->GetSubGoalWidgets().Add(pSubGoalWidget);
+		m_pQuestWidget->GetSubGoalBox()->AddChild(pSubGoalWidget);
+	}
 }

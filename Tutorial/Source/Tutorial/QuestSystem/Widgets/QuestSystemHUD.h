@@ -46,8 +46,8 @@ public:
 	UMiniMapWidget*      GetMiniMapWidget()  const { return m_pMiniMapWidget; }
 	UQuestJournalWidget* GetQuestJournalWidget() const { return m_pJournalWidget; }
 
-	const TArray<UQuestWidget*>&          GetQuestWidgets()     const { return m_QuestWidgets; }
-	const TMap<FName, UWidgetAnimation*>& GetWidgetAnimations() const { return m_WidgetAnimations; }
+	TArray<UQuestWidget*>&          GetQuestWidgets()     { return m_QuestWidgets; }
+	TMap<FName, UWidgetAnimation*>& GetWidgetAnimations() { return m_WidgetAnimations; }
 	UWidgetAnimation* GetWidgetAnimation(FName _Name)           const { return m_WidgetAnimations[_Name]; }
 
 

@@ -65,7 +65,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "SkillTreeComponent")
 	ASkillCharacter* GetPlayer() const { return m_pPlayer; }
 
-	const TArray<FTreeCategory>& GetCategories() const { return m_Categories; }
+	TArray<FTreeCategory>& GetCategories() { return m_Categories; }
 
 	/* Set */
 	UFUNCTION(BlueprintCallable, Category = "SkillTreeComponent")

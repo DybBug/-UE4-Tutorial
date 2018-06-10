@@ -123,6 +123,8 @@ public :
 	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
 	FLinearColor CircleColor = FLinearColor::White;
 
+	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
+	TSubclassOf<AActor> GoalClass;
 };
 
 USTRUCT(BlueprintType)

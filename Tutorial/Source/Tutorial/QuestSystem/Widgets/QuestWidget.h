@@ -38,7 +38,7 @@ public :
 	UVerticalBox*  GetSubGoalBox()   const { return m_pSubGoalBox; }
 	AQuestManager* GetQuestManager() const { return m_pQuestManager; }
 
-	TArray<USubGoalWidget*> GetSubGoalWidgets()  { return m_SubGoalWidgets; }
+	TArray<USubGoalWidget*>& GetSubGoalWidgets()  { return m_SubGoalWidgets; }
 	USubGoalWidget* GetSelectedSubGoalWidget() const { return m_pSelectedSubGoalWidget; }
 
 	/* Set */

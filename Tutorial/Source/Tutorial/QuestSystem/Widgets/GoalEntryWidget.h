@@ -19,7 +19,7 @@ class TUTORIAL_API UGoalEntryWidget : public UUserWidget
 	GENERATED_BODY()
 
 public :
-	void Initialize(const FGoalInfo& _Info, const EGoalState& _State, UQuestJournalWidget* _pWidget);
+	void Initialize(const FGoalInfo& _Info, const EGoalState& _State, UQuestJournalWidget* _pWidget, int _HuntIndex);
 
 protected :
 	virtual void NativeConstruct() override;
@@ -35,5 +35,7 @@ protected :
 	EGoalState m_State;
 
 	UQuestJournalWidget* m_pJournalWidget;
+
+	int m_HuntIndex;
 	
 };

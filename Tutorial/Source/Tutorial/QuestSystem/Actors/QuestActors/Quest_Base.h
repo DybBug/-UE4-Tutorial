@@ -29,16 +29,27 @@ public:
 	bool CompleteSubGoal(int _SubGoalIndex);
 	bool SelectedInJournal();
 
-	/* Get */
-	const FQuestInfo&        GetQuestInfo()        const { return m_QuestInfo; }
-	const int&               GetCurrHuntedAmount() const { return m_CurrHuntedAmount; }
-	const TArray<FGoalInfo>& GetCurrGoals()        const { return m_CurrGoals;}
-	UQuestWidget*            GetQuestWidget()      const { return m_pQuestWidget; }
-	const FText&             GetCurrDescription()  const { return m_CurrDescription; }
-	const EQuestStates&      GetCurrState()        const { return m_CurrState; }
+	void OnGoalCompleted(int _GoalIndex);
 
-	const int& GetSelectedSubGoalIndex() const { return m_SelectedSubGoalIndex; }
-	TArray<FCompletedGoal> GetCompletedSubGoals() { return m_CompletedSubGoals; }
+	FGoalInfo GoalAtIndex(int _Index);
+
+	bool GoalAlreadyFound(int _GoalIndex);
+
+	void AddGoalForIndex(int _Index);
+
+
+	/* Get */
+	const FQuestInfo&   GetQuestInfo()            const { return m_QuestInfo; }
+	const FText&        GetCurrDescription()      const { return m_CurrDescription; }
+	const EQuestStates& GetCurrState()            const { return m_CurrState; }
+	const int&          GetSelectedSubGoalIndex() const { return m_SelectedSubGoalIndex; }
+
+	UQuestWidget* GetQuestWidget()      const { return m_pQuestWidget; }
+
+	TArray<int>&           GetCurrHuntedAmounts() { return m_CurrHuntedAmounts; }
+	TArray<FGoalInfo>&      GetCurrGoals()         { return m_CurrGoals;}
+	TArray<FCompletedGoal>& GetCompletedSubGoals() { return m_CompletedSubGoals; }
+	TArray<int>&            GetCurrGoalIndices()   { return m_CurrGoalIndices; }
 
 
 	/* Set */
@@ -60,7 +71,7 @@ protected :
 	TArray<FGoalInfo> m_CurrGoals;
 
 	UPROPERTY(VisibleAnywhere, Category = "Quest_Base|DoNotTouch!")
-	int m_CurrHuntedAmount;
+	TArray<int> m_CurrHuntedAmounts;
 
 	UPROPERTY(VisibleAnywhere, Category = "Quest_Base|DoNotTouch!")
 	int m_SelectedSubGoalIndex;

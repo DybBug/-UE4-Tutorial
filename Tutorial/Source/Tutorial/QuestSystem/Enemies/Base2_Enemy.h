@@ -41,6 +41,9 @@ public :
 
 	void UpdateHealthBar();
 
+	UFUNCTION(BlueprintPure, Category = "Base_Enemy")
+	bool IsPlayingMontage();
+
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "Base_Enemy")
 	const bool& GetIsDead() const { return m_bIsDead; }
@@ -48,8 +51,13 @@ public :
 	UFUNCTION(BlueprintPure, Category = "Base_Enemy")
 	UAnimMontage* GetAttackAnimMontage() const { return m_pAttackAnimMontage; }
 
+	/* Set */
+	UFUNCTION(BlueprintCallable, Category = "Base_Enemy")
+	void SetHasSeenPlayer(bool _bBool) { m_bHasSeenPlayer = _bBool; }
+
 private :
 	void _SetupWidget();
+	void _OnActorNoticed(AActor* _pActor);
 
 	UFUNCTION()
 	void _OnSeePawn(APawn* _pPawn);
@@ -97,6 +105,12 @@ protected :
 
 	UPROPERTY(EditAnywhere, Category = "Base_Enemy|State")
 	float m_AttackDamage = 20.f;
+
+	UPROPERTY(EditAnywhere, Category = "Base_Enemy|State")
+	float m_MovementRadius = 1500.f;
+
+	UPROPERTY(EditAnywhere, Category = "Base_Enemy|State")
+	bool m_bIsRunningBack = false;
 
 	UPROPERTY(EditAnywhere, Category = "Base_Enemy|State")
 	UAnimMontage* m_pAttackAnimMontage;

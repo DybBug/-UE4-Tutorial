@@ -8,11 +8,12 @@
 #include <Components/Image.h>
 #include <Components/TextBlock.h>
 
-void UGoalEntryWidget::Initialize(const FGoalInfo& _Info, const EGoalState& _State, UQuestJournalWidget* _pWidget)
+void UGoalEntryWidget::Initialize(const FGoalInfo& _Info, const EGoalState& _State, UQuestJournalWidget* _pWidget, int _HuntIndex)
 {
 	m_GoalInfo = _Info;
 	m_State = _State;
 	m_pJournalWidget = _pWidget;
+	m_HuntIndex = _HuntIndex;
 }
 
 void UGoalEntryWidget::NativeConstruct()
@@ -46,10 +47,24 @@ void UGoalEntryWidget::_Update()
 				}
 				case EGoalTypes::Hunt:
 				{
+					int Amount = 0;
+					if (m_State == EGoalState::Current)
+					{
+						Amount = m_pJournalWidget->GetSelectedQuest()->GetCurrHuntedAmounts()[m_HuntIndex];
+					}
+					else if (m_State == EGoalState::Success)
+					{
+						Amount = m_GoalInfo.AmountToHunt;
+					}
+					else if (m_State == EGoalState::Failed)
+					{
+						Amount = 0;
+					}
+
 					FormatText = FText::Format(LOCTEXT("HuntText", "Hunt {0}{1} : {2} / {3}!"),
 						m_GoalInfo.AdditionalName,
 						m_GoalInfo.AmountToHunt > 1 ? FText::FromString("") : FText::FromString("s"),
-						m_pJournalWidget->GetSelectedQuest()->GetCurrHuntedAmount(),
+						Amount,
 						m_GoalInfo.AmountToHunt);
 					break;
 				}

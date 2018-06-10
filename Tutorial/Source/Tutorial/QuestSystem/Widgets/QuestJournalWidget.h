@@ -40,7 +40,7 @@ public :
 	void OnQuestClicked(UQuestListEntryWidget* _pWidget);
 
 	/* Get */
-	TArray<UQuestListEntryWidget*> GetAllQuestEntryWidgets() { return m_AllQuestEntryWidgets; }
+	TArray<UQuestListEntryWidget*>& GetAllQuestEntryWidgets() { return m_AllQuestEntryWidgets; }
 	UQuestListEntryWidget* GetCurrQuestWidget() const { return m_pCurrQuestWidget; }
 
 	AQuest_Base* GetSelectedQuest() const { return m_pSelectedQuest; }

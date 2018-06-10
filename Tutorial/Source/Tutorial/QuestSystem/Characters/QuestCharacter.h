@@ -13,6 +13,7 @@ class USpringArmComponent;
 class UParticleSystemComponent;
 class UPaperSpriteComponent;
 class AQuestManager;
+class AObject_Base;
 
 UCLASS()
 class TUTORIAL_API AQuestCharacter : public ACharacter
@@ -47,6 +48,8 @@ public:
 	/* Get */
 	UQuestSystemHUD* GetHUD() const { return m_pHUD; }
 	AQuestManager* GetQuestManager() const { return m_pQuestManager; }
+
+	TArray<TSubclassOf<AObject_Base>>& GetObtainedObjectClasses() { return m_ObtainedObjectClasses; }
 	
 	const int& GetCurrLevel() const { return m_CurrLevel; }
 
@@ -155,4 +158,5 @@ protected :
 
 	bool m_bCanAttack = true;
 
+	TArray<TSubclassOf<AObject_Base>> m_ObtainedObjectClasses;
 };

@@ -3,6 +3,7 @@
 #include "Base2_Enemy.h"
 #include "../Widgets/Enemy2Widget.h"
 #include "../Characters/QuestCharacter.h"
+#include "../Actors/QuestManager.h"
 
 #include <Components/CapsuleComponent.h>
 #include <Components/WidgetComponent.h>
@@ -66,7 +67,9 @@ void ABase2_Enemy::BeginPlay()
 		Cast<AAIController>(GetController())->RunBehaviorTree(m_pBehaviorTree);
 		Cast<AAIController>(GetController())->GetBlackboardComponent()->SetValueAsVector("OriginalLocation", GetActorLocation());
 		Cast<AAIController>(GetController())->GetBlackboardComponent()->SetValueAsFloat("PatrolRadius", m_PatrolRadius);	
-		Cast<AAIController>(GetController())->GetBlackboardComponent()->SetValueAsFloat("AttackRange", m_AttackRange);		
+		Cast<AAIController>(GetController())->GetBlackboardComponent()->SetValueAsFloat("AttackRange", m_AttackRange);	
+		Cast<AAIController>(GetController())->GetBlackboardComponent()->SetValueAsFloat("MovementRadius", m_MovementRadius);		
+
 	}
 
 	m_CurrHealth = m_MaxHealth;
@@ -86,8 +89,11 @@ float ABase2_Enemy::TakeDamage(float _DamageAmount, FDamageEvent const & _Damage
 		if (m_CurrHealth <= 0)
 		{
 			m_pKilledByActor = _pDamageCauser;
-			Cast<AQuestCharacter>(m_pKilledByActor)->AddExpPoints(m_ExpForKill);
 			OnDeath();
+		}
+		else
+		{
+			_OnActorNoticed(_pDamageCauser);
 		}
 	}
 	return 0.0f;
@@ -124,6 +130,10 @@ void ABase2_Enemy::OnDeath()
 
 	m_pWidget->DestroyComponent();
 
+	AQuestCharacter* pPlayer = Cast<AQuestCharacter>(m_pKilledByActor);
+	pPlayer->AddExpPoints(m_ExpForKill);
+	pPlayer->GetQuestManager()->OnEnemyKilled(this->GetClass());
+
 	FTimerHandle hTimer;
 	GetWorldTimerManager().SetTimer(hTimer, [&] {
 		Destroy();
@@ -133,6 +143,11 @@ void ABase2_Enemy::OnDeath()
 void ABase2_Enemy::UpdateHealthBar()
 {
 	m_pEnemyWidget->GetHealthBar()->SetPercent((float)m_CurrHealth / (float)m_MaxHealth);
+}
+
+bool ABase2_Enemy::IsPlayingMontage()
+{
+	return ((GetCurrentMontage()) ? true : false);
 }
 
 void ABase2_Enemy::_SetupWidget()
@@ -146,14 +161,19 @@ void ABase2_Enemy::_SetupWidget()
 	m_pWidget->SetVisibility(true);
 }
 
-void ABase2_Enemy::_OnSeePawn(APawn * _pPawn)
+void ABase2_Enemy::_OnActorNoticed(AActor * _pActor)
 {
-	if ((UGameplayStatics::GetPlayerPawn(GetWorld(), 0) == _pPawn) && !m_bHasSeenPlayer)
+	if ((UGameplayStatics::GetPlayerPawn(GetWorld(), 0) == _pActor) && !m_bHasSeenPlayer)
 	{
 		m_bHasSeenPlayer = true;
 		Cast<AAIController>(GetController())->GetBlackboardComponent()->SetValueAsBool("HasSeenPlayer?", m_bHasSeenPlayer);
-		Cast<AAIController>(GetController())->GetBlackboardComponent()->SetValueAsObject("Player", _pPawn);
+		Cast<AAIController>(GetController())->GetBlackboardComponent()->SetValueAsObject("Player", _pActor);
 		GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	}
+}
+
+void ABase2_Enemy::_OnSeePawn(APawn * _pPawn)
+{
+	_OnActorNoticed(_pPawn);
 }
 

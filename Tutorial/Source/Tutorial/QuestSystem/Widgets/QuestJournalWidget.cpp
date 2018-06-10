@@ -18,6 +18,7 @@
 #include <Components/ScrollBox.h>
 #include <Components/Button.h>
 #include <Kismet/GameplayStatics.h>
+#include <Kismet/KismetTextLibrary.h>
 
 void UQuestJournalWidget::NativeConstruct()
 {
@@ -80,7 +81,7 @@ void UQuestJournalWidget::UpdateSuggestedLevelColor()
 void UQuestJournalWidget::UpdateDescription()
 {
 	FText Desc = m_pSelectedQuest->GetCurrDescription();
-	//Desc.ToString().Replace(L"\n", L"ฟฃลอ?");
+	//Desc.ToString().Replace(L"\n", LINE_TERMINATOR);
 
 	m_pDescription->SetText(Desc);
 }
@@ -95,7 +96,8 @@ void UQuestJournalWidget::GenerateSubGoals()
 	for (int i = 0; i < CompletedGoals.Num(); ++i)
 	{
 		UGoalEntryWidget* pGoalEntryWidget = CreateWidget<UGoalEntryWidget>(GetWorld(), WidgetClass);		
-		pGoalEntryWidget->Initialize(CompletedGoals[i].GoalInfo, CompletedGoals[i].bSuccessful ? EGoalState::Success : EGoalState::Failed, this);
+
+		pGoalEntryWidget->Initialize(CompletedGoals[i].GoalInfo, CompletedGoals[i].bSuccessful ? EGoalState::Success : EGoalState::Failed, this, i);
 		m_pQuestGoalBox->AddChildToVerticalBox(pGoalEntryWidget);
 	}
 
@@ -103,7 +105,7 @@ void UQuestJournalWidget::GenerateSubGoals()
 	for (int i = 0; i < CurrGoals.Num(); ++i)
 	{
 		UGoalEntryWidget* pGoalEntryWidget = CreateWidget<UGoalEntryWidget>(GetWorld(), WidgetClass);		
-		pGoalEntryWidget->Initialize(CurrGoals[i], EGoalState::Current, this);
+		pGoalEntryWidget->Initialize(CurrGoals[i], EGoalState::Current, this, i);
 		m_pQuestGoalBox->AddChildToVerticalBox(pGoalEntryWidget);
 	}
 }
