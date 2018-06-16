@@ -22,13 +22,13 @@ public :
 	void Initialize(const FGoalInfo& _Info, const EGoalState& _State, UQuestJournalWidget* _pWidget, int _HuntIndex);
 
 protected :
-	virtual void NativeConstruct() override;
-
-protected :
 	void _Update();
 	
 protected :
+	UPROPERTY()
 	UImage* m_pGoalState;
+
+	UPROPERTY()
 	UTextBlock* m_pGoalText;
 
 	FGoalInfo m_GoalInfo;
@@ -36,6 +36,5 @@ protected :
 
 	UQuestJournalWidget* m_pJournalWidget;
 
-	int m_HuntIndex;
-	
+	int m_HuntIndex;	
 };

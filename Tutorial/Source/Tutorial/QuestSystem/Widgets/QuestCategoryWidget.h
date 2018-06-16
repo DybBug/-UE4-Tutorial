@@ -34,8 +34,13 @@ private :
 	void _OnClicked();
 
 protected :
+	UPROPERTY()
 	UButton*      m_pExpandButton;
+
+	UPROPERTY()
 	UTextBlock*   m_pCategoryName;
+
+	UPROPERTY()
 	UVerticalBox* m_pQuestBox;
 
 	UPROPERTY(EditAnywhere, Category = "QuestCategoryWidget")

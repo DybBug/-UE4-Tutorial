@@ -4,7 +4,6 @@
 #include "QuestJournalWidget.h"
 #include "../Actors/QuestActors/Quest_Base.h"
 
-#include <WidgetTree.h>
 #include <Components/Image.h>
 #include <Components/TextBlock.h>
 
@@ -14,18 +13,9 @@ void UGoalEntryWidget::Initialize(const FGoalInfo& _Info, const EGoalState& _Sta
 	m_State = _State;
 	m_pJournalWidget = _pWidget;
 	m_HuntIndex = _HuntIndex;
-}
-
-void UGoalEntryWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	m_pGoalState = WidgetTree->FindWidget<UImage>(TEXT("GoalState"));
-	m_pGoalText = WidgetTree->FindWidget<UTextBlock>(TEXT("GoalText"));
 
 	_Update();
 }
-
 
 void UGoalEntryWidget::_Update()
 {

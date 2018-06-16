@@ -22,9 +22,6 @@ class TUTORIAL_API UQuestWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-protected :
-	virtual void NativeConstruct() override;
-
 public :
 	void Initialize(AQuestManager* _pQuestManager, AQuest_Base* _pAssignedQuest);
 	void GenerateSubWidgets();
@@ -46,7 +43,10 @@ public :
 
 
 protected :
+	UPROPERTY()
 	UTextBlock* m_pQuestName;
+
+	UPROPERTY()
 	UVerticalBox* m_pSubGoalBox;
 
 	AQuestManager* m_pQuestManager;

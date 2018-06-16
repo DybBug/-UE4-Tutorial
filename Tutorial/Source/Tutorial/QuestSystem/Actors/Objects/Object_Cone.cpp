@@ -18,13 +18,13 @@ void AObject_Cone::BeginPlay()
 void AObject_Cone::OnEnterPlayerRadius(AQuestCharacter * _pPlayer)
 {
 	Super::OnEnterPlayerRadius(_pPlayer);
-	m_pMatInstance->SetVectorParameterValue("Color", FLinearColor(FColor(0xff00151e)));
+	m_pMatInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(FColor(0xff00151e)));
 }
 
 void AObject_Cone::OnLeavePlayerRadius(AQuestCharacter * _pPlayer)
 {
 	Super::OnLeavePlayerRadius(_pPlayer);
-	m_pMatInstance->SetVectorParameterValue("Color", FLinearColor(FColor(0xff070707)));
+	m_pMatInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(FColor(0xff070707)));
 
 }
 

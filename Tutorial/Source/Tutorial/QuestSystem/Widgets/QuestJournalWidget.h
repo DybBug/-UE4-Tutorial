@@ -54,25 +54,61 @@ private :
 	void _OnCancelButtonClicked();
 
 protected :
-	UTextBlock*     m_pQuestName;
-	UTextBlock*     m_pQuestCategory;
-	UTextBlock*     m_pQuestRegion;
-	UTextBlock*     m_pSuggestedLevel;
-	UTextBlock*     m_pDescription;
-	UVerticalBox*   m_pQuestGoalBox;
-	UScrollBox*     m_pQuestDetailsBox;
-	UHorizontalBox* m_pExpRewardBox;
-	UTextBlock*     m_pExpReward;
-	UHorizontalBox* m_pPrestigeRewardBox;
-	UTextBlock*     m_pPrestigeReward;
-	UVerticalBox*   m_pRewardBox;
-	UHorizontalBox* m_pButtonBox;
-	UButton*        m_pSelectButton;
-	UButton*        m_pCancelButton;
+	UPROPERTY()
+	UTextBlock* m_pQuestName;
 
-	UScrollBox*           m_pQuestList;
+	UPROPERTY()
+	UTextBlock* m_pQuestCategory;
+
+	UPROPERTY()
+	UTextBlock* m_pQuestRegion;
+
+	UPROPERTY()
+	UTextBlock* m_pSuggestedLevel;
+
+	UPROPERTY()
+	UTextBlock* m_pDescription;
+
+	UPROPERTY()
+	UVerticalBox* m_pQuestGoalBox;
+
+	UPROPERTY()
+	UScrollBox* m_pQuestDetailsBox;
+
+	UPROPERTY()
+	UHorizontalBox* m_pExpRewardBox;
+
+	UPROPERTY()
+	UTextBlock* m_pExpReward;
+
+	UPROPERTY()
+	UHorizontalBox* m_pPrestigeRewardBox;
+
+	UPROPERTY()
+	UTextBlock* m_pPrestigeReward;
+
+	UPROPERTY()
+	UVerticalBox* m_pRewardBox;
+
+	UPROPERTY()
+	UHorizontalBox* m_pButtonBox;
+
+	UPROPERTY()
+	UButton* m_pSelectButton;
+
+	UPROPERTY()
+	UButton* m_pCancelButton;
+
+	UPROPERTY()
+	UScrollBox* m_pQuestList;
+
+	UPROPERTY()
 	UQuestCategoryWidget* m_pCatCurrent;
+
+	UPROPERTY()
 	UQuestCategoryWidget* m_pCatCompleted;
+
+	UPROPERTY()
 	UQuestCategoryWidget* m_pCatFailed;
 
 	AQuest_Base* m_pSelectedQuest;

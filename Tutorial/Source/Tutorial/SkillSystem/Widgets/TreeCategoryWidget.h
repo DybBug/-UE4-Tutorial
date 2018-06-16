@@ -18,8 +18,10 @@ class TUTORIAL_API UTreeCategoryWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+protected :
+	virtual void NativeConstruct() override;
+
 public :
-	virtual bool Initialize() override;
 
 	UFUNCTION()
 	void Initialize(FText _NewCategory, USkillTreeWidget* _pSkillTreeWidget, int _Index);

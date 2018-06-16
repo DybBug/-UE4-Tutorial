@@ -120,8 +120,6 @@ protected :
 	TArray<class USkillHotkeyWidget*> m_AllHotkeySlots;
 
 
-
-
 	/* */
 	UPROPERTY()
 	class UVerticalBox* m_pHotkeyRowContainer;

@@ -7,7 +7,7 @@
 #include "../Components/SkillTreeComponent.h"
 #include "../DragDropOperations/SkillDragDropOperation.h"
 
-#include <WidgetTree.h>
+
 #include <Components/TextBlock.h>
 #include <Components/Image.h>
 #include <Components/Button.h>
@@ -16,20 +16,12 @@
 #include <Blueprint/WidgetBlueprintLibrary.h>
 
 
-bool USkillTreeEntryWidget::Initialize()
+void USkillTreeEntryWidget::NativeConstruct()
 {
-	bool Result = Super::Initialize();
-
-	m_pStageText = WidgetTree->FindWidget<UTextBlock>("StageText");
-	m_pSkillIcon = WidgetTree->FindWidget<UImage>("SkillIcon");
-	m_pPlusButton = WidgetTree->FindWidget<UButton>("PlusButton");
-	m_pMinusButton = WidgetTree->FindWidget<UButton>("MinusButton");
-	m_pUpgradeBox = WidgetTree->FindWidget<UVerticalBox>("UpgradeBox");
+	Super::NativeConstruct();
 
 	m_pPlusButton->OnClicked.AddDynamic(this, &USkillTreeEntryWidget::_OnPlusButtonClicked);
 	m_pMinusButton->OnClicked.AddDynamic(this, &USkillTreeEntryWidget::_OnMinusButtonClicked);
-
-	return Result;
 }
 
 FReply USkillTreeEntryWidget::NativeOnMouseButtonDown(const FGeometry & InGeometry, const FPointerEvent & InMouseEvent)

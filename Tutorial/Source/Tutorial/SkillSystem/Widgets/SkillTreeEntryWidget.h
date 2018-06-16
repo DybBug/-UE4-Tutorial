@@ -21,12 +21,12 @@ class TUTORIAL_API USkillTreeEntryWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-public :
-	virtual bool Initialize() override;
+protected :
+	virtual void NativeConstruct() override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& _InGeometry, const FPointerEvent& _InMouseEvent) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 
-
+public :
 	void Initialize(const TSubclassOf<ABase_Skill>& _SkillClass, USubTreeWidget* _pSubTreeWidget);
 	
 	int AmountOfStages();

@@ -98,6 +98,8 @@ void AQuestCharacter::BeginPlay()
 	// HUD À§Á¬ »ý¼º.
 	if (m_pHUDClass)
 	{
+		SetupPrestigePoints();
+
 		m_pHUD = CreateWidget<UQuestSystemHUD>(GetWorld(), m_pHUDClass);
 		m_pHUD->AddToViewport();
 
@@ -114,6 +116,7 @@ void AQuestCharacter::BeginPlay()
 		UpdateLevel();
 		UpdateExp();
 		UpdateHealth();
+		UpdateRegionWidget();
 	}	
 }
 
@@ -135,11 +138,10 @@ void AQuestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	PlayerInputComponent->BindKey(EKeys::B,   IE_Pressed, this, &AQuestCharacter::_BKey);
 	PlayerInputComponent->BindKey(EKeys::E,   IE_Pressed, this, &AQuestCharacter::_EKey);
-	PlayerInputComponent->BindKey(EKeys::F,   IE_Pressed, this, &AQuestCharacter::_FKey);
-	PlayerInputComponent->BindKey(EKeys::G,   IE_Pressed, this, &AQuestCharacter::_GKey);
 	PlayerInputComponent->BindKey(EKeys::H,   IE_Pressed, this, &AQuestCharacter::_HKey);
 	PlayerInputComponent->BindKey(EKeys::I,   IE_Pressed, this, &AQuestCharacter::_IKey);
 	PlayerInputComponent->BindKey(EKeys::J,   IE_Pressed, this, &AQuestCharacter::_JKey);
+	PlayerInputComponent->BindKey(EKeys::R,   IE_Pressed, this, &AQuestCharacter::_RKey);
 	PlayerInputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &AQuestCharacter::_TabKey);
 
 	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &AQuestCharacter::_LeftMouseButton);
@@ -208,6 +210,48 @@ void AQuestCharacter::AddExpPoints(int _Amount)
 	else
 	{
 		UpdateExp();
+	}
+}
+
+void AQuestCharacter::SetupPrestigePoints()
+{
+	for (int i = 0; i < (int8)ERegions::Max; ++i)
+	{
+		m_PrestigePoints.Add(FRegionPrestige((ERegions)i, 0));
+	}
+}
+
+int AQuestCharacter::GetPrestigeByRegion(ERegions _Region)
+{
+	return m_PrestigePoints[(int8)_Region].Prestige;
+}
+
+void AQuestCharacter::SetPrestigeByRegion(ERegions _Region, int _Value)
+{
+	m_PrestigePoints[(int8)_Region].Region = _Region;
+	m_PrestigePoints[(int8)_Region].Prestige = _Value;
+
+	if (m_CurrRegion == _Region)
+	{
+		UpdateRegionWidget();
+	}
+}
+
+void AQuestCharacter::UpdateRegionWidget()
+{
+	FString Region = CONVERT_TO_STRING(L"ERegions", m_CurrRegion);
+	m_pHUD->GetRegionText()->SetText(FText::FromString(Region));
+
+	int Prestige = GetPrestigeByRegion(m_CurrRegion);
+	m_pHUD->GetPrestigeText()->SetText(FText::AsNumber(Prestige));
+}
+
+void AQuestCharacter::OnNewRegionEntered(ERegions _Region)
+{
+	if (m_CurrRegion != _Region)
+	{
+		m_CurrRegion = _Region;
+		UpdateRegionWidget();
 	}
 }
 
@@ -324,22 +368,12 @@ void AQuestCharacter::_EKey()
 	}
 }
 
-void AQuestCharacter::_FKey()
-{
-	AddExpPoints(100);
-}
-
-void AQuestCharacter::_GKey()
-{
-	UClass* pQuestClass2 = LoadClass<AQuest_Base>(nullptr, TEXT("Blueprint'/Game/TutorialContent/QuestSystem/Actors/BP_Quest_Test2.BP_Quest_Test2_C'"));
-	m_pQuestManager->AddNewQuest(pQuestClass2, false);	
-}
-
 void AQuestCharacter::_HKey()
 {
-	if (m_pQuestManager->GetCurrQuestActors().Num() > 0)
+	AQuest_Base* pQuest = m_pQuestManager->GetCurrQuestActors()[0];
+	if (pQuest)
 	{
-		m_pQuestManager->GetCurrQuestActors()[0]->CompleteSubGoal(0);
+		pQuest->CompleteSubGoal(0, true);
 	}
 }
 
@@ -352,8 +386,7 @@ void AQuestCharacter::_JKey()
 {
 	if (m_bWidgetInput)
 	{
-		m_pHUD->GetQuestJournalWidget()->SetVisibility(ESlateVisibility::Hidden);
-			
+		m_pHUD->GetQuestJournalWidget()->SetVisibility(ESlateVisibility::Hidden);			
 	}
 	else
 	{
@@ -362,6 +395,20 @@ void AQuestCharacter::_JKey()
 	_ToggleInputMode();	
 }
 
+void AQuestCharacter::_RKey()
+{
+	static bool bSwitch = false;
+	bSwitch = !bSwitch;
+	if (bSwitch)
+	{
+		OnNewRegionEntered(ERegions::Johto);		
+	}
+	else
+	{
+		OnNewRegionEntered(ERegions::Kanto);
+	}
+
+}
 
 void AQuestCharacter::_TabKey()
 {

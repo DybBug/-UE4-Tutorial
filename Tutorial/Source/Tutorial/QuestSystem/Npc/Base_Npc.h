@@ -28,8 +28,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public :
-	void Initialize(bool _bDoesPatrol, TArray<APatrolPoint*>& _PatrollingPoints, int _CurrPatrolIndex);
+	void Initialize(bool _bDoesPatrol, const TArray<APatrolPoint*>& _PatrollingPoints, int _CurrPatrolIndex, int _NpcId);
 	void MoveToCurrPatrolPoint();
+	virtual void OnTalkedTo(AQuestCharacter* _pPlayer);
+	void ShowMessage(const FText& _Message, float _Duration, AQuestCharacter* _pPlayer);
 
 	/* Interface Functions */
 	virtual void OnEnterPlayerRadius(AQuestCharacter* _pPlayer) override;
@@ -44,7 +46,10 @@ protected :
 	UPaperSpriteComponent* m_pQuestionMark;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Base_Npc|Components")
-	UWidgetComponent* m_pWidget;
+	UWidgetComponent* m_pInteractionWidget;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Base_Npc|Components")
+	UWidgetComponent* m_pMessageWidget;
 
 	UPROPERTY(EditAnywhere, Category = "Base_Npc")
 	FText m_Name;
@@ -59,9 +64,18 @@ protected :
 	int m_CurrPatrolIndex;
 
 	UPROPERTY(EditAnywhere, Category = "Base_Npc")
-	bool m_bHasQuestion;
+	TSubclassOf<AQuest_Base> m_HasQuestClass;
 
-	TSubclassOf<AQuest_Base> m_QuestTest1Class;
+	UPROPERTY(VisibleAnywhere, Category = "Base_Npc")
+	int m_NpcId;
 
+	UPROPERTY(EditAnywhere, Category = "Base_Npc")
+	FText m_DefaultMessage;
 
+	UPROPERTY(EditAnywhere, Category = "Base_Npc")
+	float m_DefaultDuration;
+
+	bool m_bInPlayerRadius = false;
+
+	bool m_bCanBeTalkedTo = true;
 };

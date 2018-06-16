@@ -418,13 +418,13 @@ void ASkillCharacter::_OnStatLerpStart(EStats _Stat)
 void ASkillCharacter::_OnHealthStatLerpEnd()
 {
 	m_Stats[EStats::Health].bCurrentlyAnimated = false;
-	m_Stats[EStats::Health].pBarWidget->GetWidgetFromName("StatLerpBar")->SetVisibility(ESlateVisibility::Hidden);
+	m_Stats[EStats::Health].pBarWidget->GetWidgetFromName("m_pStatLerpBar")->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ASkillCharacter::_OnManaStatLerpEnd()
 {
 	m_Stats[EStats::Mana].bCurrentlyAnimated = false;
-	m_Stats[EStats::Mana].pBarWidget->GetWidgetFromName("StatLerpBar")->SetVisibility(ESlateVisibility::Hidden);
+	m_Stats[EStats::Mana].pBarWidget->GetWidgetFromName("m_pStatLerpBar")->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void ASkillCharacter::_OnExpStatLerpEnd()
@@ -443,7 +443,7 @@ void ASkillCharacter::_OnExpStatLerpEnd()
 		return;
 	}
 	m_Stats[EStats::Exp].bCurrentlyAnimated = false;
-	m_Stats[EStats::Exp].pBarWidget->GetWidgetFromName("StatLerpBar")->SetVisibility(ESlateVisibility::Hidden);
+	m_Stats[EStats::Exp].pBarWidget->GetWidgetFromName("m_pStatLerpBar")->SetVisibility(ESlateVisibility::Hidden);
 }
 
 
@@ -461,7 +461,7 @@ void ASkillCharacter::_LerpStatDisplay(EStats _Stat, float _LerpTime, bool _bInP
 	float Percent = (float)m_Stats[_Stat].CurrValue / (float)m_Stats[_Stat].MaxValue;
 
 	m_Stats[_Stat].pBarWidget->GetDynamicMaterial()->SetScalarParameterValue(Name, Percent);
-	m_Stats[_Stat].pBarWidget->GetWidgetFromName("StatLerpBar")->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	m_Stats[_Stat].pBarWidget->GetWidgetFromName("m_pStatLerpBar")->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 
 	if (_Stat == EStats::Health)
 	{

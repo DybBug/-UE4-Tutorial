@@ -17,8 +17,6 @@ class TUTORIAL_API UConnectionWidget : public UUserWidget
 	GENERATED_BODY()
 
 public :
-	virtual bool Initialize() override;
-
 	void Initialize(const TSubclassOf<ABase_Skill>& _ForSpellClass);
 
 	void Active();

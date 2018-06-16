@@ -12,6 +12,7 @@ class UWidgetComponent;
 class UBTTask_BlueprintBase;
 class UAnimMontage;
 class UEnemy2Widget;
+class ARespawnActor;
 
 UCLASS()
 class TUTORIAL_API ABase2_Enemy : public ACharacter
@@ -54,6 +55,9 @@ public :
 	/* Set */
 	UFUNCTION(BlueprintCallable, Category = "Base_Enemy")
 	void SetHasSeenPlayer(bool _bBool) { m_bHasSeenPlayer = _bBool; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Base_Enemy")
+	void SetRespawnActor(ARespawnActor* _pActor) { m_pRespawnActor = _pActor; }
 
 private :
 	void _SetupWidget();
@@ -114,7 +118,13 @@ protected :
 
 	UPROPERTY(EditAnywhere, Category = "Base_Enemy|State")
 	UAnimMontage* m_pAttackAnimMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Base_Enemy|State")
+	float m_RespawnTime = 5.f;
 	
+	UPROPERTY(EditAnywhere, Category = "Base_Enemy|State")
+	ARespawnActor* m_pRespawnActor;
+
 	UEnemy2Widget* m_pEnemyWidget;
 
 	AActor* m_pKilledByActor;

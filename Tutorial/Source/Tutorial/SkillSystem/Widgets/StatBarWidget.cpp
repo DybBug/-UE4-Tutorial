@@ -8,25 +8,58 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Kismet/KismetMathLibrary.h"
 
-bool UStatBarWidget::Initialize()
+
+
+
+void UStatBarWidget::NativeConstruct()
 {
-	bool Result = Super::Initialize();
-	
-	m_pStatBar =     WidgetTree->FindWidget<UProgressBar>(FName("StatBar"));
-	m_pStatLerpBar = WidgetTree->FindWidget<UImage>(FName("StatLerpBar"));
-	m_pStatText =    WidgetTree->FindWidget<UTextBlock>(FName("StatText"));
+	Super::NativeConstruct();
 
 	m_pDynamicMaterial = m_pStatLerpBar->GetDynamicMaterial();
 	m_pDynamicMaterial->SetVectorParameterValue("Color", m_LerpColor);
 
-	return Result;
+	m_pStatBar->SetPercent(m_Percent);
+	m_pStatBar->SetFillColorAndOpacity(m_FillColor);
+	m_pStatText->SetText(UpdateStatText());
+}
+
+void UStatBarWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	
+	m_pStatBar->SetPercent(m_Percent);
+	m_pStatBar->SetFillColorAndOpacity(UpdateStatBarColor());
+	m_pStatText->SetText(UpdateStatText());
+}
+
+FText UStatBarWidget::UpdateStatText()
+{
+#define LOCTEXT_NAMESPACE "StatText"
+	FText Format = FText::Format(LOCTEXT("StatText", "{0} / {1}"), m_DisplayedValue, m_MaxValue);
+#undef LOCTEXT_NAMESPACE
+
+	return Format;
+}
+
+FLinearColor UStatBarWidget::UpdateStatBarColor()
+{
+	if (m_bIsGradiation)
+	{
+		return UKismetMathLibrary::LinearColorLerpUsingHSV(FLinearColor::Red, m_FillColor, m_Percent);
+	}
+	else
+	{
+		return m_FillColor;
+	}
 }
 
 
 void UStatBarWidget::SetPercent(float _Percent)
 {
 	m_Percent = _Percent;
+	
 }
 
 void UStatBarWidget::SetFillColor(FLinearColor _Color)

@@ -44,8 +44,13 @@ protected :
 
 	
 protected :
+	UPROPERTY()
 	UBorder* m_pGoalBorder;
+
+	UPROPERTY()
 	UButton* m_pSelectButton;
+
+	UPROPERTY()
 	UTextBlock* m_pGoalText;
 
 	FGoalInfo m_GoalInfo;

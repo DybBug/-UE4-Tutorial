@@ -28,23 +28,29 @@ class TUTORIAL_API UQuestSystemHUD : public UUserWidget
 	GENERATED_BODY()
 
 protected:
+	
 	virtual void NativeConstruct() override;
 
 public:
 	UQuestWidget* AddQuestToList(AQuest_Base* _pQuestActor);
 
 	/* Get */
-	UProgressBar*        GetExpBar()         const { return m_pExpBar; }
-	UTextBlock*          GetExpText()        const { return m_pExpText; }
-	UProgressBar*        GetHealthBar()      const { return m_pHealthBar; }
-	UTextBlock*          GetHealthText()     const { return m_pHealthText; }
-	UImage*              GetCharacterIcon()  const { return m_pCharacterIcon; }
-	UTextBlock*          GetLevelText()      const { return m_pLevelText; }
-	UScrollBox*          GetQuestList()      const { return m_pQuestList; }
-	UBorder*             GetDistanceBorder() const { return m_pDistanceBorder; }
-	UTextBlock*          GetDistanceText()   const { return m_pDistanceText; }
-	UMiniMapWidget*      GetMiniMapWidget()  const { return m_pMiniMapWidget; }
+	UProgressBar*        GetExpBar()             const { return m_pExpBar; }
+	UTextBlock*          GetExpText()            const { return m_pExpText; }
+	UProgressBar*        GetHealthBar()          const { return m_pHealthBar; }
+	UTextBlock*          GetHealthText()         const { return m_pHealthText; }
+	UImage*              GetCharacterIcon()      const { return m_pCharacterIcon; }
+	UTextBlock*          GetLevelText()          const { return m_pLevelText; }
+	UScrollBox*          GetQuestList()          const { return m_pQuestList; }
+	UBorder*             GetDistanceBorder()     const { return m_pDistanceBorder; }
+	UTextBlock*          GetDistanceText()       const { return m_pDistanceText; }
+	UMiniMapWidget*      GetMiniMapWidget()      const { return m_pMiniMapWidget; }
 	UQuestJournalWidget* GetQuestJournalWidget() const { return m_pJournalWidget; }
+	UBorder*             GetRegionBorder()       const { return m_pRegionBorder; }
+	UTextBlock*          GetRegionText()         const { return m_pRegionText; }	
+	UTextBlock*          GetPrestigeText()       const { return m_pPrestigeText; }
+
+
 
 	TArray<UQuestWidget*>&          GetQuestWidgets()     { return m_QuestWidgets; }
 	TMap<FName, UWidgetAnimation*>& GetWidgetAnimations() { return m_WidgetAnimations; }
@@ -86,9 +92,20 @@ protected :
 	UPROPERTY()
 	UTextBlock* m_pDistanceText;
 
+	UPROPERTY()
 	UMiniMapWidget* m_pMiniMapWidget;
 
+	UPROPERTY()
 	UQuestJournalWidget* m_pJournalWidget;
+
+	UPROPERTY()
+	UBorder* m_pRegionBorder;
+
+	UPROPERTY()
+	UTextBlock* m_pRegionText;
+
+	UPROPERTY()
+	UTextBlock* m_pPrestigeText;
 	
 	AQuestManager* m_pQuestManager;
 
@@ -98,5 +115,4 @@ protected :
 
 	/* Widget Animations */
 	TMap<FName, UWidgetAnimation*> m_WidgetAnimations;
-	
 };

@@ -3,15 +3,9 @@
 #include "HotkeyRowWidget.h"
 #include "SkillHotkeyWidget.h"
 
-#include "WidgetTree.h"
+
 #include "Components/HorizontalBox.h"
 
-void UHotkeyRowWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	m_pBox = WidgetTree->FindWidget<UHorizontalBox>(FName("Box"));
-}
 
 TArray<USkillHotkeyWidget*> UHotkeyRowWidget::GenerateHotkeyRow()
 {

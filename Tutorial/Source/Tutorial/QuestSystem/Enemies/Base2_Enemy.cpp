@@ -4,6 +4,8 @@
 #include "../Widgets/Enemy2Widget.h"
 #include "../Characters/QuestCharacter.h"
 #include "../Actors/QuestManager.h"
+#include "../Actors/RespawnActor.h"
+
 
 #include <Components/CapsuleComponent.h>
 #include <Components/WidgetComponent.h>
@@ -26,6 +28,7 @@ ABase2_Enemy::ABase2_Enemy()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	// #.PawnSensingComponent.
 	m_pSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("Sensing"));
@@ -86,9 +89,10 @@ float ABase2_Enemy::TakeDamage(float _DamageAmount, FDamageEvent const & _Damage
 		m_CurrHealth = FMath::Clamp<int>(m_CurrHealth, 0, m_MaxHealth);
 		UpdateHealthBar();
 
+		m_pKilledByActor = _pDamageCauser;
+
 		if (m_CurrHealth <= 0)
-		{
-			m_pKilledByActor = _pDamageCauser;
+		{			
 			OnDeath();
 		}
 		else
@@ -136,6 +140,7 @@ void ABase2_Enemy::OnDeath()
 
 	FTimerHandle hTimer;
 	GetWorldTimerManager().SetTimer(hTimer, [&] {
+		m_pRespawnActor->RespawnEnemy(FEnemyRespawn(m_RespawnTime, GetClass()));
 		Destroy();
 	}, 1.f, false, 4.f);
 }

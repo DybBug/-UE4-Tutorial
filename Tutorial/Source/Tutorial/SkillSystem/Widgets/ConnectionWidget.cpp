@@ -6,15 +6,6 @@
 #include <Components/Image.h>
 
 
-bool UConnectionWidget::Initialize()
-{
-	bool Result = Super::Initialize();
-
-	m_pLine = WidgetTree->FindWidget<UImage>("Line");
-
-	return Result;
-}
-
 void UConnectionWidget::Initialize(const TSubclassOf<ABase_Skill>& _ForSpellClass)
 {
 	m_ForSpellClass = _ForSpellClass;

@@ -26,10 +26,11 @@ public:
 	void SetupStartingGoals();
 	bool GoToNextSubGoals();
 
-	bool CompleteSubGoal(int _SubGoalIndex);
+	bool CompleteSubGoal(int _SubGoalIndex, bool _bFail);
 	bool SelectedInJournal();
 
 	void OnGoalCompleted(int _GoalIndex);
+	void OnGoalFailed(int _GoalIndex);
 
 	FGoalInfo GoalAtIndex(int _Index);
 
@@ -56,6 +57,9 @@ public:
 	void SetSelectedSubGoalIndex(int _Index)                 { m_SelectedSubGoalIndex = _Index; }
 	void SetQuestWidget(UQuestWidget* _pNewQuestWidget)      { m_pQuestWidget = _pNewQuestWidget; }
 	void SetListEntryWidget(UQuestListEntryWidget* _pWidget) { m_pListEntryWidget = _pWidget; }
+
+protected :
+	void _EndQuest(bool _bFail);
 
 protected :
 	UPROPERTY(EditAnywhere, Category = "Quest_Base")

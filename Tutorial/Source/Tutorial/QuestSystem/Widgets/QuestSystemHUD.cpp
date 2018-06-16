@@ -4,27 +4,13 @@
 #include "QuestWidget.h"
 #include "QuestJournalWidget.h"
 
-#include <WidgetTree.h>
 #include <Components/ScrollBoxSlot.h>
 #include <MovieScene.h>
-
 
 
 void UQuestSystemHUD::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	m_pExpBar         = WidgetTree->FindWidget<UProgressBar>(TEXT("ExpBar"));
-	m_pExpText        = WidgetTree->FindWidget<UTextBlock>(TEXT("ExpText"));
-	m_pHealthBar      = WidgetTree->FindWidget<UProgressBar>(TEXT("HealthBar"));
-	m_pHealthText     = WidgetTree->FindWidget<UTextBlock>(TEXT("HealthText"));
-	m_pCharacterIcon  = WidgetTree->FindWidget<UImage>(TEXT("CharacterIcon"));
-	m_pLevelText      = WidgetTree->FindWidget<UTextBlock>(TEXT("LevelText"));
-	m_pQuestList      = WidgetTree->FindWidget<UScrollBox>(TEXT("QuestList"));
-	m_pDistanceBorder = WidgetTree->FindWidget<UBorder>(TEXT("DistanceBorder"));
-	m_pDistanceText   = WidgetTree->FindWidget<UTextBlock>(TEXT("DistanceText"));
-	m_pMiniMapWidget  = WidgetTree->FindWidget<UMiniMapWidget>(TEXT("WB_MiniMap"));
-	m_pJournalWidget  = WidgetTree->FindWidget<UQuestJournalWidget>(TEXT("WB_QuestJournal"));
 
 	_SetupWidgetAnimations();
 }

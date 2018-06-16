@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../QuestSystem.h"
 #include "QuestCharacter.generated.h"
 
 
@@ -44,6 +45,13 @@ public:
 	void UpdateLevel();
 	void UpdateHealth();
 	void AddExpPoints(int _Amount);
+
+	void SetupPrestigePoints();
+	int GetPrestigeByRegion(ERegions _Region);
+	void SetPrestigeByRegion(ERegions _Region, int _Value);
+	void UpdateRegionWidget();
+
+	void OnNewRegionEntered(ERegions _Region);
 
 	/* Get */
 	UQuestSystemHUD* GetHUD() const { return m_pHUD; }
@@ -86,12 +94,6 @@ protected :
 	void _EKey();
 
 	UFUNCTION()
-	void _FKey();
-
-	UFUNCTION()
-	void _GKey();
-
-	UFUNCTION()
 	void _HKey();
 
 	UFUNCTION()
@@ -99,6 +101,9 @@ protected :
 
 	UFUNCTION()
 	void _JKey();
+
+	UFUNCTION()
+	void _RKey();
 
 	UFUNCTION()
 	void _TabKey();
@@ -159,4 +164,8 @@ protected :
 	bool m_bCanAttack = true;
 
 	TArray<TSubclassOf<AObject_Base>> m_ObtainedObjectClasses;
+
+	TArray<FRegionPrestige> m_PrestigePoints;
+
+	ERegions m_CurrRegion;
 };

@@ -5,17 +5,9 @@
 #include "../Actors/QuestActors/Quest_Base.h"
 #include "../Actors/QuestManager.h"
 
-#include <WidgetTree.h>
 
 
-void UQuestWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
 
-	m_pQuestName = WidgetTree->FindWidget<UTextBlock>(TEXT("QuestName"));
-	m_pSubGoalBox = WidgetTree->FindWidget<UVerticalBox>(TEXT("SubGoalBox"));
-
-}
 
 void UQuestWidget::Initialize(AQuestManager * _pQuestManager, AQuest_Base* _pAssignedQuest)
 {

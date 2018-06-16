@@ -11,7 +11,6 @@
 #include "../Actors/QuestManager.h"
 
 
-#include <WidgetTree.h>
 #include <Components/TextBlock.h>
 #include <Components/VerticalBox.h>
 #include <Components/HorizontalBox.h>
@@ -19,31 +18,11 @@
 #include <Components/Button.h>
 #include <Kismet/GameplayStatics.h>
 #include <Kismet/KismetTextLibrary.h>
+#include <Kismet/KismetSystemLibrary.h>
 
 void UQuestJournalWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	m_pQuestName         = WidgetTree->FindWidget<UTextBlock>(TEXT("QuestName"));
-	m_pQuestCategory     = WidgetTree->FindWidget<UTextBlock>(TEXT("QuestCategory"));
-	m_pQuestRegion       = WidgetTree->FindWidget<UTextBlock>(TEXT("QuestRegion"));
-	m_pSuggestedLevel    = WidgetTree->FindWidget<UTextBlock>(TEXT("SuggestedLevel"));
-	m_pDescription       = WidgetTree->FindWidget<UTextBlock>(TEXT("Description"));
-	m_pQuestGoalBox      = WidgetTree->FindWidget<UVerticalBox>(TEXT("QuestGoalBox"));
-	m_pQuestDetailsBox   = WidgetTree->FindWidget<UScrollBox>(TEXT("QuestDetailsBox"));
-	m_pExpRewardBox      = WidgetTree->FindWidget<UHorizontalBox>(TEXT("ExpRewardBox"));
-	m_pExpReward         = WidgetTree->FindWidget<UTextBlock>(TEXT("ExpReward"));
-	m_pPrestigeRewardBox = WidgetTree->FindWidget<UHorizontalBox>(TEXT("PrestigeRewardBox"));
-	m_pPrestigeReward    = WidgetTree->FindWidget<UTextBlock>(TEXT("PrestigeReward"));
-	m_pRewardBox         = WidgetTree->FindWidget<UVerticalBox>(TEXT("RewardBox"));
-	m_pButtonBox         = WidgetTree->FindWidget<UHorizontalBox>(TEXT("ButtonBox"));
-	m_pSelectButton      = WidgetTree->FindWidget<UButton>(TEXT("SelectButton"));
-	m_pCancelButton      = WidgetTree->FindWidget<UButton>(TEXT("CancelButton"));
-
-	m_pQuestList    = WidgetTree->FindWidget<UScrollBox>(TEXT("QuestList"));
-	m_pCatCurrent   = WidgetTree->FindWidget<UQuestCategoryWidget>(TEXT("CatCurrent"));
-	m_pCatCompleted = WidgetTree->FindWidget<UQuestCategoryWidget>(TEXT("CatCompleted"));
-	m_pCatFailed    = WidgetTree->FindWidget<UQuestCategoryWidget>(TEXT("CatFailed"));
 
 	m_pSelectButton->OnClicked.AddDynamic(this, &UQuestJournalWidget::_OnSelectButtonClicked);
 	m_pCancelButton->OnClicked.AddDynamic(this, &UQuestJournalWidget::_OnCancelButtonClicked);
@@ -81,7 +60,6 @@ void UQuestJournalWidget::UpdateSuggestedLevelColor()
 void UQuestJournalWidget::UpdateDescription()
 {
 	FText Desc = m_pSelectedQuest->GetCurrDescription();
-	//Desc.ToString().Replace(L"\n", LINE_TERMINATOR);
 
 	m_pDescription->SetText(Desc);
 }
@@ -92,12 +70,12 @@ void UQuestJournalWidget::GenerateSubGoals()
 
 	UClass* WidgetClass = LoadClass<UGoalEntryWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/QuestSystem/Widgets/WB_GoalEntry.WB_GoalEntry_C'"));
 	
-	TArray<FCompletedGoal> CompletedGoals = m_pSelectedQuest->GetCompletedSubGoals();
-	for (int i = 0; i < CompletedGoals.Num(); ++i)
+	TArray<FCompletedGoal> CompletedSubGoals = m_pSelectedQuest->GetCompletedSubGoals();
+	for (int i = 0; i < CompletedSubGoals.Num(); ++i)
 	{
 		UGoalEntryWidget* pGoalEntryWidget = CreateWidget<UGoalEntryWidget>(GetWorld(), WidgetClass);		
 
-		pGoalEntryWidget->Initialize(CompletedGoals[i].GoalInfo, CompletedGoals[i].bSuccessful ? EGoalState::Success : EGoalState::Failed, this, i);
+		pGoalEntryWidget->Initialize(CompletedSubGoals[i].GoalInfo, CompletedSubGoals[i].bSuccessful ? EGoalState::Success : EGoalState::Failed, this, i);
 		m_pQuestGoalBox->AddChildToVerticalBox(pGoalEntryWidget);
 	}
 
@@ -256,18 +234,26 @@ void UQuestJournalWidget::AddEntry(AQuest_Base * _pQuestActor)
 
 void UQuestJournalWidget::OnQuestClicked(UQuestListEntryWidget * _pWidget)
 {
-	if (m_pCurrQuestWidget)
+	if (UKismetSystemLibrary::IsValid(_pWidget))
 	{
-		m_pCurrQuestWidget->GetQuestButton()->SetIsEnabled(true);
+		if (m_pCurrQuestWidget)
+		{
+			m_pCurrQuestWidget->GetQuestButton()->SetIsEnabled(true);
+		}
+
+		m_pCurrQuestWidget = _pWidget;
+
+		m_pCurrQuestWidget->GetQuestButton()->SetIsEnabled(false);
+
+		m_pSelectedQuest = m_pCurrQuestWidget->GetAssignedQuest();
+
+		UpdateDetailWindow();
 	}
-
-	m_pCurrQuestWidget = _pWidget;
-
-	m_pCurrQuestWidget->GetQuestButton()->SetIsEnabled(false);
-
-	m_pSelectedQuest = m_pCurrQuestWidget->GetAssignedQuest();
-
-	UpdateDetailWindow();
+	else
+	{
+		m_pSelectedQuest = nullptr;
+		UpdateDetailWindow();
+	}	
 }
 
 void UQuestJournalWidget::_OnSelectButtonClicked()

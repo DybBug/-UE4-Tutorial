@@ -16,9 +16,8 @@ UCLASS()
 class TUTORIAL_API UEnemyWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+		
 public :
-	virtual bool Initialize() override;
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "EnemyWidget/Get")

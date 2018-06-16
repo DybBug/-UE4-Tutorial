@@ -14,14 +14,7 @@
 void USkillHotkeyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
-	m_pHotkeyName = WidgetTree->FindWidget<UTextBlock>(TEXT("HotkeyName"));
-	m_pCooldownText = WidgetTree->FindWidget<UTextBlock>(TEXT("CooldownText"));
-	m_pSkillButton = WidgetTree->FindWidget<UButton>(TEXT("SkillButton"));
-	m_pBaseImage = WidgetTree->FindWidget<UImage>(TEXT("BaseImage"));
-	m_pSkillIcon = WidgetTree->FindWidget<UImage>(TEXT("SkillIcon"));
-	m_pCooldownImage = WidgetTree->FindWidget<UImage>(TEXT("CooldownImage"));
-	
+
 #define LOCTEXT_NAMESPACE "USkillHotkeyWidget"
 	FText DisplayName = FText::Format(LOCTEXT("DisplayName", "[{0}]"), m_Hotkey.GetDisplayName());
 	m_pHotkeyName->SetText(DisplayName);

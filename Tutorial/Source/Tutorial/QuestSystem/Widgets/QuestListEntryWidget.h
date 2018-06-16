@@ -35,12 +35,20 @@ private :
 	void _OnClicked();
 
 protected :
-	
+	UPROPERTY()
 	UButton*   m_pQuestButton;
+
+	UPROPERTY()
 	UTextBlock* m_pQuestName;
+
+	UPROPERTY()
 	UTextBlock* m_pRegionName;
+
+	UPROPERTY()
 	UTextBlock* m_pSuggestedLevel;
 	
+	UPROPERTY()
 	UQuestJournalWidget* m_pJournalWidget;
+
 	AQuest_Base* m_pAssignedQuest;
 };

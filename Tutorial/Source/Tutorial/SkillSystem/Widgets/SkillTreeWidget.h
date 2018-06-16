@@ -23,8 +23,10 @@ class TUTORIAL_API USkillTreeWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+protected :
+	virtual void NativeConstruct() override;
+
 public :
-	virtual bool Initialize() override;
 
 	void Initialize(USkillTreeComponent* _pAssignedSkillTree);
 
@@ -64,6 +66,7 @@ protected :
 	UPROPERTY()
 	UScrollBox* m_pCategoriesBox;
 
+	UPROPERTY()
 	UWidgetSwitcher* m_pSubTreeSwitcher;
 
 	UPROPERTY()

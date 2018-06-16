@@ -14,11 +14,17 @@ class TUTORIAL_API UStatBarWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+protected :
+	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+
 public :
-	virtual bool Initialize() override;
+	UFUNCTION(BlueprintPure, Category = "StatBarWidget")
+	FText UpdateStatText();
 
-
-
+	UFUNCTION(BlueprintPure, Category = "StatBarWidget")
+	FLinearColor UpdateStatBarColor();
 
 	/* Get */
 	UFUNCTION(BlueprintPure, Category = "StatBarWidget")

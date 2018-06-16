@@ -13,6 +13,7 @@ class AQuest_Base;
 class AGoalActor;
 class USubGoalWidget;
 class ABase2_Enemy;
+class ABase_Npc;
 class AObject_Base;
 
 UCLASS()
@@ -42,6 +43,11 @@ public:
 
 	void OnObjectFound(TSubclassOf<AObject_Base> _FoundObjectClass);
 
+	void HasCurrentQuest(const TSubclassOf<AQuest_Base>& _QuestClass, bool& out_bIsFound, AQuest_Base* out_pQuestActor);
+	void OnTalkedToNpc(const TSubclassOf<ABase_Npc>& _NpcClass, int _NpcId);
+
+	void EndQuest(AQuest_Base* _pQuest);
+
 	/* Get */
 	AQuest_Base* GetCurrQuest() const { return m_pCurrQuest; }
 	TArray<AQuest_Base*>& GetCurrQuestActors()  { return m_CurrQuestActors; }
@@ -52,6 +58,9 @@ public:
 
 	/* Set */
 	void SetHUD(UQuestSystemHUD* _pHUD) { m_pHUD = _pHUD; }
+
+protected :
+	void _CompleteGoals();
 
 protected:
 	AQuestCharacter* m_pPlayer;
@@ -76,4 +85,6 @@ protected:
 
 	TSubclassOf<ABase2_Enemy> m_KilledEnemyClass;
 	TSubclassOf<AObject_Base> m_FoundObjectClass;
+
+	TArray<FIndexToComplete> m_IndicesToCompleteLater;
 };

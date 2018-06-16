@@ -14,7 +14,8 @@ enum class EQuestCategories : uint8
 {
 	Main_Quest UMETA(DisplayName = "MAIN_QUEST"),
 	Side_Quest UMETA(DisplayName = "SIDE_QUEST"),
-	Events     UMETA(DisplayName = "EVENTS")
+	Events     UMETA(DisplayName = "EVENTS"),
+	Max        UMETA(DisplayName = "MAX")
 };
 
 UENUM(BlueprintType)
@@ -23,7 +24,8 @@ enum class EGoalTypes : uint8
 	Custom UMETA(DisplayName = "CUSTOM"),
 	Hunt   UMETA(DisplayName = "HUNT"),
 	Find   UMETA(DisplayName = "FIND"),
-	Talk   UMETA(DisplayName = "TALK")
+	Talk   UMETA(DisplayName = "TALK"),
+	Max        UMETA(DisplayName = "MAX")
 };
 
 UENUM(BlueprintType)
@@ -31,7 +33,8 @@ enum class ERegions : uint8
 {
 	Kanto  UMETA(DisplayName = "KANTO"),
 	Johto  UMETA(DisplayName = "JOHTO"),
-	Sinnoh UMETA(DisplayName = "SINNOH")
+	Sinnoh UMETA(DisplayName = "SINNOH"),
+	Max    UMETA(DisplayName = "MAX")
 };
 
 UENUM(BlueprintType)
@@ -39,7 +42,8 @@ enum class EQuestStates : uint8
 {
 	Current_Quests   UMETA(DisplayName = "CURRENT_QUEST"),
 	Completed_Quests UMETA(DisplayName = "COMPLETED_QUEST"),
-	Failed_Quests    UMETA(DisplayName = "FAILED_QUEST")
+	Failed_Quests    UMETA(DisplayName = "FAILED_QUEST"),
+	Max        UMETA(DisplayName = "MAX")
 };
 
 UENUM(BlueprintType)
@@ -47,7 +51,8 @@ enum class EGoalState : uint8
 {
 	Current UMETA(DisplayName = "CURRENT"),
 	Success UMETA(DisplayName = "SUCCESS"),
-	Failed  UMETA(DisplayName = "FAILED")
+	Failed  UMETA(DisplayName = "FAILED"),
+	Max        UMETA(DisplayName = "MAX")
 };
 
 USTRUCT(BlueprintType)
@@ -88,6 +93,9 @@ struct FGoalInfo
 
 public :
 	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
+	int GoalId;
+
+	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
 	EGoalTypes Type = EGoalTypes::Custom;
 
 	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
@@ -125,6 +133,12 @@ public :
 
 	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
 	TSubclassOf<AActor> GoalClass;
+
+	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
+	bool bFailMeansQuestFail = false;
+
+	UPROPERTY(EditAnywhere, Category = "FGoalInfo")
+	bool bCompletesQuest = false;
 };
 
 USTRUCT(BlueprintType)
@@ -174,8 +188,75 @@ public :
 	}
 
 public :
+	UPROPERTY(EditAnywhere, Category = "FCompletedGoal")
 	int GoalIndex;
+
+	UPROPERTY(EditAnywhere, Category = "FCompletedGoal")
 	FGoalInfo GoalInfo;
+
+	UPROPERTY(EditAnywhere, Category = "FCompletedGoal")
 	bool bSuccessful;
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyRespawn
+{
+	GENERATED_BODY()
+
+public :
+	FEnemyRespawn() {};
+	FEnemyRespawn(float _Time, TSubclassOf<class ABase2_Enemy> _EnemyClass)
+		: Time(_Time),
+		  EnemyClass(_EnemyClass)
+	{
+		return;
+	}
+
+public :
+	UPROPERTY(EditAnywhere, Category = "FEnemyRespawn")
+	float Time;
+
+	UPROPERTY(EditAnywhere, Category = "FEnemyRespawn")
+	TSubclassOf<class ABase2_Enemy> EnemyClass;
+};
+
+USTRUCT(BlueprintType)
+struct FRegionPrestige
+{
+	GENERATED_BODY()
+
+public :
+	FRegionPrestige() {};
+	FRegionPrestige(ERegions _Region, int _Prestige)
+		: Region(_Region),
+		Prestige(_Prestige)
+	{
+		return;
+	}
+	 
+public :
+	UPROPERTY(EditAnywhere, Category = "FRegionPrestige")
+	ERegions Region;
+
+	UPROPERTY(EditAnywhere, Category = "FRegionPrestige")
+	int Prestige;
+};
+
+USTRUCT(BlueprintType)
+struct FIndexToComplete
+{
+	GENERATED_BODY()
+public :
+	FIndexToComplete() {};
+	FIndexToComplete(class AQuest_Base* _pQuest, int _Index)
+		: pQuest(_pQuest),
+		  Index(_Index)
+	{
+		return;
+	}
+
+public :
+	class AQuest_Base* pQuest;
+	int Index;
 };
 

@@ -7,7 +7,7 @@
 #include "../Widgets/SubTreeWidget.h"
 #include "../DragDropOperations/WidgetDragDropOperation.h"
 
-#include <WidgetTree.h>
+
 #include <Components/Button.h>
 #include <Components/TextBlock.h>
 #include <Components/ScrollBox.h>
@@ -17,18 +17,11 @@
 #include <Blueprint/SlateBlueprintLibrary.h>
 
 
-bool USkillTreeWidget::Initialize()
+void USkillTreeWidget::NativeConstruct()
 {
-	bool Result = Super::Initialize();
-	m_pCloseButton     = WidgetTree->FindWidget<UButton>("CloseButton");
-	m_pSpText          = WidgetTree->FindWidget<UTextBlock>("SpText");
-	m_pLevelText       = WidgetTree->FindWidget<UTextBlock>("LevelText");
-	m_pCategoriesBox   = WidgetTree->FindWidget<UScrollBox>("CategoriesBox");
-	m_pSubTreeSwitcher = WidgetTree->FindWidget<UWidgetSwitcher>("SubTreeSwitcher");
+	Super::NativeConstruct();
 
 	m_pCloseButton->OnClicked.AddDynamic(this, &USkillTreeWidget::_OnCloseButtonClicked);
-
-	return Result;
 }
 
 void USkillTreeWidget::Initialize(USkillTreeComponent * _pAssignedSkillTree)

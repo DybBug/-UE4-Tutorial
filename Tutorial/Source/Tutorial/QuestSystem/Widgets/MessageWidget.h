@@ -4,24 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "MiniMapWidget.generated.h"
+#include "MessageWidget.generated.h"
 
-class UImage;
+class UTextBlock;
 /**
  * 
  */
 UCLASS()
-class TUTORIAL_API UMiniMapWidget : public UUserWidget
+class TUTORIAL_API UMessageWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 public :
-
 	/* Get */
-	UImage* GetDirectionArrow() const { return m_pDirectionArrow; }
-
+	UTextBlock* GetMessage() const { return m_pMessage; }
+	
 protected :
 	UPROPERTY()
-	UImage* m_pDirectionArrow;
+	UTextBlock* m_pMessage;
 	
 };

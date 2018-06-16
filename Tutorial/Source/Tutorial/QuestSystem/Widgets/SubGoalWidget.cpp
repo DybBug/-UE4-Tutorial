@@ -5,16 +5,11 @@
 #include "../Actors/QuestActors/Quest_Base.h"
 #include "QuestWidget.h"
 
-#include <WidgetTree.h>
 
 
 void USubGoalWidget::NativeConstruct()
 {
-	Super::NativeConstruct();
-	
-	m_pGoalBorder   = WidgetTree->FindWidget<UBorder>(TEXT("GoalBorder"));
-	m_pSelectButton = WidgetTree->FindWidget<UButton>(TEXT("SelectButton"));
-	m_pGoalText     = WidgetTree->FindWidget<UTextBlock>(TEXT("GoalText"));
+	Super::NativeConstruct();	
 
 	m_pSelectButton->OnClicked.AddDynamic(this, &USubGoalWidget::_OnSelectButtonClicked);
 

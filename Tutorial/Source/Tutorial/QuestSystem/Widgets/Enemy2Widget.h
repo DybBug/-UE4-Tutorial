@@ -14,21 +14,21 @@ class UTextBlock;
 UCLASS()
 class TUTORIAL_API UEnemy2Widget : public UUserWidget
 {
-	GENERATED_BODY()
-
+	GENERATED_BODY()	
 public :
-	virtual bool Initialize() override;
-	
-public :
-
 	/* Get */
 	UProgressBar * GetHealthBar() const { return m_pHealthBar; }
 	UTextBlock*   GetNameText()   const { return m_pNameText; }
 	UTextBlock*   GetLevelText()  const { return m_pLevelText; }
 	
 protected :
+	UPROPERTY()
 	UProgressBar* m_pHealthBar;
+
+	UPROPERTY()
 	UTextBlock*   m_pNameText;
+
+	UPROPERTY()
 	UTextBlock*   m_pLevelText;
 	
 };

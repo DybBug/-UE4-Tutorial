@@ -184,6 +184,8 @@ void AQuestManager::OnPlayerMove()
 
 void AQuestManager::OnEnemyKilled(TSubclassOf<ABase2_Enemy> _Class)
 {
+	m_IndicesToCompleteLater.Empty();
+
 	m_KilledEnemyClass = _Class;
 
 	for (int CurrQuestActorIndex = 0; CurrQuestActorIndex < m_CurrQuestActors.Num(); ++CurrQuestActorIndex)
@@ -195,11 +197,18 @@ void AQuestManager::OnEnemyKilled(TSubclassOf<ABase2_Enemy> _Class)
 				CurrGoals[CurrGoalIndex].GoalClass == m_KilledEnemyClass)
 			{
 				int CurrHuntedAmount = m_CurrQuestActors[CurrQuestActorIndex]->GetCurrHuntedAmounts()[CurrGoalIndex] + 1;
+				int CompleteIndex = m_CurrQuestActors[CurrQuestActorIndex]->GetCurrGoalIndices()[CurrGoalIndex];
 
 				if (CurrHuntedAmount >= CurrGoals[CurrGoalIndex].AmountToHunt)
 				{
-					int CompleteIndex = m_CurrQuestActors[CurrQuestActorIndex]->GetCurrGoalIndices()[CurrGoalIndex];
-					m_CurrQuestActors[CurrQuestActorIndex]->CompleteSubGoal(CompleteIndex);
+					if (CurrGoals[CurrGoalIndex].bCompletesQuest)
+					{
+						m_IndicesToCompleteLater.Add(FIndexToComplete(m_CurrQuestActors[CurrQuestActorIndex], CompleteIndex));
+					}
+					else
+					{						
+						m_CurrQuestActors[CurrQuestActorIndex]->CompleteSubGoal(CompleteIndex, false);
+					}					
 				}
 				else
 				{					
@@ -213,13 +222,16 @@ void AQuestManager::OnEnemyKilled(TSubclassOf<ABase2_Enemy> _Class)
 					}
 				}
 			}
-		}
-		
+		}		
 	}
+
+	_CompleteGoals();
 }
 
 void AQuestManager::OnObjectFound(TSubclassOf<AObject_Base> _FoundObjectClass)
 {
+	m_IndicesToCompleteLater.Empty();
+
 	m_FoundObjectClass = _FoundObjectClass;
 
 	for (int CurrQuestActorIndex = 0; CurrQuestActorIndex < m_CurrQuestActors.Num(); ++CurrQuestActorIndex)
@@ -231,9 +243,139 @@ void AQuestManager::OnObjectFound(TSubclassOf<AObject_Base> _FoundObjectClass)
 				CurrGoals[CurrGoalIndex].GoalClass == m_FoundObjectClass)
 			{
 				int Index = m_CurrQuestActors[CurrQuestActorIndex]->GetCurrGoalIndices()[CurrGoalIndex];
-				m_CurrQuestActors[CurrQuestActorIndex]->CompleteSubGoal(Index);
+
+				if (CurrGoals[CurrGoalIndex].bCompletesQuest)
+				{
+					m_IndicesToCompleteLater.Add(FIndexToComplete(m_CurrQuestActors[CurrQuestActorIndex], Index));
+				}
+				else
+				{
+					m_CurrQuestActors[CurrQuestActorIndex]->CompleteSubGoal(Index, false);
+				}
 			}
 		}
+	}
+
+	_CompleteGoals();
+}
+
+void AQuestManager::HasCurrentQuest(const TSubclassOf<AQuest_Base>& _QuestClass, bool & out_bIsFound, AQuest_Base* out_pQuestActor)
+{
+	for (int i = 0; i < m_CurrQuestActors.Num(); ++i)
+	{
+		if (m_CurrQuestActors[i]->GetClass() == _QuestClass)
+		{
+			out_bIsFound = true;
+			out_pQuestActor = m_CurrQuestActors[i];
+			return;
+		}
+	}
+
+	out_bIsFound = false;
+	out_pQuestActor = nullptr;
+}
+
+void AQuestManager::OnTalkedToNpc(const TSubclassOf<ABase_Npc>& _NpcClass, int _NpcId)
+{
+	m_IndicesToCompleteLater.Empty();
+
+	for (int CurrQuestIndex = 0;  CurrQuestIndex < m_CurrQuestActors.Num(); ++CurrQuestIndex)
+	{
+		AQuest_Base* pCurrQuestActor = m_CurrQuestActors[CurrQuestIndex];
+
+		for (int CurrGoalIndex = 0; CurrGoalIndex < pCurrQuestActor->GetCurrGoals().Num(); ++CurrGoalIndex)
+		{
+			FGoalInfo CurrGoal = pCurrQuestActor->GetCurrGoals()[CurrGoalIndex];
+
+			if ((CurrGoal.Type == EGoalTypes::Talk) &&
+				(CurrGoal.GoalClass == _NpcClass) &&
+				(CurrGoal.GoalId == _NpcId))
+			{
+				int Index = m_CurrQuestActors[CurrQuestIndex]->GetCurrGoalIndices()[CurrGoalIndex];
+
+				if (CurrGoal.bCompletesQuest)
+				{
+					m_IndicesToCompleteLater.Add(FIndexToComplete(m_CurrQuestActors[CurrQuestIndex], Index));
+				}
+				else
+				{
+					pCurrQuestActor->CompleteSubGoal(pCurrQuestActor->GetCurrGoalIndices()[CurrGoalIndex], false);
+				}
+			}
+		}
+	}
+
+	_CompleteGoals();
+}
+
+void AQuestManager::EndQuest(AQuest_Base * _pQuest)
+{
+	m_CurrQuestActors.Remove(_pQuest);
+
+	switch (_pQuest->GetCurrState())
+	{
+		case EQuestStates::Current_Quests:
+		{
+			m_CurrQuestActors.Add(_pQuest);
+			break;
+		}
+		case EQuestStates::Completed_Quests:
+		{
+			m_CompletedQuestActors.Add(_pQuest);
+			break;
+		}
+		case EQuestStates::Failed_Quests:
+		{		
+			m_FailedQuestActors.Add(_pQuest);
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	m_pHUD->GetQuestJournalWidget()->AddEntry(_pQuest);
+
+	if (_pQuest == m_pCurrQuest)
+	{
+		m_pCurrQuest = nullptr;
+
+		if (UKismetSystemLibrary::IsValid(m_pCurrGoalActor))
+		{
+			m_pCurrGoalActor->Destroy();
+			m_pHUD->GetDistanceBorder()->SetVisibility(ESlateVisibility::Hidden);
+			m_pHUD->GetMiniMapWidget()->SetVisibility(ESlateVisibility::Hidden);
+		}		
+	}
+
+	if (m_CurrQuestActors.Num() > 0)
+	{
+		AQuest_Base*    pCurrQuest     = m_CurrQuestActors[0];
+		USubGoalWidget* pSubGoalWidget = m_CurrQuestActors[0]->GetQuestWidget()->GetSubGoalWidgets()[0];
+		SelectNewQuest(pCurrQuest, pSubGoalWidget);
+	}
+
+	if (_pQuest->SelectedInJournal())
+	{
+		m_pHUD->GetQuestJournalWidget()->OnQuestClicked(nullptr);
+	}
+
+	if (_pQuest->GetCurrState() == EQuestStates::Completed_Quests)
+	{
+		const FQuestInfo& QuestInfo = _pQuest->GetQuestInfo();
+		m_pPlayer->AddExpPoints(QuestInfo.CompletionReward.Experience);
+
+		int Prestige = m_pPlayer->GetPrestigeByRegion(QuestInfo.Region) + QuestInfo.CompletionReward.PrestigePoints;
+		m_pPlayer->SetPrestigeByRegion(QuestInfo.Region, Prestige);
+	}
+}
+
+void AQuestManager::_CompleteGoals()
+{
+	for (int i = 0; i < m_IndicesToCompleteLater.Num(); ++i)
+	{
+		m_IndicesToCompleteLater[i].pQuest->CompleteSubGoal(m_IndicesToCompleteLater[i].Index, false);
 	}
 }
 

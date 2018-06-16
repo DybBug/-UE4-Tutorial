@@ -17,15 +17,15 @@ class TUTORIAL_API UInteractionWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
-public  :
-	virtual bool Initialize() override;
-	
 public :
 	/* Get */
 	UTextBlock* GetName() const { return m_pName; }
 	UTextBlock* GetInteractText() const { return m_pInteractText; }
 
 protected :
+	UPROPERTY()
 	UTextBlock* m_pName;
+
+	UPROPERTY()
 	UTextBlock* m_pInteractText;
 };

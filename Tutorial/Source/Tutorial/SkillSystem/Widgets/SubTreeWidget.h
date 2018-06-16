@@ -22,10 +22,9 @@ class TUTORIAL_API USubTreeWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual bool Initialize() override;
 
 	UFUNCTION()
-		void Initialize(const FSubTreeContent& _NewContent, USkillTreeWidget* _pSkillTreeWidget);
+	void Initialize(const FSubTreeContent& _NewContent, USkillTreeWidget* _pSkillTreeWidget);
 
 	void GenerateContent();
 

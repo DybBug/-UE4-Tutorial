@@ -5,6 +5,7 @@
 #include "../../Widgets/SubGoalWidget.h"
 #include "../../Widgets/QuestSystemHUD.h"
 #include "../../Widgets/QuestJournalWidget.h"
+#include "../../Widgets/QuestListEntryWidget.h"
 #include "../QuestManager.h"
 #include "../../Characters/QuestCharacter.h"
 
@@ -74,19 +75,19 @@ bool AQuest_Base::GoToNextSubGoals()
 	return false;
 }
 
-bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex)
+bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex, bool _bFail)
 {
 	if (m_CurrGoalIndices.Contains(_SubGoalIndex))
 	{
 		FGoalInfo CurrGoalInfo = m_QuestInfo.SubGoals[_SubGoalIndex];
 
-		FCompletedGoal CompletedGoal(_SubGoalIndex, CurrGoalInfo, true);
+		FCompletedGoal CompletedGoal(_SubGoalIndex, CurrGoalInfo, !_bFail);
 		m_CompletedSubGoals.Add(CompletedGoal);
 
-		if (CurrGoalInfo.bUpdateQuestDescription)
+		if (CurrGoalInfo.bUpdateQuestDescription && !_bFail)
 		{
 #define LOCTEXT_NAMESPACE "Description"
-			FText Format = FText::Format(LOCTEXT("Description", "{0} {1}"), m_CurrDescription, CurrGoalInfo.UpdateDescription);
+			FText Format = FText::Format(LOCTEXT("Description", "{0} \n {1}"), m_CurrDescription, CurrGoalInfo.UpdateDescription);
 #undef LOCTEXT_NAMESPACE
 			m_CurrDescription = Format;
 
@@ -106,11 +107,32 @@ bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex)
 		m_pQuestWidget->GetSubGoalWidgets()[CurrWidgetIndex]->RemoveFromParent();
 		m_pQuestWidget->GetSubGoalWidgets().RemoveAt(CurrWidgetIndex);
 
-		OnGoalCompleted(_SubGoalIndex); //??
-
-		for (int i = 0; i < CurrGoalInfo.FollowingSubGoalIndices.Num(); ++i)
+		if (_bFail)
 		{
-			AddGoalForIndex(CurrGoalInfo.FollowingSubGoalIndices[i]);
+			OnGoalFailed(_SubGoalIndex);
+
+			if (CurrGoalInfo.bFailMeansQuestFail)
+			{
+				_EndQuest(_bFail);
+				return true;
+			}
+		}
+		else
+		{
+			OnGoalCompleted(_SubGoalIndex);
+
+			if (CurrGoalInfo.bCompletesQuest)
+			{
+				_EndQuest(_bFail);
+				return true;
+			}
+			else
+			{
+				for (int i = 0; i < CurrGoalInfo.FollowingSubGoalIndices.Num(); ++i)
+				{
+					AddGoalForIndex(CurrGoalInfo.FollowingSubGoalIndices[i]);
+				}
+			}
 		}
 
 		if (SelectedInJournal())
@@ -122,8 +144,8 @@ bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex)
 		{
 			m_pQuestWidget->SelectSubGoal(m_pQuestWidget->GetSubGoalWidgets()[0]);
 		}
+
 		return true;
-		
 	}
 	return false;
 }
@@ -139,6 +161,10 @@ bool AQuest_Base::SelectedInJournal()
 }
 
 void AQuest_Base::OnGoalCompleted(int _GoalIndex)
+{
+}
+
+void AQuest_Base::OnGoalFailed(int _GoalIndex)
 {
 }
 
@@ -181,7 +207,7 @@ void AQuest_Base::AddGoalForIndex(int _Index)
 		if (GoalAtIndex(_Index).bUpdateQuestDescription)
 		{
 #define LOCTEXT_NAMESPACE "Description"
-			FText Format = FText::Format(LOCTEXT("Description", "{0} {1}"), m_CurrDescription, GoalAtIndex(_Index).UpdateDescription);
+			FText Format = FText::Format(LOCTEXT("Description", "{0} \n {1}"), m_CurrDescription, GoalAtIndex(_Index).UpdateDescription);
 #undef LOCTEXT_NAMESPACE
 			m_CurrDescription = Format;
 
@@ -215,4 +241,20 @@ void AQuest_Base::AddGoalForIndex(int _Index)
 		m_pQuestWidget->GetSubGoalWidgets().Add(pSubGoalWidget);
 		m_pQuestWidget->GetSubGoalBox()->AddChild(pSubGoalWidget);
 	}
+}
+
+void AQuest_Base::_EndQuest(bool _bFail)
+{
+	for (int i = 0; i < m_CurrGoalIndices.Num(); ++i)
+	{
+		m_CompletedSubGoals.Add(FCompletedGoal(m_CurrGoalIndices[i], GoalAtIndex(m_CurrGoalIndices[i]), false));
+	}
+
+	m_CurrGoalIndices.Empty();
+	m_CurrHuntedAmounts.Empty();
+	m_CurrGoals.Empty();
+	m_CurrState = _bFail ? EQuestStates::Failed_Quests : EQuestStates::Completed_Quests;
+	m_pListEntryWidget->RemoveFromParent();
+	m_pQuestWidget->RemoveFromParent();
+	m_pQuestManager->EndQuest(this);
 }

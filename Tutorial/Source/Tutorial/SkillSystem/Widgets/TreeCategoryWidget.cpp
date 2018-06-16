@@ -3,21 +3,18 @@
 #include "TreeCategoryWidget.h"
 #include "SkillTreeWidget.h"
 
-#include <WidgetTree.h>
+
 #include <Components/TextBlock.h>
 #include <Components/Button.h>
 
-bool UTreeCategoryWidget::Initialize()
+void UTreeCategoryWidget::NativeConstruct()
 {
-	Super::Initialize();
-	m_pCategoryName = WidgetTree->FindWidget<UTextBlock>("CategoryName");
-	m_pCategoryButton = WidgetTree->FindWidget<UButton>("CategoryButton");
+	Super::NativeConstruct();
 
 	m_pCategoryButton->OnClicked.AddDynamic(this, &UTreeCategoryWidget::_OnClicked);
 	m_pCategoryButton->OnHovered.AddDynamic(this, &UTreeCategoryWidget::_OnHovered);
 	m_pCategoryButton->OnUnhovered.AddDynamic(this, &UTreeCategoryWidget::_OnUnhovered);
-	
-	return true;
+
 }
 
 void UTreeCategoryWidget::Initialize(FText _NewCategory, USkillTreeWidget* _pSkillTreeWidget, int _Index)

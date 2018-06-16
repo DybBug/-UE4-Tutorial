@@ -3,7 +3,6 @@
 #include "QuestCategoryWidget.h"
 
 
-#include <WidgetTree.h>
 #include <Components/TextBlock.h>
 #include <Components/Button.h>
 #include <Components/VerticalBox.h>
@@ -12,10 +11,6 @@
 void UQuestCategoryWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	m_pExpandButton = WidgetTree->FindWidget<UButton>(TEXT("ExpandButton"));
-	m_pCategoryName = WidgetTree->FindWidget<UTextBlock>(TEXT("CategoryName"));
-	m_pQuestBox     = WidgetTree->FindWidget<UVerticalBox>(TEXT("QuestBox"));
 
 	m_pExpandButton->OnClicked.AddDynamic(this, &UQuestCategoryWidget::_OnClicked);
 

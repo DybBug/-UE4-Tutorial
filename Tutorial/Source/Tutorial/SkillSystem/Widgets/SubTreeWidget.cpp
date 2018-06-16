@@ -10,14 +10,6 @@
 #include <Components/CanvasPanelSlot.h>
 
 
-bool USubTreeWidget::Initialize()
-{
-	bool Result = Super::Initialize();
-	m_pCanvas = WidgetTree->FindWidget<UCanvasPanel>("Canvas");
-
-	return Result;
-}
-
 void USubTreeWidget::Initialize(const FSubTreeContent& _NewContent, USkillTreeWidget* _pSkillTreeWidget)
 {
 	m_Content = _NewContent;

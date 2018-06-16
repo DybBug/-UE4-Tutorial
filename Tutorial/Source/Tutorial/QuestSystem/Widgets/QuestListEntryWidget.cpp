@@ -5,18 +5,13 @@
 #include "../Characters/QuestCharacter.h"
 #include "../Actors/QuestActors/Quest_Base.h"
 
-#include <WidgetTree.h>
+
 #include <Components/Button.h>
 #include <Components/TextBlock.h>
 
 void UQuestListEntryWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	m_pQuestButton    = WidgetTree->FindWidget<UButton>(TEXT("QuestButton"));
-	m_pQuestName      = WidgetTree->FindWidget<UTextBlock>(TEXT("QuestName"));
-	m_pRegionName     = WidgetTree->FindWidget<UTextBlock>(TEXT("RegionName"));
-	m_pSuggestedLevel = WidgetTree->FindWidget<UTextBlock>(TEXT("SuggestedLevel"));
 
 	m_pQuestButton->OnClicked.AddDynamic(this, &UQuestListEntryWidget::_OnClicked);
 
