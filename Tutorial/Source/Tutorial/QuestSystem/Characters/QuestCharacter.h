@@ -101,6 +101,9 @@ protected :
 	void _MoveRight(float _Value);
 
 	UFUNCTION()
+	void _Turn(float _Value);
+
+	UFUNCTION()
 	void _BKey();
 
 	UFUNCTION()

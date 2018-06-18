@@ -125,6 +125,7 @@ void AQuestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AQuestCharacter::_MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AQuestCharacter::_MoveRight);
+	PlayerInputComponent->BindAxis("Turn", this, &AQuestCharacter::_Turn);
 
 	PlayerInputComponent->BindKey(EKeys::B,   IE_Pressed, this, &AQuestCharacter::_BKey);
 	PlayerInputComponent->BindKey(EKeys::E,   IE_Pressed, this, &AQuestCharacter::_EKey);
@@ -476,6 +477,16 @@ void AQuestCharacter::_MoveRight(float _Value)
 
 	m_pQuestManager->OnPlayerMove();
 }
+
+void AQuestCharacter::_Turn(float _Value)
+{
+	if (_Value == 0.f)
+	{
+		return;
+	}
+	AddControllerYawInput(_Value);
+}
+
 
 void AQuestCharacter::_BKey()
 {
