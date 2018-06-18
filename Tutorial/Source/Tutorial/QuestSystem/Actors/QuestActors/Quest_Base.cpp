@@ -87,7 +87,7 @@ bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex, bool _bFail)
 		if (CurrGoalInfo.bUpdateQuestDescription && !_bFail)
 		{
 #define LOCTEXT_NAMESPACE "Description"
-			FText Format = FText::Format(LOCTEXT("Description", "{0} \n {1}"), m_CurrDescription, CurrGoalInfo.UpdateDescription);
+			FText Format = FText::Format(LOCTEXT("Description", "{0} \n\n {1}"), m_CurrDescription, CurrGoalInfo.UpdateDescription);
 #undef LOCTEXT_NAMESPACE
 			m_CurrDescription = Format;
 
@@ -139,12 +139,12 @@ bool AQuest_Base::CompleteSubGoal(int _SubGoalIndex, bool _bFail)
 		{
 			m_pQuestManager->GetHUD()->GetQuestJournalWidget()->GenerateSubGoals();
 		}
-
+			
 		if ((_SubGoalIndex == m_SelectedSubGoalIndex) && (m_pQuestManager->GetCurrQuest() == this))
 		{
-			m_pQuestWidget->SelectSubGoal(m_pQuestWidget->GetSubGoalWidgets()[0]);
+			m_pQuestWidget->SelectSubGoal(m_pQuestWidget->GetSubGoalWidgets()[0], false);
 		}
-
+	
 		return true;
 	}
 	return false;
@@ -166,6 +166,12 @@ void AQuest_Base::OnGoalCompleted(int _GoalIndex)
 
 void AQuest_Base::OnGoalFailed(int _GoalIndex)
 {
+}
+
+void AQuest_Base::OnQuestCancelled()
+{
+	RemoveWidgets();
+	m_pQuestManager->CancelQuest(this);
 }
 
 FGoalInfo AQuest_Base::GoalAtIndex(int _Index)
@@ -207,7 +213,7 @@ void AQuest_Base::AddGoalForIndex(int _Index)
 		if (GoalAtIndex(_Index).bUpdateQuestDescription)
 		{
 #define LOCTEXT_NAMESPACE "Description"
-			FText Format = FText::Format(LOCTEXT("Description", "{0} \n {1}"), m_CurrDescription, GoalAtIndex(_Index).UpdateDescription);
+			FText Format = FText::Format(LOCTEXT("Description", "{0} \n\n {1}"), m_CurrDescription, GoalAtIndex(_Index).UpdateDescription);
 #undef LOCTEXT_NAMESPACE
 			m_CurrDescription = Format;
 
@@ -243,6 +249,15 @@ void AQuest_Base::AddGoalForIndex(int _Index)
 	}
 }
 
+void AQuest_Base::RemoveWidgets()
+{
+	m_pQuestManager->GetHUD()->GetQuestWidgets().Remove(m_pQuestWidget);
+	m_pQuestWidget->RemoveFromParent();
+
+	m_pQuestManager->GetHUD()->GetQuestJournalWidget()->GetAllQuestEntryWidgets().Remove(m_pListEntryWidget);
+	m_pListEntryWidget->RemoveFromParent();
+}
+
 void AQuest_Base::_EndQuest(bool _bFail)
 {
 	for (int i = 0; i < m_CurrGoalIndices.Num(); ++i)
@@ -250,11 +265,11 @@ void AQuest_Base::_EndQuest(bool _bFail)
 		m_CompletedSubGoals.Add(FCompletedGoal(m_CurrGoalIndices[i], GoalAtIndex(m_CurrGoalIndices[i]), false));
 	}
 
+	RemoveWidgets();
+
 	m_CurrGoalIndices.Empty();
 	m_CurrHuntedAmounts.Empty();
 	m_CurrGoals.Empty();
 	m_CurrState = _bFail ? EQuestStates::Failed_Quests : EQuestStates::Completed_Quests;
-	m_pListEntryWidget->RemoveFromParent();
-	m_pQuestWidget->RemoveFromParent();
 	m_pQuestManager->EndQuest(this);
 }

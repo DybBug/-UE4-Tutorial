@@ -9,12 +9,14 @@
 
 
 class UQuestSystemHUD;
+class USaveLoadWidget;
 class UCameraComponent;
 class USpringArmComponent;
 class UParticleSystemComponent;
 class UPaperSpriteComponent;
 class AQuestManager;
 class AObject_Base;
+class UCharacterSave;
 
 UCLASS()
 class TUTORIAL_API AQuestCharacter : public ACharacter
@@ -39,7 +41,11 @@ protected:
 public:	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
+	void StartGame(bool _Load, int _LoadSlot);
+	void ContinueGame();
+	void ShowSaveWidget();
+	
 	void OnLevelUp();
 	void UpdateExp();
 	void UpdateLevel();
@@ -53,6 +59,9 @@ public:
 
 	void OnNewRegionEntered(ERegions _Region);
 
+	void SaveGameToSlot(int _ToSlot);
+	void LoadGameToSlot(int _ToSlot);
+
 	/* Get */
 	UQuestSystemHUD* GetHUD() const { return m_pHUD; }
 	AQuestManager* GetQuestManager() const { return m_pQuestManager; }
@@ -60,6 +69,10 @@ public:
 	TArray<TSubclassOf<AObject_Base>>& GetObtainedObjectClasses() { return m_ObtainedObjectClasses; }
 	
 	const int& GetCurrLevel() const { return m_CurrLevel; }
+
+	const FString& GetDefaultSlotName() const { return m_DefaultSlotName; }
+
+	const TArray<FSavedQuest>& GetLoadedQuests() const { return m_LoadedQuests; }
 
 protected :
 	void _ToggleInputMode();
@@ -101,6 +114,9 @@ protected :
 
 	UFUNCTION()
 	void _JKey();
+
+	UFUNCTION()
+	void _MKey();
 
 	UFUNCTION()
 	void _RKey();
@@ -168,4 +184,12 @@ protected :
 	TArray<FRegionPrestige> m_PrestigePoints;
 
 	ERegions m_CurrRegion;
+
+	FString m_DefaultSlotName = "PlayerSave";
+	UCharacterSave* m_pSaveGameObject;
+	int m_AmountOfSaveSlots = 6;
+
+	USaveLoadWidget* m_pSaveLoadWidget;
+
+	TArray<FSavedQuest> m_LoadedQuests;
 };

@@ -12,25 +12,24 @@ void AObject_Cone::BeginPlay()
 {
 	Super::BeginPlay();
 
-	m_pMatInstance = UKismetMaterialLibrary::CreateDynamicMaterialInstance(GetWorld(), m_pStaticMesh->GetMaterial(0));
+	m_pMatInstance = m_pStaticMesh->CreateDynamicMaterialInstance(0);
 }
 
 void AObject_Cone::OnEnterPlayerRadius(AQuestCharacter * _pPlayer)
 {
 	Super::OnEnterPlayerRadius(_pPlayer);
-	m_pMatInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(FColor(0xff00151e)));
+	m_pMatInstance->SetVectorParameterValue("Color", FColor(0xffff151e));
 }
 
 void AObject_Cone::OnLeavePlayerRadius(AQuestCharacter * _pPlayer)
 {
 	Super::OnLeavePlayerRadius(_pPlayer);
-	m_pMatInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor(FColor(0xff070707)));
+	m_pMatInstance->SetVectorParameterValue("Color", FColor(0xff070707));
 
 }
 
 void AObject_Cone::OnInteractWith(AQuestCharacter * _pPlayer)
 {
 	Super::OnInteractWith(_pPlayer);
-
 }
 

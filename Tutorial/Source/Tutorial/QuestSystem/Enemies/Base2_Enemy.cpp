@@ -116,7 +116,7 @@ void ABase2_Enemy::AttackNotify()
 	IgnorActors.Add(this);
 
 	FHitResult Result;
-	UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), StartVec, EndVec, ObjTypes, true, IgnorActors, EDrawDebugTrace::ForDuration, Result, true);
+	UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), StartVec, EndVec, ObjTypes, true, IgnorActors, EDrawDebugTrace::None, Result, true);
 	UGameplayStatics::ApplyDamage(Result.GetActor(), m_AttackDamage, nullptr, this, UDamageType::StaticClass());
 
 }

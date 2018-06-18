@@ -30,7 +30,7 @@ protected :
 
 public:	
 	void OnSwitchSubQuest();
-	void SelectNewQuest(AQuest_Base* _pQuest, USubGoalWidget* _pSubGoal);
+	void SelectNewQuest(AQuest_Base* _pQuest, USubGoalWidget* _pSubGoal, bool _bLoaded);
 
 	bool AddNewQuest(TSubclassOf<AQuest_Base> _NewQuestClass, bool _bDirectlyStart);
 
@@ -47,19 +47,31 @@ public:
 	void OnTalkedToNpc(const TSubclassOf<ABase_Npc>& _NpcClass, int _NpcId);
 
 	void EndQuest(AQuest_Base* _pQuest);
+	void FindNpcById(TSubclassOf<ABase_Npc> _NpcClass, int _Id, bool& out_bFound, ABase_Npc*& out_pNpc);
+	void CancelQuest(AQuest_Base* _pQuestActor);
 
+	void LoadQuests();
+
+	
 	/* Get */
+	const TArray<AQuest_Base*>& GetCurrQuestActors()      const { return m_CurrQuestActors; }
+	const TArray<AQuest_Base*>& GetCompletedQuestActors() const { return m_CompletedQuestActors; }
+	const TArray<AQuest_Base*>& GetFailedQuestActors()    const { return m_FailedQuestActors; }
+
 	AQuest_Base* GetCurrQuest() const { return m_pCurrQuest; }
-	TArray<AQuest_Base*>& GetCurrQuestActors()  { return m_CurrQuestActors; }
-	TArray<TSubclassOf<AQuest_Base>>& GetAllQuestClasses()  { return m_AllQuestClasses; }
 	UQuestSystemHUD* GetHUD() const { return m_pHUD; }
 	AQuestCharacter* GetPlayer() const { return m_pPlayer; }
+
+	TArray<TSubclassOf<AQuest_Base>>& GetAllQuestClasses() { return m_AllQuestClasses; }
+	TArray<ABase_Npc*>&               GetAllNpcsInWorld() { return m_AllNpcsInWorld; }
 
 
 	/* Set */
 	void SetHUD(UQuestSystemHUD* _pHUD) { m_pHUD = _pHUD; }
 
 protected :
+	void _SetupAllObjects();
+	void _SetupAllNpcsInWorld();
 	void _CompleteGoals();
 
 protected:
@@ -87,4 +99,6 @@ protected:
 	TSubclassOf<AObject_Base> m_FoundObjectClass;
 
 	TArray<FIndexToComplete> m_IndicesToCompleteLater;
+	TArray<ABase_Npc*> m_AllNpcsInWorld;
+	TArray<AObject_Base*> m_AllObjectsInWorld;
 };

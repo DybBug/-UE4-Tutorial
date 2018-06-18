@@ -9,6 +9,7 @@
 #include "Components/Image.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 
 
@@ -16,7 +17,7 @@
 void UStatBarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
+	
 	m_pDynamicMaterial = m_pStatLerpBar->GetDynamicMaterial();
 	m_pDynamicMaterial->SetVectorParameterValue("Color", m_LerpColor);
 
@@ -37,7 +38,7 @@ void UStatBarWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 FText UStatBarWidget::UpdateStatText()
 {
 #define LOCTEXT_NAMESPACE "StatText"
-	FText Format = FText::Format(LOCTEXT("StatText", "{0} / {1}"), m_DisplayedValue, m_MaxValue);
+	FText Format = FText::Format(LOCTEXT("StatText", "{0} / {1}"), (int)m_DisplayedValue, (int)m_MaxValue);
 #undef LOCTEXT_NAMESPACE
 
 	return Format;

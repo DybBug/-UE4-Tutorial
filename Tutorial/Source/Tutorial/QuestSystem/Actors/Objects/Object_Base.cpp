@@ -42,6 +42,16 @@ void AObject_Base::BeginPlay()
 }
 
 
+void AObject_Base::OnGameLoaded(AQuestManager* _pManager)
+{
+	if (_pManager->GetPlayer()->GetObtainedObjectClasses().Contains(this->GetClass()))
+	{
+		Destroy();
+	}
+}
+
+
+
 void AObject_Base::OnEnterPlayerRadius(AQuestCharacter * _pPlayer)
 {
 	m_pWidget->SetVisibility(true);

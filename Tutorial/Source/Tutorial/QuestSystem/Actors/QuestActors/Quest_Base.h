@@ -31,12 +31,15 @@ public:
 
 	void OnGoalCompleted(int _GoalIndex);
 	void OnGoalFailed(int _GoalIndex);
+	void OnQuestCancelled();
 
 	FGoalInfo GoalAtIndex(int _Index);
 
 	bool GoalAlreadyFound(int _GoalIndex);
 
 	void AddGoalForIndex(int _Index);
+
+	void RemoveWidgets();
 
 
 	/* Get */
@@ -47,16 +50,25 @@ public:
 
 	UQuestWidget* GetQuestWidget()      const { return m_pQuestWidget; }
 
-	TArray<int>&           GetCurrHuntedAmounts() { return m_CurrHuntedAmounts; }
+	TArray<int>&            GetCurrHuntedAmounts() { return m_CurrHuntedAmounts; }
 	TArray<FGoalInfo>&      GetCurrGoals()         { return m_CurrGoals;}
 	TArray<FCompletedGoal>& GetCompletedSubGoals() { return m_CompletedSubGoals; }
 	TArray<int>&            GetCurrGoalIndices()   { return m_CurrGoalIndices; }
 
 
 	/* Set */
-	void SetSelectedSubGoalIndex(int _Index)                 { m_SelectedSubGoalIndex = _Index; }
+	void SetQuestInfo(const FQuestInfo& _Info)     { m_QuestInfo = _Info; }
+	void SetCurrDescription(const FText& _Text)    { m_CurrDescription = _Text; }
+	void SetCurrState(const EQuestStates& _States) { m_CurrState = _States; }
+	void SetSelectedSubGoalIndex(int _Index)       { m_SelectedSubGoalIndex = _Index; }
+
 	void SetQuestWidget(UQuestWidget* _pNewQuestWidget)      { m_pQuestWidget = _pNewQuestWidget; }
 	void SetListEntryWidget(UQuestListEntryWidget* _pWidget) { m_pListEntryWidget = _pWidget; }
+
+	void SetCurrHuntedAmounts(const TArray<int>& _Values)            { m_CurrHuntedAmounts = _Values; }
+	void SetCurrGoals(const TArray<FGoalInfo>&  _Values)             { m_CurrGoals = _Values;}
+	void SetCompletedSubGoals(const TArray<FCompletedGoal>& _Values) { m_CompletedSubGoals = _Values; }
+	void SetCurrGoalIndices(const TArray<int>& _Values)              { m_CurrGoalIndices = _Values; }
 
 protected :
 	void _EndQuest(bool _bFail);

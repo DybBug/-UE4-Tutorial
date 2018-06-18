@@ -81,10 +81,10 @@ void USubGoalWidget::_OnSelectButtonClicked()
 {
 	if (m_pQuestWidget->IsCurrQuest())
 	{
-		m_pQuestWidget->SelectSubGoal(this);
+		m_pQuestWidget->SelectSubGoal(this, false);
 	}
 	else
 	{
-		m_pQuestWidget->GetQuestManager()->SelectNewQuest(m_pAssignedQuest, this);
+		m_pQuestWidget->GetQuestManager()->SelectNewQuest(m_pAssignedQuest, this, false);
 	}
 }

@@ -170,6 +170,15 @@ public :
 
 	UPROPERTY(EditAnywhere, Category = "FQuestInfo")
 	TArray<FGoalInfo> SubGoals;
+
+	UPROPERTY(EditAnywhere, Category = "FQuestInfo")
+	bool bHasClient;
+
+	UPROPERTY(EditAnywhere, Category = "FQuestInfo")
+	TSubclassOf<class ABase_Npc> ClientClass;
+
+	UPROPERTY(EditAnywhere, Category = "FQuestInfo")
+	int ClientId;
 };
 
 USTRUCT(BlueprintType)
@@ -256,7 +265,42 @@ public :
 	}
 
 public :
+	UPROPERTY(EditAnywhere, Category = "FIndexToComplete")
 	class AQuest_Base* pQuest;
+
+	UPROPERTY(EditAnywhere, Category = "FIndexToComplete")
 	int Index;
 };
 
+USTRUCT(BlueprintType)
+struct FSavedQuest
+{
+	GENERATED_BODY()
+public :
+	UPROPERTY(EditAnywhere, Category = "FSavedQuest")
+	TSubclassOf<AQuest_Base> QuestClass;
+
+	UPROPERTY(EditAnywhere, Category = "FSavedQuest")
+	bool bCurrentlyActive;
+
+	UPROPERTY(EditAnywhere, Category = "FSavedQuest")
+	TArray<int> CurrGoalIndices;
+
+	UPROPERTY(EditAnywhere, Category = "FSavedQuest")
+	TArray<int> HuntAmounts;
+
+	UPROPERTY(EditAnywhere, Category = "FSavedQuest")
+	int SelectedGoalIndex;
+
+	UPROPERTY(EditAnywhere, Category = "FSavedQuest")
+	TArray<FGoalInfo> CurrGoals;
+
+	UPROPERTY(EditAnywhere, Category = "FSavedQuest")
+	TArray<FCompletedGoal> CompletedGoals;
+
+	UPROPERTY(EditAnywhere, Category = "FSavedQuest")
+	EQuestStates CurrState;
+
+	UPROPERTY(EditAnywhere, Category = "FSavedQuest")
+	FText CurrDescription;
+};

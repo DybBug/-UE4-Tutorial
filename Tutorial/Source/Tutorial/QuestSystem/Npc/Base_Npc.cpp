@@ -76,16 +76,19 @@ void ABase_Npc::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetOwner(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	m_pQuestionMark->SetVisibility(UKismetSystemLibrary::IsValidClass(m_HasQuestClass));
+	AQuestCharacter* pPlayer = Cast<AQuestCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	SetOwner(pPlayer);
+
+	OnPlayerLevelUp(pPlayer->GetCurrLevel());
+	OnPlayerGainPrestige(pPlayer);
+	m_pQuestionMark->SetVisibility(m_bCanGivePrestigeQuest && m_bCanGiveLevelQuest);
 
 	Cast<UInteractionWidget>(m_pInteractionWidget->GetUserWidgetObject())->GetName()->SetText(m_Name);
 
 	if (m_bDoesPatrol && (m_PatrollingPoints.Num() > 0))
 	{
 		MoveToCurrPatrolPoint();
-	}
-	
+	}	
 }
 
 void ABase_Npc::Initialize(bool _bDoesPatrol, const TArray<APatrolPoint*>& _PatrollingPoints, int _CurrPatrolIndex, int _NpcId)
@@ -93,7 +96,7 @@ void ABase_Npc::Initialize(bool _bDoesPatrol, const TArray<APatrolPoint*>& _Patr
 	m_bDoesPatrol = _bDoesPatrol;
 	m_PatrollingPoints = _PatrollingPoints;
 	m_CurrPatrolIndex = _CurrPatrolIndex;
-	m_NpcId = _NpcId;
+	m_NpcId = _NpcId;	
 }
 
 void ABase_Npc::MoveToCurrPatrolPoint()
@@ -126,6 +129,60 @@ void ABase_Npc::ShowMessage(const FText& _Message, float _Duration, AQuestCharac
 		}, 1, false, _Duration);
 	}
 }
+void ABase_Npc::OnOwnQuestCancelled(TSubclassOf<AQuest_Base> QuestClass)
+{
+	m_pQuestionMark->SetVisibility(true);
+	m_bCanGiveLevelQuest = true;
+	m_bCanGivePrestigeQuest = true;
+}
+bool ABase_Npc::OnPlayerLevelUp(int _NewLevel)
+{
+	if(!m_HasQuestClass) return false;
+
+	if (_NewLevel >= m_RequireLevel &&
+		!m_bCanGiveLevelQuest &&
+		!m_bHasGivenQuest)
+	{
+		m_pQuestionMark->SetVisibility(true);
+		m_bCanGiveLevelQuest = true;
+		return true;
+	}
+
+	return false;
+}
+bool ABase_Npc::OnPlayerGainPrestige(AQuestCharacter * _pPlayer)
+{
+	if(!m_HasQuestClass) return false;
+
+	int PlayerPrestige = _pPlayer->GetPrestigeByRegion(m_RequiredPrestige.Region);
+
+	if (PlayerPrestige >= m_RequiredPrestige.Prestige &&
+		!m_bCanGivePrestigeQuest &&
+		!m_bHasGivenQuest)
+	{
+		m_pQuestionMark->SetVisibility(true);
+		m_bCanGivePrestigeQuest = true;
+		return true;
+	}
+
+	return false;
+}
+void ABase_Npc::OnQuestsLoaded(AQuestManager* _pManager)
+{
+	if (m_HasQuestClass)
+	{
+		if (_pManager->GetAllQuestClasses().Contains(m_HasQuestClass))
+		{
+			m_pQuestionMark->SetVisibility(false);
+
+		}
+		else
+		{
+			OnPlayerLevelUp(_pManager->GetPlayer()->GetCurrLevel());
+			OnPlayerGainPrestige(_pManager->GetPlayer());
+		}
+	}
+}
 void ABase_Npc::OnEnterPlayerRadius(AQuestCharacter* _pPlayer)
 {
 	m_bInPlayerRadius = true;
@@ -145,14 +202,18 @@ void ABase_Npc::OnLeavePlayerRadius(AQuestCharacter* _pPlayer)
 
 void ABase_Npc::OnInteractWith(AQuestCharacter* _pPlayer)
 {
-	if (UKismetSystemLibrary::IsValidClass(m_HasQuestClass))
+	if ((m_bCanGivePrestigeQuest && m_bCanGiveLevelQuest) && !m_bHasGivenQuest)
 	{
-		if (!_pPlayer->GetQuestManager()->GetAllQuestClasses().Contains(m_HasQuestClass))
+		if (UKismetSystemLibrary::IsValidClass(m_HasQuestClass))
 		{
-			_pPlayer->GetQuestManager()->AddNewQuest(m_HasQuestClass, true);
-			m_pQuestionMark->SetVisibility(false);
-			return;
-		}
+			if (!_pPlayer->GetQuestManager()->GetAllQuestClasses().Contains(m_HasQuestClass))
+			{
+				_pPlayer->GetQuestManager()->AddNewQuest(m_HasQuestClass, true);
+				m_pQuestionMark->SetVisibility(false);
+				m_bHasGivenQuest = true;
+				return;
+			}
+		}	
 	}
 
 	OnTalkedTo(_pPlayer);

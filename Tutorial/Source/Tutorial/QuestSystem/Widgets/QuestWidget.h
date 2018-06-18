@@ -27,8 +27,8 @@ public :
 	void GenerateSubWidgets();
 	void UpdateQuest();
 	bool IsCurrQuest();
-	void SelectSubGoal(USubGoalWidget* _pClickedSubGoal);
-	void OnQuestSelected(USubGoalWidget* _pClickedSubGoal);
+	void SelectSubGoal(USubGoalWidget* _pClickedSubGoal, bool _bLoaded);
+	void OnQuestSelected(USubGoalWidget* _pClickedSubGoal, bool _bLoaded);
 
 	/* Get */ 
 	UTextBlock*    GetQuestName()    const { return m_pQuestName; }

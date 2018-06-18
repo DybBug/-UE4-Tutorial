@@ -37,6 +37,11 @@ void UQuestJournalWidget::Initialize(AQuestManager * _pQuestManager)
 
 void UQuestJournalWidget::UpdateSuggestedLevelColor()
 {
+	if (!m_pSelectedQuest)
+	{
+		return;
+	}
+
 	FLinearColor Color;
 	if (m_pPlayer->GetCurrLevel() > m_pSelectedQuest->GetQuestInfo().SuggestedLevel)
 	{
@@ -260,12 +265,13 @@ void UQuestJournalWidget::_OnSelectButtonClicked()
 {
 	if (m_pQuestManager->GetCurrQuest() != m_pSelectedQuest)
 	{		
-		m_pQuestManager->SelectNewQuest(m_pSelectedQuest, m_pSelectedQuest->GetQuestWidget()->GetSubGoalWidgets()[0]);
+		m_pQuestManager->SelectNewQuest(m_pSelectedQuest, m_pSelectedQuest->GetQuestWidget()->GetSubGoalWidgets()[0], false);
 	}
 }
 
 void UQuestJournalWidget::_OnCancelButtonClicked()
 {
+	m_pSelectedQuest->OnQuestCancelled();
 }
 
 

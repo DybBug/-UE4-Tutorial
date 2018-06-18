@@ -6,9 +6,12 @@
 #include "../Widgets/SubGoalWidget.h"
 #include "../Widgets/QuestJournalWidget.h"
 #include "../Widgets/QuestListEntryWidget.h"
+#include "../Widgets/SaveLoadWidget.h"
 #include "../Actors/QuestManager.h"
 #include "../Actors/QuestActors/Quest_Base.h"
 #include "../Interfaces/Interactable_Interface.h"
+#include "../Npc/Base_Npc.h"
+#include "../SaveGames/CharacterSave.h"
 
 #include <UObject/ConstructorHelpers.h>
 #include <Camera/CameraComponent.h>
@@ -95,29 +98,16 @@ void AQuestCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// HUD 困连 积己.
-	if (m_pHUDClass)
-	{
-		SetupPrestigePoints();
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
 
-		m_pHUD = CreateWidget<UQuestSystemHUD>(GetWorld(), m_pHUDClass);
-		m_pHUD->AddToViewport();
+	UClass* pWidgetClass = LoadClass<USaveLoadWidget>(nullptr, TEXT("WidgetBlueprint'/Game/TutorialContent/QuestSystem/Widgets/WB_SaveLoad.WB_SaveLoad_C'"));
+	m_pSaveLoadWidget = CreateWidget<USaveLoadWidget>(GetWorld(), pWidgetClass);
+	m_pSaveLoadWidget->Initialize(this, m_AmountOfSaveSlots, true);
+	m_pSaveLoadWidget->AddToViewport(10);
 
-		FActorSpawnParameters Param;
-		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		m_pQuestManager = GetWorld()->SpawnActor<AQuestManager>(AQuestManager::StaticClass(), Param);
-
-		m_pHUD->SetQuestManager(m_pQuestManager);
-
-		m_pQuestManager->SetHUD(m_pHUD);
-		
-		m_pHUD->GetQuestJournalWidget()->Initialize(m_pQuestManager);
-
-		UpdateLevel();
-		UpdateExp();
-		UpdateHealth();
-		UpdateRegionWidget();
-	}	
+	APlayerController* pController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	pController->bShowMouseCursor = true;
+	m_bWidgetInput = true;
 }
 
 float AQuestCharacter::TakeDamage(float _DamageAmount, FDamageEvent const& _DamageEvent, AController* _pEventInstigator, AActor* _pDamageCauser)
@@ -141,12 +131,78 @@ void AQuestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindKey(EKeys::H,   IE_Pressed, this, &AQuestCharacter::_HKey);
 	PlayerInputComponent->BindKey(EKeys::I,   IE_Pressed, this, &AQuestCharacter::_IKey);
 	PlayerInputComponent->BindKey(EKeys::J,   IE_Pressed, this, &AQuestCharacter::_JKey);
+	PlayerInputComponent->BindKey(EKeys::M,   IE_Pressed, this, &AQuestCharacter::_MKey);
 	PlayerInputComponent->BindKey(EKeys::R,   IE_Pressed, this, &AQuestCharacter::_RKey);
 	PlayerInputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &AQuestCharacter::_TabKey);
 
 	PlayerInputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &AQuestCharacter::_LeftMouseButton);
 
 
+}
+
+void AQuestCharacter::StartGame(bool _bLoad, int _LoadSlot)
+{
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
+	m_pSaveLoadWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	if (_bLoad)
+	{
+		LoadGameToSlot(_LoadSlot);
+	}
+
+	// HUD 困连 积己.
+	if (m_pHUDClass)
+	{
+		SetupPrestigePoints();
+
+		m_pHUD = CreateWidget<UQuestSystemHUD>(GetWorld(), m_pHUDClass);
+		m_pHUD->AddToViewport();
+
+		FActorSpawnParameters Param;
+		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		m_pQuestManager = GetWorld()->SpawnActor<AQuestManager>(AQuestManager::StaticClass(), Param);
+
+		m_pHUD->SetQuestManager(m_pQuestManager);
+
+		m_pQuestManager->SetHUD(m_pHUD);
+
+		m_pHUD->GetQuestJournalWidget()->Initialize(m_pQuestManager);
+
+		UpdateLevel();
+		UpdateExp();
+		UpdateHealth();
+		UpdateRegionWidget();
+
+		_ToggleInputMode();
+
+		if (_bLoad)
+		{
+			m_pQuestManager->LoadQuests();
+		}
+
+	//	m_pHUD->AddToViewport();
+	}	
+}
+
+void AQuestCharacter::ContinueGame()
+{
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
+	m_pSaveLoadWidget->SetVisibility(ESlateVisibility::Hidden);
+	_ToggleInputMode();
+}
+
+void AQuestCharacter::ShowSaveWidget()
+{
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+	if (!m_bWidgetInput)
+	{
+		_ToggleInputMode();		
+	}
+
+	m_pSaveLoadWidget->SetLoad(false);
+	m_pSaveLoadWidget->Update();
+	m_pSaveLoadWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void AQuestCharacter::OnLevelUp()
@@ -170,6 +226,11 @@ void AQuestCharacter::OnLevelUp()
 
 	UGameplayStatics::PlaySound2D(GetWorld(), m_pLevelUpSound, 0.5f, 1.2f);
 	m_pLevelUpEffect->SetActive(true);
+
+	for (auto& pNpc : m_pQuestManager->GetAllNpcsInWorld())
+	{
+		pNpc->OnPlayerLevelUp(m_CurrLevel);
+	}
 }
 
 void AQuestCharacter::UpdateExp()
@@ -223,6 +284,10 @@ void AQuestCharacter::SetupPrestigePoints()
 
 int AQuestCharacter::GetPrestigeByRegion(ERegions _Region)
 {
+	if(m_PrestigePoints.Num() == 0)
+	{
+		return 0;
+	}
 	return m_PrestigePoints[(int8)_Region].Prestige;
 }
 
@@ -234,6 +299,11 @@ void AQuestCharacter::SetPrestigeByRegion(ERegions _Region, int _Value)
 	if (m_CurrRegion == _Region)
 	{
 		UpdateRegionWidget();
+	}
+
+	for (auto& pNpc : m_pQuestManager->GetAllNpcsInWorld())
+	{
+		pNpc->OnPlayerGainPrestige(this);
 	}
 }
 
@@ -252,6 +322,81 @@ void AQuestCharacter::OnNewRegionEntered(ERegions _Region)
 	{
 		m_CurrRegion = _Region;
 		UpdateRegionWidget();
+	}
+}
+
+void AQuestCharacter::SaveGameToSlot(int _ToSlot)
+{
+	m_pSaveGameObject = Cast<UCharacterSave>(UGameplayStatics::CreateSaveGameObject(UCharacterSave::StaticClass()));
+
+	if (m_pSaveGameObject)
+	{
+		m_pSaveGameObject->SetSavedExp(m_CurrExp);
+		m_pSaveGameObject->SetSavedExpForNextLevel(m_ExpForNextLevel);
+		m_pSaveGameObject->SetSavedLevel(m_CurrLevel);
+		m_pSaveGameObject->SetSavedHealth(m_CurrHealth);
+		m_pSaveGameObject->SetSavedMaxHealth(m_MaxHealth);
+		m_pSaveGameObject->SetSavedObtainedObjects(m_ObtainedObjectClasses);
+		m_pSaveGameObject->SetSavedPrestigePoints(m_PrestigePoints);
+		m_pSaveGameObject->SetSavedLocation(GetActorLocation());
+		m_pSaveGameObject->SetSavedHour(FDateTime::Now().GetHour());
+		m_pSaveGameObject->SetSavedMinute(FDateTime::Now().GetMinute());
+
+		TArray<FSavedQuest> LocalSavedQuests;
+		TArray<AQuest_Base*> LocalQuestActors = m_pQuestManager->GetCurrQuestActors();
+		LocalQuestActors.Append(m_pQuestManager->GetCompletedQuestActors());
+		LocalQuestActors.Append(m_pQuestManager->GetFailedQuestActors());
+
+		for (auto& pLocalQuestActor : LocalQuestActors)
+		{
+			FSavedQuest SavedQuest;
+
+			SavedQuest.QuestClass = pLocalQuestActor->GetClass();
+			SavedQuest.CurrGoalIndices = pLocalQuestActor->GetCurrGoalIndices();
+			SavedQuest.HuntAmounts = pLocalQuestActor->GetCurrHuntedAmounts();
+			SavedQuest.SelectedGoalIndex = pLocalQuestActor->GetSelectedSubGoalIndex();
+			SavedQuest.CurrGoals = pLocalQuestActor->GetCurrGoals();
+			SavedQuest.CompletedGoals = pLocalQuestActor->GetCompletedSubGoals();
+			SavedQuest.CurrState = pLocalQuestActor->GetCurrState();
+			SavedQuest.CurrDescription = pLocalQuestActor->GetCurrDescription();		
+
+			if(m_pQuestManager->GetCurrQuest())
+			{
+				SavedQuest.bCurrentlyActive = (pLocalQuestActor == m_pQuestManager->GetCurrQuest());
+			}
+			else
+			{
+				SavedQuest.bCurrentlyActive = false;
+			}
+
+			LocalSavedQuests.Add(SavedQuest);
+		}
+
+		m_pSaveGameObject->SetSavedQuests(LocalSavedQuests);
+
+		FString DefaultSlotName = m_DefaultSlotName;
+		UGameplayStatics::SaveGameToSlot(m_pSaveGameObject, DefaultSlotName.Append(FString::FromInt(_ToSlot)), 0);
+	}
+}
+
+void AQuestCharacter::LoadGameToSlot(int _ToSlot)
+{
+	FString DefaultSlotName = m_DefaultSlotName;
+	m_pSaveGameObject = Cast<UCharacterSave>(UGameplayStatics::LoadGameFromSlot(DefaultSlotName.Append(FString::FromInt(_ToSlot)), 0));
+
+	if (m_pSaveGameObject)
+	{
+		m_CurrExp               = m_pSaveGameObject->GetSavedExp();
+		m_ExpForNextLevel       = m_pSaveGameObject->GetSavedExpForNextLevel();
+		m_CurrLevel             = m_pSaveGameObject->GetSavedLevel();
+		m_CurrHealth            = m_pSaveGameObject->GetSavedHealth();
+		m_MaxHealth             = m_pSaveGameObject->GetSavedMaxHealth();
+		m_ObtainedObjectClasses = m_pSaveGameObject->GetSavedObtainedObjects();
+		m_PrestigePoints        = m_pSaveGameObject->GetSavedPrestigePoints();
+		m_CurrRegion            = m_pSaveGameObject->GetSavedRegion();
+		SetActorLocation(m_pSaveGameObject->GetSavedLocation());
+
+		m_LoadedQuests = m_pSaveGameObject->GetSavedQuests();
 	}
 }
 
@@ -395,6 +540,11 @@ void AQuestCharacter::_JKey()
 	_ToggleInputMode();	
 }
 
+void AQuestCharacter::_MKey()
+{
+	ShowSaveWidget();
+}
+
 void AQuestCharacter::_RKey()
 {
 	static bool bSwitch = false;
@@ -421,7 +571,7 @@ void AQuestCharacter::_TabKey()
 			int Index = pQuestWidget->GetSubGoalWidgets().Find(pQuestWidget->GetSelectedSubGoalWidget());
 			Index = (Index < (pQuestWidget->GetSubGoalWidgets().Num() - 1)) ? ++Index : 0;			
 
-			pQuestWidget->SelectSubGoal(pQuestWidget->GetSubGoalWidgets()[Index]);
+			pQuestWidget->SelectSubGoal(pQuestWidget->GetSubGoalWidgets()[Index], false);
 		}
 	}
 }
@@ -440,7 +590,7 @@ void AQuestCharacter::_LeftMouseButton()
 		TArray<AActor*> IgnoreActor;
 		IgnoreActor.Add(this);
 		TArray<FHitResult> HitResults;
-		UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), GetActorLocation(), GetActorLocation(), 300.f, ObjTypes, true, IgnoreActor, EDrawDebugTrace::Persistent, HitResults, true);
+		UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), GetActorLocation(), GetActorLocation(), 300.f, ObjTypes, true, IgnoreActor, EDrawDebugTrace::None, HitResults, true);
 
 		for (int i = 0; i < HitResults.Num(); ++i)
 		{

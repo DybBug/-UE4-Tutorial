@@ -54,7 +54,7 @@ public:
 
 	TArray<UQuestWidget*>&          GetQuestWidgets()     { return m_QuestWidgets; }
 	TMap<FName, UWidgetAnimation*>& GetWidgetAnimations() { return m_WidgetAnimations; }
-	UWidgetAnimation* GetWidgetAnimation(FName _Name)           const { return m_WidgetAnimations[_Name]; }
+	UWidgetAnimation* GetWidgetAnimation(FName _Name) const { return m_WidgetAnimations[_Name]; }
 
 
 	const bool& GetSlideOut() const { return m_bSlideOut; }

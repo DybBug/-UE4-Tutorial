@@ -73,7 +73,7 @@ bool UQuestWidget::IsCurrQuest()
 	return (m_pAssignedQuest == m_pQuestManager->GetCurrQuest());
 }
 
-void UQuestWidget::SelectSubGoal(USubGoalWidget* _pClickedSubGoal)
+void UQuestWidget::SelectSubGoal(USubGoalWidget* _pClickedSubGoal, bool _bLoaded)
 {
 	if (m_pSelectedSubGoalWidget)
 	{
@@ -85,17 +85,18 @@ void UQuestWidget::SelectSubGoal(USubGoalWidget* _pClickedSubGoal)
 	{
 		m_pSelectedSubGoalWidget = _pClickedSubGoal;
 		m_pSelectedSubGoalWidget->GetGoalBorder()->SetContentColorAndOpacity(FLinearColor::White);
-		m_pSelectedSubGoalWidget->GetSelectButton()->SetIsEnabled(false);		
-		
-		m_pAssignedQuest->SetSelectedSubGoalIndex(m_pSelectedSubGoalWidget->GetGoalIndex());
+		m_pSelectedSubGoalWidget->GetSelectButton()->SetIsEnabled(false);
 
-		m_pQuestManager->OnSwitchSubQuest();
-	}
-	
+		if (!_bLoaded)
+		{
+			m_pAssignedQuest->SetSelectedSubGoalIndex(m_pSelectedSubGoalWidget->GetGoalIndex());
+		}
+		m_pQuestManager->OnSwitchSubQuest();		
+	}	
 }
 
-void UQuestWidget::OnQuestSelected(USubGoalWidget* _pClickedSubGoal)
+void UQuestWidget::OnQuestSelected(USubGoalWidget* _pClickedSubGoal, bool _bLoaded)
 {
 	m_pQuestName->SetIsEnabled(true);
-	SelectSubGoal(_pClickedSubGoal);
+	SelectSubGoal(_pClickedSubGoal, _bLoaded);
 }

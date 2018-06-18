@@ -9,6 +9,8 @@
 #include "../Widgets/QuestSystemHUD.h"
 #include "../Widgets/QuestJournalWidget.h"
 #include "../Widgets/SubgoalWidget.h"
+#include "../Npc/Base_Npc.h"
+#include "../Actors/Objects/Object_Base.h"
 
 #include <Engine/World.h>
 #include <Kismet/KismetMathLibrary.h>
@@ -37,6 +39,8 @@ void AQuestManager::BeginPlay()
 	Super::BeginPlay();
 
 	m_pPlayer = Cast<AQuestCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	_SetupAllObjects();
+	_SetupAllNpcsInWorld();
 }
 
 void AQuestManager::OnSwitchSubQuest()
@@ -65,7 +69,6 @@ void AQuestManager::OnSwitchSubQuest()
 		ESlateVisibility Visibility = (m_CurrDistance > m_ShowDirectionArrowAmount) ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden;
 		m_pHUD->GetMiniMapWidget()->GetDirectionArrow()->SetVisibility(Visibility);
 		m_pHUD->GetDistanceBorder()->SetVisibility(ESlateVisibility::HitTestInvisible);
-
 		
 	}
 	else
@@ -77,17 +80,17 @@ void AQuestManager::OnSwitchSubQuest()
 
 }
 
-void AQuestManager::SelectNewQuest(AQuest_Base * _pQuest, USubGoalWidget * _pSubGoal)
+void AQuestManager::SelectNewQuest(AQuest_Base * _pQuest, USubGoalWidget * _pSubGoal, bool _bLoaded)
 {
 	if (m_pCurrQuest)
 	{
 		m_pCurrQuest->GetQuestWidget()->GetQuestName()->SetIsEnabled(false);
-		m_pCurrQuest->GetQuestWidget()->SelectSubGoal(nullptr);
+		m_pCurrQuest->GetQuestWidget()->SelectSubGoal(nullptr, false);
 		m_pCurrQuest->GetQuestWidget()->SetSelectedSubGoalWidget(nullptr);	
 	}
 
 	m_pCurrQuest = _pQuest;
-	m_pCurrQuest->GetQuestWidget()->OnQuestSelected(_pSubGoal);
+	m_pCurrQuest->GetQuestWidget()->OnQuestSelected(_pSubGoal, _bLoaded);
 }
 
 bool AQuestManager::AddNewQuest(TSubclassOf<AQuest_Base> _NewQuestClass, bool _bDirectlyStart)
@@ -118,7 +121,7 @@ bool AQuestManager::AddNewQuest(TSubclassOf<AQuest_Base> _NewQuestClass, bool _b
 		if (_bDirectlyStart || (m_CurrQuestActors.Num() <= 1))
 		{
 			USubGoalWidget* pSubGoalidget = pSpawnedQuestActor->GetQuestWidget()->GetSubGoalWidgets()[0];
-			SelectNewQuest(pSpawnedQuestActor, pSubGoalidget);			
+			SelectNewQuest(pSpawnedQuestActor, pSubGoalidget, false);			
 		}
 
 		if (m_pHUD->GetSlideOut())
@@ -353,7 +356,7 @@ void AQuestManager::EndQuest(AQuest_Base * _pQuest)
 	{
 		AQuest_Base*    pCurrQuest     = m_CurrQuestActors[0];
 		USubGoalWidget* pSubGoalWidget = m_CurrQuestActors[0]->GetQuestWidget()->GetSubGoalWidgets()[0];
-		SelectNewQuest(pCurrQuest, pSubGoalWidget);
+		SelectNewQuest(pCurrQuest, pSubGoalWidget, false);
 	}
 
 	if (_pQuest->SelectedInJournal())
@@ -368,6 +371,164 @@ void AQuestManager::EndQuest(AQuest_Base * _pQuest)
 
 		int Prestige = m_pPlayer->GetPrestigeByRegion(QuestInfo.Region) + QuestInfo.CompletionReward.PrestigePoints;
 		m_pPlayer->SetPrestigeByRegion(QuestInfo.Region, Prestige);
+	}
+}
+
+void AQuestManager::FindNpcById(TSubclassOf<ABase_Npc> _NpcClass, int _Id, bool& out_bFound, ABase_Npc*& out_pNpc)
+{
+	for (auto& pCurrNpc : m_AllNpcsInWorld)
+	{
+		if (pCurrNpc->GetClass() == _NpcClass &&
+			pCurrNpc->GetNpcId() == _Id)
+		{
+			out_bFound = true;
+			out_pNpc = pCurrNpc;
+		}
+	}
+
+	out_bFound = false;
+	out_pNpc = nullptr;
+}
+
+void AQuestManager::CancelQuest(AQuest_Base * _pQuestActor)
+{
+	m_CurrQuestActors.Remove(_pQuestActor);
+
+	if (_pQuestActor == m_pCurrQuest)
+	{
+		m_pCurrQuest = nullptr;
+
+		if (UKismetSystemLibrary::IsValid(m_pCurrGoalActor))
+		{
+			m_pCurrGoalActor->Destroy();
+			m_pHUD->GetDistanceBorder()->SetVisibility(ESlateVisibility::Hidden);
+			m_pHUD->GetMiniMapWidget()->SetVisibility(ESlateVisibility::Hidden);
+		}		
+	}
+
+	if (m_CurrQuestActors.Num() > 0)
+	{
+		AQuest_Base*    pCurrQuest     = m_CurrQuestActors[0];
+		USubGoalWidget* pSubGoalWidget = m_CurrQuestActors[0]->GetQuestWidget()->GetSubGoalWidgets()[0];
+		SelectNewQuest(pCurrQuest, pSubGoalWidget, false);
+	}
+
+	if (_pQuestActor->SelectedInJournal())
+	{
+		m_pHUD->GetQuestJournalWidget()->OnQuestClicked(nullptr);
+	}
+
+	FQuestInfo QuestInfo = _pQuestActor->GetQuestInfo();
+	if (QuestInfo.bHasClient)
+	{	
+		bool bFound;
+		ABase_Npc* pNpc;
+
+		FindNpcById(QuestInfo.ClientClass, QuestInfo.ClientId, bFound, pNpc);
+
+		if (bFound)
+		{
+			pNpc->OnOwnQuestCancelled(_pQuestActor->GetClass());
+		}
+	}
+
+	m_AllQuestClasses.Remove(_pQuestActor->GetClass());
+	_pQuestActor->Destroy();
+}
+
+void AQuestManager::LoadQuests()
+{
+	for (auto& LoadedQuest : m_pPlayer->GetLoadedQuests())
+	{
+		m_AllQuestClasses.Add(LoadedQuest.QuestClass);
+
+		FActorSpawnParameters Param;
+		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		AQuest_Base* pSpawnedQuest = GetWorld()->SpawnActor<AQuest_Base>(LoadedQuest.QuestClass, Param);
+		pSpawnedQuest->Initialize(this);
+
+	
+		pSpawnedQuest->SetCurrGoalIndices(LoadedQuest.CurrGoalIndices);
+		pSpawnedQuest->SetCurrHuntedAmounts(LoadedQuest.HuntAmounts);
+		pSpawnedQuest->SetSelectedSubGoalIndex(LoadedQuest.SelectedGoalIndex);
+		pSpawnedQuest->SetCurrGoals(LoadedQuest.CurrGoals);
+		pSpawnedQuest->SetCompletedSubGoals(LoadedQuest.CompletedGoals);
+		pSpawnedQuest->SetCurrState(LoadedQuest.CurrState);
+		pSpawnedQuest->SetCurrDescription(LoadedQuest.CurrDescription);
+
+		switch (pSpawnedQuest->GetCurrState())
+		{
+			case EQuestStates::Current_Quests :
+			{
+				 m_CurrQuestActors.Add(pSpawnedQuest);
+				break;
+			}
+			case EQuestStates::Completed_Quests :
+			{
+				m_CompletedQuestActors.Add(pSpawnedQuest);;
+				break;
+			}
+			case EQuestStates::Failed_Quests :
+			{
+				m_FailedQuestActors.Add(pSpawnedQuest);;
+				break;
+			}
+			default :
+			{
+				break;
+			}
+		}	
+		m_pHUD->GetQuestJournalWidget()->AddEntry(pSpawnedQuest);
+
+		if (pSpawnedQuest->GetCurrState() == EQuestStates::Current_Quests)
+		{
+			UQuestWidget* pWidget = m_pHUD->AddQuestToList(pSpawnedQuest);
+			pSpawnedQuest->SetQuestWidget(pWidget);
+			pWidget->UpdateQuest();
+
+			if (LoadedQuest.bCurrentlyActive)
+			{
+				int Index = pSpawnedQuest->GetCurrGoalIndices().Find(pSpawnedQuest->GetSelectedSubGoalIndex());
+				SelectNewQuest(pSpawnedQuest, pWidget->GetSubGoalWidgets()[Index], true);
+
+				if (m_pHUD->GetSlideOut())
+				{
+					m_pHUD->PlayAnimation(m_pHUD->GetWidgetAnimation("SlideOut"));
+					m_pHUD->SetSlideOut(false);
+				}
+			}
+		}
+	}
+
+	for (auto& pNpc : m_AllNpcsInWorld)
+	{
+		pNpc->OnQuestsLoaded(this);
+	}
+
+	for (auto& pObject : m_AllObjectsInWorld)
+	{
+		pObject->OnGameLoaded(this);
+	}
+	
+}
+
+void AQuestManager::_SetupAllObjects()
+{
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AObject_Base::StaticClass(), Actors);
+	for (auto& pActor : Actors)
+	{
+		m_AllObjectsInWorld.Emplace(Cast<AObject_Base>(pActor));
+	}
+}
+
+void AQuestManager::_SetupAllNpcsInWorld()
+{
+	TArray<AActor*> AllActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABase_Npc::StaticClass(), AllActors);
+	for (auto& Actor : AllActors)
+	{
+		m_AllNpcsInWorld.Emplace(Cast<ABase_Npc>(Actor));
 	}
 }
 

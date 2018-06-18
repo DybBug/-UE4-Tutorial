@@ -9,6 +9,7 @@
 
 class UStaticMeshComponent;
 class UWidgetComponent;
+class AQuestManager;
 
 UCLASS()
 class TUTORIAL_API AObject_Base : public AActor, public IInteractable_Interface
@@ -24,6 +25,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public :
+	void OnGameLoaded(AQuestManager* _pManager);
+
 	/* Interface */
 	virtual void OnEnterPlayerRadius(AQuestCharacter* _pPlayer) override;
 	virtual void OnLeavePlayerRadius(AQuestCharacter* _pPlayer) override;

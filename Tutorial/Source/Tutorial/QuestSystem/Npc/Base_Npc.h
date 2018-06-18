@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "../Interfaces/Interactable_Interface.h"
+#include "../QuestSystem.h"
 #include "Base_Npc.generated.h"
 
 class USpringArmComponent;
@@ -12,6 +13,7 @@ class UPaperSpriteComponent;
 class UWidgetComponent;
 class AQuest_Base;
 class APatrolPoint;
+class AQuestManager;
 
 UCLASS()
 class TUTORIAL_API ABase_Npc : public ACharacter,
@@ -32,11 +34,19 @@ public :
 	void MoveToCurrPatrolPoint();
 	virtual void OnTalkedTo(AQuestCharacter* _pPlayer);
 	void ShowMessage(const FText& _Message, float _Duration, AQuestCharacter* _pPlayer);
+	void OnOwnQuestCancelled(TSubclassOf<AQuest_Base> QuestClass);
+
+	bool OnPlayerLevelUp(int _NewLevel);
+	bool OnPlayerGainPrestige(AQuestCharacter* _pPlayer);
+	void OnQuestsLoaded(AQuestManager* _pManager);
 
 	/* Interface Functions */
 	virtual void OnEnterPlayerRadius(AQuestCharacter* _pPlayer) override;
 	virtual void OnLeavePlayerRadius(AQuestCharacter* _pPlayer) override;
 	virtual void OnInteractWith(AQuestCharacter* _pPlayer) override;
+
+	/* Get */
+	const int& GetNpcId() const { return m_NpcId; }
 	
 protected :
 	UPROPERTY(VisibleDefaultsOnly, Category = "Base_Npc|Components")
@@ -78,4 +88,20 @@ protected :
 	bool m_bInPlayerRadius = false;
 
 	bool m_bCanBeTalkedTo = true;
+
+	UPROPERTY(VisibleAnywhere, Category = "Base_Npc")
+	bool m_bCanGiveLevelQuest = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Base_Npc")
+	bool m_bCanGivePrestigeQuest = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Base_Npc")
+	bool m_bHasGivenQuest = false;
+
+	UPROPERTY(EditAnywhere, Category = "Base_Npc")
+	int m_RequireLevel;
+
+	UPROPERTY(EditAnywhere, Category = "Base_Npc")
+	FRegionPrestige m_RequiredPrestige;
+
 };

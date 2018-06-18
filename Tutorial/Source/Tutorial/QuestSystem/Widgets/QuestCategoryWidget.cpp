@@ -24,12 +24,12 @@ void UQuestCategoryWidget::_OnClicked()
 	m_bExpanded = !m_bExpanded;
 	if (m_bExpanded)
 	{
-		m_pExpandButton->SetRenderAngle(0.f);
+		m_pExpandButton->SetRenderAngle(-90.f);
 		m_pQuestBox->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 	else
 	{
-		m_pExpandButton->SetRenderAngle(-90.f);
+		m_pExpandButton->SetRenderAngle(0.f);
 		m_pQuestBox->SetVisibility(ESlateVisibility::Collapsed);
 	}		
 }
