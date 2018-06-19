@@ -172,7 +172,7 @@ public :
 	TArray<FGoalInfo> SubGoals;
 
 	UPROPERTY(EditAnywhere, Category = "FQuestInfo")
-	bool bHasClient;
+	bool bHasClient = true;
 
 	UPROPERTY(EditAnywhere, Category = "FQuestInfo")
 	TSubclassOf<class ABase_Npc> ClientClass;

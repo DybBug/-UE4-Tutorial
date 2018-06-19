@@ -383,6 +383,7 @@ void AQuestManager::FindNpcById(TSubclassOf<ABase_Npc> _NpcClass, int _Id, bool&
 		{
 			out_bFound = true;
 			out_pNpc = pCurrNpc;
+			return;
 		}
 	}
 
@@ -402,7 +403,7 @@ void AQuestManager::CancelQuest(AQuest_Base * _pQuestActor)
 		{
 			m_pCurrGoalActor->Destroy();
 			m_pHUD->GetDistanceBorder()->SetVisibility(ESlateVisibility::Hidden);
-			m_pHUD->GetMiniMapWidget()->SetVisibility(ESlateVisibility::Hidden);
+			m_pHUD->GetMiniMapWidget()->GetDirectionArrow()->SetVisibility(ESlateVisibility::Hidden);
 		}		
 	}
 

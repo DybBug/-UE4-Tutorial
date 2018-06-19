@@ -88,7 +88,7 @@ void ABase_Npc::BeginPlay()
 	if (m_bDoesPatrol && (m_PatrollingPoints.Num() > 0))
 	{
 		MoveToCurrPatrolPoint();
-	}	
+	}
 }
 
 void ABase_Npc::Initialize(bool _bDoesPatrol, const TArray<APatrolPoint*>& _PatrollingPoints, int _CurrPatrolIndex, int _NpcId)
@@ -134,6 +134,7 @@ void ABase_Npc::OnOwnQuestCancelled(TSubclassOf<AQuest_Base> QuestClass)
 	m_pQuestionMark->SetVisibility(true);
 	m_bCanGiveLevelQuest = true;
 	m_bCanGivePrestigeQuest = true;
+	m_bHasGivenQuest = false;
 }
 bool ABase_Npc::OnPlayerLevelUp(int _NewLevel)
 {
